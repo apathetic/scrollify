@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>Scrollify</title>
+	<meta name="viewport" content="width=device-width">
+
+	<link rel="stylesheet" href="styles.css">
+
+	<!-- demo stuffs -->
+	<link rel="stylesheet" href="https://rawgit.com/apathetic/showcase/harp/www/css/styles.css">
+	<script src="prism.js"></script>
+	<script src="https://rawgit.com/apathetic/stickynav/master/dist/stickynav.min.js"></script>
+	<script>
+		window.addEventListener('DOMContentLoaded', function() {
+			// new stickyNav({ nav: '#sticky' });
+		});
+	</script>
+	<!-- end demo stuffs -->
+
+</head>
+
+<body>
+
+
+	<header>
+		<h1>Scrollify.</h1>
+	</header>
+
+	<nav>
+		<div id="sticky">
+			<div class="container">
+				<nav data-autogenerate="true">
+					<ul></ul>
+				</nav>
+			</div>
+		</div>
+	</nav>
+
+	<main class="component left-rail">
+
+		<section data-nav="About" id="about">
+			<div class="container">
+				<h2>About</h2>
+				<p>Scrollify. Trigger simple actions on scroll.</p>
+
+				<h3>A Note on the Possibilities</h3>
+				<p>There are several things you might want to do upon user-scroll. This ES6 class provides a few basic
+					things, such as "pinning" an element, parallax-ing it, or toggling a class on/off. You can also easily
+					create your own custom plugin effects.<p>
+				<ul class="bullets">
+					<li><strong>Pin</strong>: sticks an element to a particular point and holds in there for a
+						pre-defined number of pixels.</li>
+					<li><strong>Parallax</strong>: move stuff on scroll. A subtle effect that transistions elements
+						more slowly (or perhaps quickly) than the speed of the user-scroll.</li>
+					<li><strong>Toggle</strong>: turn a CSS class on or off if the element crosses a particular
+						threshhold on the page.</li>
+					<li><strong>Custom</strong>: you can easily add your own custom effects, which may include various
+						transformations, rotations, etc.
+				</ul>
+			</div>
+		</section>
+
+		<section data-nav="Download" id="download">
+			<div class="container">
+				<h2>Download</h2>
+				<h3>Stash</h3>
+				<p><a href="https://github.com/apathetic/scrollify">Get it from Github</a></p>
+			</div>
+		</section>
+
+		<section data-nav="Demo" id="demo">
+			<div class="container">
+				<h2>Demo</h2>
+
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+				quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+				cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+				<div>
+					<div class="parallax item" data-parallax-speed="1"> 1 </div>
+					<div class="parallax item" data-parallax-speed="0.5"> 2 </div>
+					<div class="parallax item" data-parallax-speed="0"> 3 </div>
+					<div class="parallax item" data-parallax-speed="-0.5"> 4 </div>
+					<div class="parallax item" data-parallax-speed="-1.0"> 5 </div>
+				</div>
+
+				<p class="parallax" data-parallax-speed="1.4">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+				quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+				cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+				<p class="scrollify" id="tester">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+
+				<p class="scrollify" data-scroll="parallax(1.4, 200)">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+				<p class="scrollify" data-scroll="pin(30)">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+				<p class="scrollify" data-scroll="toggle('move', 20)">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+				<p class="scrollify" data-scroll="custom(30)">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+
+
+				<div class="clip">
+					<img class="parallax" data-parallax-speed="0.7" src="https://cdn.rawgit.com/apathetic/parallax/master/demo/images/pastoral.jpg" alt="" />
+				</div>
+
+				<div class="clip">
+					<div class="backwards parallax" data-parallax-speed="-0.5"></div>
+				</div>
+			</div>
+		</section>
+
+		<section data-nav="Prereqs" id="prereqs">
+			<div class="container">
+				<h2>Prereqs</h2>
+				<p>none.</p>
+			</div>
+		</section>
+
+		<section data-nav="Compatibility" id="compatibility">
+			<div class="container">
+				<h2>Compatibility</h2>
+				<ul class="bullets">
+					<li>IE9+</li>
+					<li>Firefox, Webkit, Opera</li>
+					<li>no mobile</li>
+				</ul>
+			</div>
+		</section>
+
+		<section data-nav="Code" id="code">
+			<div class="container">
+				<h2>Code</h2>
+				<pre><code class="language-javascript">
+	parallax.init({
+		el: '.parallax'
+	});
+				</code></pre>
+			</div>
+		</section>
+
+		<section data-nav="Options" id="options">
+			<div class="container">
+				<h2>Options</h2>
+				<div class="table-responsive">
+					<table class="table table-bordered table-striped">
+						<thead>
+							<tr>
+								<th style="width: 100px;">Name</th>
+								<th style="width: 50px;">type</th>
+								<th style="width: 50px;">default</th>
+								<th>description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>el</td>
+								<td>string</td>
+								<td>.parallax</td>
+								<td>selector of elements to parallax-ify</td>
+							</tr>
+							<tr>
+								<td>mode</td>
+								<td>integer</td>
+								<td>1</td>
+								<td>There are two different modes:<br />
+									Commence parallaxing items only when they appear within the viewport (mode 1, default) *<br /><br />
+									Parallax items universally, irrespective of where they are on the page. (mode 0)
+								</td>
+							</tr>
+							<tr>
+								<td>range</td>
+								<td>integer</td>
+								<td>200</td>
+								<td>The total distance (in px) to parallax an element. Only applies when parallax mode = 1</td>
+							</tr>
+							<tr>
+								<td>data-parallax-speed</td>
+								<td>string</td>
+								<td>0</td>
+								<td>Data attribute on the element specifying the speed of parallax. Some examples:<br />
+									<b>-1</b>: translate up as fast as you scroll up (ie. moving upwards at 2x the scroll)<br />
+									<b>0</b>: normal (ie. no translation)<br />
+									<strong>1</strong>: translate down as fast as you scroll up (ie. "fixed" position)<br />
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					<p>* note: if an element loads within the viewport, the engine will calculate the amount of parallax based on
+					its position and adjust accordingly. Because of this, it may be a good idea to only fire the init() function
+					after all assets (ie. images, etc) have loaded.</p>
+				</div>
+			</div>
+		</section>
+
+	</main>
+
+
+	<footer>
+		<div class="container">
+		</div>
+	</footer>
+
+
+	<script src="../dist/scrollify.js"></script>
+	<script>
+		window.addEventListener('DOMContentLoaded', function() {
+			// new Scrollify('#tester')
+			// 	.useEffect('parallax', { /* opts */ })														// use one of the built-in effects
+			// 	.addEffect('spin', function(pos) { this.style.transform = 'rotate('+ (pos*2) +'deg)'; })	// or add your own
+			// 	.useEffect('trigger', {'class':'red'});
+
+
+			new Scrollify('#tester')
+				.useEffect('parallax', { speed: 1.1 });
+
+		});
+	</script>
+
+</body>
+
+</html>
