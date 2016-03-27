@@ -13,22 +13,32 @@ var effectList = {
 	/**
 	 * speed, range
 	 * NOTE: should only use speed OR range, not both
+	 * NOTE: don't use arrow fn's here as they proxy "this"
 	 */
-	parallax: (opts) => {
-		console.log(this);
-		let position = this.fromStart * (opts.speed || 1);		// if speed
-		// let position = this.percent * (opts.range || 200);;	// if range was used
+	 // parallax: function(opts) {
+	parallax(opts) {
+		// console.log(this.fromStart);
+		// console.log(this.position);
+		let offset = 0;
 
-		this.style[this.transform] = 'translate3d(0, '+ position +'px, 0)';	// no IE9, nor non 3d-accellerated browsers
+		if (opts.speed) {		// check speed first
+		 	offset = this.fromStart * (opts.speed || 1) - this.fromStart;
+		} else {				// fallback to range
+		 	offset = this.percent * (opts.range || 200);
+		}
+
+		console.log(this.fromStart, offset);
+
+		this.el.style[this.transform] = 'translate3d(0, '+ offset +'px, 0)';	// no IE9, nor non 3d-accellerated browsers
 	},
 
 	// start pos, durations
-	pin: (position) => {
+	pin(position) {
 
 	},
 
 	// trigger, classname
-	toggle: (position) => {
+	toggle(position) {
 
 	}
 
@@ -40,7 +50,6 @@ export default class Scrollify {
 	constructor(element) {
 		this.ticking = false;
 		this.scroll = window.scrollY;
-		// this.height = window.innerHeight;
 		this.effects = [];
 		this.elements = [];
 
@@ -62,12 +71,13 @@ export default class Scrollify {
 		Array.from(elements, (el) => {
 			let data = {
 				el: el,
-				transform: el.style[transform],		// shortcut
-				percent: 0,
-				fromStart: 0
+				// transform: el.style[transform],		// shortcut... except no "pointer" in JS
+				transform: transform,
+				position: 0,
+				fromStart: 0							// NOTE: this is from that "starting point" of the effect: namely, when the top edge of the element comes on to the _bottom_ of the screen
 			}
 			this.elements.push(data);
-			this.calculate(data);
+			this.calculate(data, true);
 		});
 
 		window.addEventListener('scroll', (e) => this.onScroll(e));
@@ -125,22 +135,26 @@ export default class Scrollify {
 	/**
 	 *
 	 */
-	calculate(data) {
-		let start = data.el.getBoundingClientRect().top;
-		let end = data.el.getBoundingClientRect().bottom;
+	calculate(data, force) {
+		let BCR = data.el.getBoundingClientRect();
+		let start = BCR.top;
+		let end = BCR.bottom;
+		let h = BCR.height;
 		let height = window.innerHeight;
 		let position;
 
 		// dont do nuthin until this here thing is within range (ie. top edge peeks out from the bottom of the screen)
-		if (height < start) { return; }
-		// if (this.height < start) { return; }
-		// if (0 > end) { return; }
+		// if (!force) {
+			if (height < start || 0 > end) { return; }
+		// }
 
-		position = Math.min(1, -start / height);	// 0 --> 1
+		// position = Math.min(1, start / height);			// 1 --> 0
+		position = (start+h) / (height+h);					// 1 --> 0
 
 		// update data Object
-		data.percent = position;
+		data.position = position;
 		data.fromStart = height - start;
+		// data.absolute = height - start;
 
 		this.effects.forEach((effect) => { effect.call(data) });
 	}
