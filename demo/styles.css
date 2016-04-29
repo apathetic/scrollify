@@ -11,21 +11,23 @@
 	p.parallax { color: #ddd; z-index:-1 }
 
 	.clip {
-		height: 400px;
+		padding-bottom: 56.25%;
+		position: relative;
 		overflow:hidden;
 		margin-bottom: 2em;
+		background-color: #ccc;
 	}
 
-	.clip img.parallax {
+	.clip .parallax {
+		position: absolute;
+ 		background-image: url("images/pastoral.jpg");
+		background-position: 50% 50%;
+		background-size: cover;
+		top: -250px;
 		width: 100%;
+		height: calc(100% + 250px);
 	}
 
 	.clip .backwards.parallax {
  		background-image: url("images/pasture.jpg");
-		background-position: 50% 50%;
-		background-size: cover;
-		top: -160px;
-		width: 100%;
-		height: 100%;					/* fallback for mobile, etc. */
-		height: calc(100% + 250px);		/* 200px being our range, set in the js */
 	}
