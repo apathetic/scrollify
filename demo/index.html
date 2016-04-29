@@ -83,14 +83,14 @@
 				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
 				<div>
-					<div class="parallax item" data-parallax-speed="1"> 1 </div>
-					<div class="parallax item" data-parallax-speed="0.5"> 2 </div>
-					<div class="parallax item" data-parallax-speed="0"> 3 </div>
-					<div class="parallax item" data-parallax-speed="-0.5"> 4 </div>
-					<div class="parallax item" data-parallax-speed="-1.0"> 5 </div>
+					<div class="parallax item" data-scrollify="['parallax', {speed:0.6}]"> 1 </div>
+					<div class="parallax item" data-scrollify="['parallax', {speed:0.3}]"> 2 </div>
+					<div class="parallax item" data-scrollify="['parallax', {speed:0.0}]"> 3 </div>
+					<div class="parallax item" data-scrollify="['parallax', {speed:-.3}]"> 4 </div>
+					<div class="parallax item" data-scrollify="['parallax', {speed:-.6}]"> 5 </div>
 				</div>
 
-				<p class="parallax" data-parallax-speed="1.4">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+				<p class="parallax" data-scrollifyXX="['parallax', {speed:1.4}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
 				quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
 				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
@@ -99,18 +99,18 @@
 
 				<p class="scrollify" id="tester" style="background:red">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 
-				<p class="scrollify" data-scroll="parallax(1.4, 200)">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+				<p class="scrollify" data-scroll="[ {parallax:[1.4, 200]}, {pin:40} ]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 				<p class="scrollify" data-scroll="pin(30)">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 				<p class="scrollify" data-scroll="toggle('move', 20)">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 				<p class="scrollify" data-scroll="custom(30)">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 
 
 				<div class="clip">
-					<img class="parallax" data-parallax-speed="0.7" src="https://cdn.rawgit.com/apathetic/parallax/master/demo/images/pastoral.jpg" alt="" />
+					<img class="parallax" data-scrollify="['parallax', {speed:0.7}]" src="https://cdn.rawgit.com/apathetic/parallax/master/demo/images/pastoral.jpg" alt="" />
 				</div>
 
 				<div class="clip">
-					<div class="backwards parallax" data-parallax-speed="-0.5"></div>
+					<div class="backwards parallax" data-scrollify="['parallax', {speed:-0.5}]"></div>
 				</div>
 			</div>
 		</section>
@@ -137,9 +137,9 @@
 			<div class="container">
 				<h2>Code</h2>
 				<pre><code class="language-javascript">
-	parallax.init({
-		el: '.parallax'
-	});
+						parallax.init({
+							el: '.parallax'
+						});
 				</code></pre>
 			</div>
 		</section>
@@ -210,14 +210,26 @@
 	<script src="../dist/scrollify.js"></script>
 	<script>
 		window.addEventListener('DOMContentLoaded', function() {
+			var elements = document.querySelectorAll('[data-scrollify]');
+
 			// new Scrollify('#tester')
 			// 	.useEffect('parallax', { /* opts */ })														// use one of the built-in effects
 			// 	.addEffect('spin', function(pos) { this.style.transform = 'rotate('+ (pos*2) +'deg)'; })	// or add your own
 			// 	.useEffect('trigger', {'class':'red'});
 
-
 			new Scrollify('#tester')
-				.useEffect('parallax', { speed: 1.2 });
+				.useEffect('parallax', {'range': 200 })
+				.useEffect('trigger', [{'red': '20%'},
+									   {'blue': '50%'},
+									   {'green': '70%'}])
+				.useEffect('pin', {'40%': '300px'});
+
+			Array.prototype.forEach.call(elements, function(el) {
+				var data = eval('(' + el.dataset.scrollify +')');
+				var effect = data[0];
+				var opts = data[1];
+				new Scrollify(el).useEffect(effect, opts);
+			});
 
 		});
 	</script>

@@ -8,28 +8,42 @@
  */
 
 
+/**
+ * Feature detection: CSS transforms
+ * @type {Boolean}
+ */
+var transform = false;
+const transforms = ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'];
+for (let i in transforms) {
+	if ( document.body.style[transforms[i]] !== undefined) {
+		transform = transforms[i];
+		break;
+	}
+}
 
+
+/**
+ * A list of some default "Effects" or "Transformations" that may be applied
+ * @type {Object}
+ */
 var effectList = {
 	/**
 	 * speed, range
 	 * NOTE: should only use speed OR range, not both
 	 * NOTE: don't use arrow fn's here as they proxy "this"
 	 */
-	 // parallax: function(opts) {
+	 // TODO: if element *begins* onscreen, the parallax algorithm will need
+	 // to "settle" ie. find the limit as bounding rects converge
 	parallax(opts) {
-		// console.log(this.fromStart);
-		// console.log(this.position);
 		let offset = 0;
 
-		if (opts.speed) {		// check speed first
-		 	offset = this.fromStart * (opts.speed || 1) - this.fromStart;
+		if (opts.speed !== undefined) {		// check speed first
+		 	offset = this.absolute * opts.speed;// - this.absolute;
 		} else {				// fallback to range
-		 	offset = this.percent * (opts.range || 200);
+		 	offset = this.percent * (opts.range || 0);		// default is "0", no effect
 		}
 
-		console.log(this.fromStart, offset);
-
-		this.el.style[this.transform] = 'translate3d(0, '+ offset +'px, 0)';	// no IE9, nor non 3d-accellerated browsers
+		this.el.style[transform] = 'translate3d(0, '+ offset +'px, 0)';	// no IE9, nor non 3d-accellerated browsers
 	},
 
 	// start pos, durations
@@ -38,13 +52,15 @@ var effectList = {
 	},
 
 	// trigger, classname
-	toggle(position) {
+	trigger(opts) {
 
 	}
-
 }
 
 
+/**
+ * The Scrollify Class
+ */
 export default class Scrollify {
 
 	constructor(element) {
@@ -53,31 +69,36 @@ export default class Scrollify {
 		this.effects = [];
 		this.elements = [];
 
-		var transform = false;
 		const elements = (element instanceof HTMLElement) ? [element] : document.querySelectorAll(element);
-		const transforms = ['transform', 'webkitTransform', 'MozTransform', 'OTransform'];
-		const style = document.body.style;
-		// note: we don't test "ms" prefix, (as that gives us IE9 which doesn't support transforms3d anyway. IE10 test will work with "transform")
-		for (let i in transforms) {
-			if ( style[ transforms[i] ] !== undefined) {
-				transform = transforms[i];
-				break;
-			}
-		}
 
 		if ( !elements.length || !transform ) { return false; }
 
 		// create a "data" Object for each element, containing position information and a shortcut to the transform fn
 		Array.from(elements, (el) => {
+
+			// ***** NOTE: this calculation needs to be made "as if from an initial scroll position of 0"
+			// let BCR = el.getBoundingClientRect();
+			// BCR.top -= window.scrollY;
+			// BCR.bottom -= window.scrollY;
+			// let BCR = Object.assign({}, temp);
+
+			// probably a better way to do this...
+			let BCR = el.getBoundingClientRect();
+			let initial = {
+				top:  BCR.top + window.scrollY,
+				bottom: BCR.bottom + window.scrollY,
+				height: BCR.height
+			};
+
 			let data = {
 				el: el,
-				// transform: el.style[transform],		// shortcut... except no "pointer" in JS
-				transform: transform,
-				position: 0,
-				fromStart: 0							// NOTE: this is from that "starting point" of the effect: namely, when the top edge of the element comes on to the _bottom_ of the screen
+				initial: initial,
+				position: 0,								// a value transitioning from 1 to 0, starting when the element first appears at the bottom until it disappears at the top
+				absolute: 0									// the absolute number of pixels the element has travelled since coming into view
 			}
+
 			this.elements.push(data);
-			this.calculate(data, true);
+			this.calculate(data, true);		// set initial position
 		});
 
 		window.addEventListener('scroll', (e) => this.onScroll(e));
@@ -102,7 +123,8 @@ export default class Scrollify {
 			}
 		}
 
-		return this.effects.push( curry(effectList[name], options) );
+		this.effects.push( curry(effectList[name], options) );
+		return this;
 	}
 
 	/**
@@ -135,37 +157,26 @@ export default class Scrollify {
 	/**
 	 *
 	 */
-	calculate(data, force) {
-		let BCR = data.el.getBoundingClientRect();
-		let start = BCR.top;
-		let end = BCR.bottom;
-		let h = BCR.height;
+	calculate(data) {
 		let height = window.innerHeight;
+		let start = data.initial.top - this.scroll;
+		let end = data.initial.bottom - this.scroll;
+		let h = data.initial.height;
 		let position;
 
 		// dont do nuthin until this here thing is within range (ie. top edge peeks out from the bottom of the screen)
-		// if (!force) {
-			if (height < start || 0 > end) { return; }
-		// }
+		if (height < start || 0 > end) { return; }
 
+		// Calculate how far across the screen the element is. "1" is when the top edge of the element first peeks out
+		// from the bottom of the viewport, and "0" is when the bottom edge disappears beyond the top of the viewport:
 		// position = Math.min(1, start / height);			// 1 --> 0
 		position = (start+h) / (height+h);					// 1 --> 0
 
 		// update data Object
 		data.position = position;
-		data.fromStart = height - start;
-		// data.absolute = height - start;
+		data.absolute = height - start;
 
+		// cycle through any registered transformations
 		this.effects.forEach((effect) => { effect.call(data) });
 	}
-
-
-	/**
-	 *
-	 */
-	// destroy() {
-	// 	window.removeEventListener('scroll', this.onScroll);
-	// 	window.removeEventListener('resize', this.onResize);
-	// 	// delete root.parallax;	// no amd provision
-	// }
 }
