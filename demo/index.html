@@ -49,7 +49,7 @@
 				<h3>A Note on the Possibilities</h3>
 				<p>There are several things you might want to do upon user-scroll. This ES6 class provides a few basic
 					things, such as "pinning" an element, parallax-ing it, or toggling a class on/off. You can also easily
-					create your own custom plugin effects.<p>
+					create your own custom plugin effects. The built-in effects include:<p>
 				<ul class="bullets">
 					<li><strong>Pin</strong>: sticks an element to a particular point and holds in there for a
 						pre-defined number of pixels.</li>
@@ -57,8 +57,6 @@
 						more slowly (or perhaps quickly) than the speed of the user-scroll.</li>
 					<li><strong>Toggle</strong>: turn a CSS class on or off if the element crosses a particular
 						threshhold on the page.</li>
-					<li><strong>Custom</strong>: you can easily add your own custom effects, which may include various
-						transformations, rotations, etc.
 				</ul>
 			</div>
 		</section>
@@ -66,7 +64,7 @@
 		<section data-nav="Download" id="download">
 			<div class="container">
 				<h2>Download</h2>
-				<h3>Stash</h3>
+				<h3>Github</h3>
 				<p><a href="https://github.com/apathetic/scrollify">Get it from Github</a></p>
 			</div>
 		</section>
@@ -97,7 +95,12 @@
 				cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
 				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
-				<p class="scrollify" id="tester" style="background:red">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+				<p class="scrollify" id="transformer"><strong>This element is toggling various classes on and off. At 20%, 50%, and 70%.</strong> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+				quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+				cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
 				<p class="scrollify" data-scroll="[ {parallax:{speed:1.4}}, {pin:40} ]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
 				<p class="scrollify" data-scroll="pin(30)">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
@@ -128,7 +131,6 @@
 				<ul class="bullets">
 					<li>IE9+</li>
 					<li>Firefox, Webkit, Opera</li>
-					<li>no mobile</li>
 				</ul>
 			</div>
 		</section>
@@ -137,9 +139,23 @@
 			<div class="container">
 				<h2>Code</h2>
 				<pre><code class="language-javascript">
-						parallax.init({
-							el: '.parallax'
-						});
+	// use a built-in effect:
+	var element = document.querySelectorAll('.scrollify');
+	var options = {
+		speed: 0.2
+	};
+
+	new Scrollify(element).useEffect('parallax', options);
+				</code></pre>
+
+				<!-- OR: Scrollify.prototype.addEffect('rotate', function(data) { ...  }); -->
+				<pre><code class="language-javascript">
+	// roll your own custom effect:
+	new Scrollify('#custom')
+		.addEffect('rotate', function(data) {
+			var degrees = 360 * data.percent;
+			data.el.transform = 'rotate('+degrees+'deg)';
+		});
 				</code></pre>
 			</div>
 		</section>
@@ -217,12 +233,12 @@
 			// 	.addEffect('spin', function(pos) { this.style.transform = 'rotate('+ (pos*2) +'deg)'; })	// or add your own
 			// 	.useEffect('trigger', {'class':'red'});
 
-			new Scrollify('#tester')
-				.useEffect('parallax', {'range': 200 })
-				.useEffect('trigger', [{'red': '20%'},
-									   {'blue': '50%'},
-									   {'green': '70%'}])
-				.useEffect('pin', {'40%': '300px'});
+			new Scrollify('#transformer')
+				// .useEffect('parallax', {'range': 200 })
+				// .useEffect('pin', {'40%': '300px'})
+				.useEffect('trigger', {'red': '20%',
+									   					'blue': '50%',
+									 					  'green': '70%'});
 
 			Array.prototype.forEach.call(elements, function(el) {
 				var data = eval('(' + el.dataset.scrollify +')');

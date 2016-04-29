@@ -37,13 +37,13 @@ var effectList = {
 	parallax(opts) {
 		let offset = 0;
 
-		if (opts.speed !== undefined) {		// check speed first
-		 	offset = this.absolute * opts.speed;// - this.absolute;
-		} else {				// fallback to range
+		if (opts.speed !== undefined) {									// check speed first
+		 	offset = this.absolute * opts.speed;
+		} else {																				// fallback to range
 		 	offset = this.percent * (opts.range || 0);		// default is "0", no effect
 		}
 
-		this.el.style[transform] = 'translate3d(0, '+ offset +'px, 0)';	// no IE9, nor non 3d-accellerated browsers
+		this.el.style[transform] = 'translate(0, '+ offset +'px)';
 	},
 
 	// start pos, durations
@@ -53,7 +53,21 @@ var effectList = {
 
 	// trigger, classname
 	trigger(opts) {
+		let classes = Object.keys(opts);
+		let el = this.el;
+		let percent = this.percent * 100;
 
+		// var css = classes[0];		// just taking 1st arbitrarily for now
+		// var when = parseInt(opts[css]);
+
+		classes.forEach(function(css) {
+			let when = parseInt(opts[css]);
+			if (percent > when) {
+				el.classList.add(css);
+			} else {
+				el.classList.remove(css);
+			}
+		});
 	}
 }
 
@@ -73,7 +87,7 @@ export default class Scrollify {
 
 		if ( !elements.length || !transform ) { return false; }
 
-		// create a "data" Object for each element, containing position information and a shortcut to the transform fn
+		// create a "data" Object for each element, containing position information and a reference to the DOM node
 		Array.from(elements, (el) => {
 
 			// ***** NOTE: this calculation needs to be made "as if from an initial scroll position of 0"
@@ -90,15 +104,17 @@ export default class Scrollify {
 				height: BCR.height
 			};
 
+			// el['transform'] = transform;		// create a consistent ref, here? somehow but not like this exactly
+
 			let data = {
 				el: el,
 				initial: initial,
-				position: 0,								// a value transitioning from 1 to 0, starting when the element first appears at the bottom until it disappears at the top
+				percent: 0,									// a value from 1 to 0, starting when the element first appears at the bottom until it disappears at the top
 				absolute: 0									// the absolute number of pixels the element has travelled since coming into view
 			}
 
 			this.elements.push(data);
-			this.calculate(data, true);		// set initial position
+			this.calculate(data, true);		// set initial details
 		});
 
 		window.addEventListener('scroll', (e) => this.onScroll(e));
@@ -162,18 +178,18 @@ export default class Scrollify {
 		let start = data.initial.top - this.scroll;
 		let end = data.initial.bottom - this.scroll;
 		let h = data.initial.height;
-		let position;
+		let percent;
 
 		// dont do nuthin until this here thing is within range (ie. top edge peeks out from the bottom of the screen)
 		if (height < start || 0 > end) { return; }
 
 		// Calculate how far across the screen the element is. "1" is when the top edge of the element first peeks out
 		// from the bottom of the viewport, and "0" is when the bottom edge disappears beyond the top of the viewport:
-		// position = Math.min(1, start / height);			// 1 --> 0
-		position = (start+h) / (height+h);					// 1 --> 0
+		// percent = Math.min(1, start / height);			// 1 --> 0
+		percent = (start+h) / (height+h);					// 1 --> 0
 
 		// update data Object
-		data.position = position;
+		data.percent = percent;
 		data.absolute = height - start;
 
 		// cycle through any registered transformations
