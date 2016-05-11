@@ -22,18 +22,20 @@ for (let i in transforms) {
 }
 
 
+// Math.easeInOutQuad = function (t, b, c, d) { t /= d/2; if (t < 1) { return c/2*t*t + b; } t--; return -c/2 * (t*(t-2) - 1) + b; };
+// Math.easeOutCubic = function (t, b, c, d) { t /= d; t--; return c*(t*t*t + 1) + b; };
+
+
 /**
- * A list of some default "Effects" or "Transformations" that may be applied
+ * A list of some default "transformations" that may be applied
+ * NOTE: don't use arrow fn's here as they proxy "this"
  * @type {Object}
  */
 var effectList = {
+
 	/**
-	 * speed, range
-	 * NOTE: should only use speed OR range, not both
-	 * NOTE: don't use arrow fn's here as they proxy "this"
+	 * Parallax an element. Options include parallax speed OR parallax range
 	 */
-	 // TODO: if element *begins* onscreen, the parallax algorithm will need
-	 // to "settle" ie. find the limit as bounding rects converge
 	parallax(opts) {
 		let offset = 0;
 
@@ -46,19 +48,52 @@ var effectList = {
 		this.el.style[transform] = 'translate(0, '+ offset +'px)';
 	},
 
-	// start pos, durations
-	pin(position) {
 
+	/**
+	 * Pin an element for a specific duration
+	 * ... while this works, it is pretty ugly and candidate for improvement
+	 */
+	pin(opts) {
+		let waypoints = Object.keys(opts);
+		let percent = this.percent * 100;
+
+		waypoints.forEach(where => {
+			if (percent < parseInt(where)) {
+
+				let distance = opts[where];
+				let absolute = this.absolute;
+				var current;
+
+				if (this.current) {
+					current = this.current;
+				} else {
+					current = absolute;
+					this.current = current;
+				}
+
+				let end = current + distance;	// (this assumes current will be "frozen" and unchanged while pinned)
+				let offset = absolute - current;
+
+				if (absolute < end) {
+					this.el.style[transform] = 'translate(0, '+ offset +'px)';
+				}
+			} else {
+				// this.el.style[transform] = 'translate(0, 0)';
+			}
+		});
 	},
+  // initial
+  // percent
+  // absolute
 
-	// trigger, classname
-	trigger(opts) {
+
+	/**
+	 * Toggle a class on or off
+	 */
+	toggle(opts) {
 		let classes = Object.keys(opts);
 		let el = this.el;
 		let percent = this.percent * 100;
-
-		// var css = classes[0];		// just taking 1st arbitrarily for now
-		// var when = parseInt(opts[css]);
 
 		classes.forEach(function(css) {
 			let when = parseInt(opts[css]);
@@ -158,7 +193,8 @@ export default class Scrollify {
 	 *
 	 */
 	onResize() {
-		this.height = window.innerHeight;
+		// this.height = window.innerHeight;
+		// TODO may have to also recalculate each elements' new dimensions, if changed
 		this.update();
 	}
 
@@ -181,7 +217,9 @@ export default class Scrollify {
 		let percent;
 
 		// dont do nuthin until this here thing is within range (ie. top edge peeks out from the bottom of the screen)
-		if (height < start || 0 > end) { return; }
+		// if (height < start || 0 > end) { return; }		// note: this wont work as the position of each element changes at different rates.
+
+		if (height < data.el.getBoundingClientRect().top || 0 > data.el.getBoundingClientRect().bottom) { return; }	// use *actual* position data
 
 		// Calculate how far across the screen the element is. "1" is when the top edge of the element first peeks out
 		// from the bottom of the viewport, and "0" is when the bottom edge disappears beyond the top of the viewport:
@@ -189,7 +227,7 @@ export default class Scrollify {
 		percent = (start+h) / (height+h);					// 1 --> 0
 
 		// update data Object
-		data.percent = percent;
+		data.percent = percent;						// [TODO] should this be 0 -> 100 ...?
 		data.absolute = height - start;
 
 		// cycle through any registered transformations
