@@ -15,7 +15,7 @@
 	<script src="https://rawgit.com/apathetic/stickynav/master/dist/stickynav.min.js"></script>
 	<script>
 		window.addEventListener('DOMContentLoaded', function() {
-			// new stickyNav({ nav: '#sticky' });
+			new stickyNav({ nav: '#sticky' });
 		});
 	</script>
 	<!-- end demo stuffs -->
@@ -44,19 +44,19 @@
 		<section data-nav="About" id="about">
 			<div class="container">
 				<h2>About</h2>
-				<p>Scrollify. Trigger simple actions on scroll.</p>
+				<p>Scrollify. Do things on scroll.</p>
 
-				<h3>A Note on the Possibilities</h3>
-				<p>There are several things you might want to do upon user-scroll. This ES6 class provides a few basic
-					things, such as "pinning" an element, parallax-ing it, or toggling a class on/off. You can also easily
-					create your own custom plugin effects. The built-in effects include:<p>
+				<h3>What sorts of things?</h3>
+				<p>Well, whatever you want. Common effects such as parallax or toggling a class on/off are
+				  possible and bundled within. However, you may also easily create your own custom scroll
+				  function, and pass it in to Scrollify. The built-in effects include:<p>
 				<ul class="bullets">
-					<li><strong>Pin</strong>: sticks an element to a particular point and holds in there for a
+<!-- 					<li><strong>Pin</strong>: sticks an element to a particular point and holds in there for a
 						pre-defined number of pixels.</li>
-					<li><strong>Parallax</strong>: move stuff on scroll. A subtle effect that transistions elements
+ -->					<li><strong>Parallax</strong>: move stuff on scroll. A subtle effect that transistions elements
 						more slowly (or perhaps quickly) than the speed of the user-scroll.</li>
 					<li><strong>Toggle</strong>: turn a CSS class on or off if the element crosses a particular
-						threshhold on the page.</li>
+						threshold on the page.</li>
 				</ul>
 			</div>
 		</section>
@@ -73,7 +73,11 @@
 			<div class="container">
 				<h2>Demo</h2>
 
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+				<p id="pin">Note: be careful about applying multiple effects to a single element. As
+				an element may only have one <code>"transform: ..."</code> on it at a time, you may
+				experience strange behaviour if you try to apply several things at once.</p>
+
+				<p> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
 				quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
 				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
@@ -81,14 +85,14 @@
 				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
 				<div>
-					<div class="parallax item" data-scrollify="['parallax', {speed:0.6}]"> 1 </div>
-					<div class="parallax item" data-scrollify="['parallax', {speed:0.3}]"> 2 </div>
+					<div class="parallax item" data-scrollify="['parallax', {speed:0.4}]"> 1 </div>
+					<div class="parallax item" data-scrollify="['parallax', {speed:0.2}]"> 2 </div>
 					<div class="parallax item" data-scrollify="['parallax', {speed:0.0}]"> 3 </div>
-					<div class="parallax item" data-scrollify="['parallax', {speed:-.3}]"> 4 </div>
-					<div class="parallax item" data-scrollify="['parallax', {speed:-.6}]"> 5 </div>
+					<div class="parallax item" data-scrollify="['parallax', {speed:-.2}]"> 4 </div>
+					<div class="parallax item" data-scrollify="['parallax', {speed:-.4}]"> 5 </div>
 				</div>
 
-				<p class="parallax" data-scrollify="['parallax', {speed:-0.4}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+				<p class="parallax" data-scrollify="['parallax', {speed:-0.3}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
 				quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
 				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
@@ -118,10 +122,10 @@
 
 		</section>
 
-		<section data-nav="Prereqs" id="prereqs">
+		<section data-nav="Requirements" id="requirements">
 			<div class="container">
-				<h2>Prereqs</h2>
-				<p>none.</p>
+				<h2>Requirements</h2>
+				<p>None. Works fine without any frameworks.</p>
 			</div>
 		</section>
 
@@ -140,7 +144,7 @@
 				<h2>Code</h2>
 				<pre><code class="language-javascript">
 	// use a built-in effect:
-	var element = document.querySelectorAll('.scrollify');
+	var element = document.querySelector('.scrollify');
 	var options = {
 		speed: 0.2
 	};
@@ -163,54 +167,51 @@
 		<section data-nav="Options" id="options">
 			<div class="container">
 				<h2>Options</h2>
-				<div class="table-responsive">
-					<table class="table table-bordered table-striped">
-						<thead>
-							<tr>
-								<th style="width: 100px;">Name</th>
-								<th style="width: 50px;">type</th>
-								<th style="width: 50px;">default</th>
-								<th>description</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td>el</td>
-								<td>string</td>
-								<td>.parallax</td>
-								<td>selector of elements to parallax-ify</td>
-							</tr>
-							<tr>
-								<td>mode</td>
-								<td>integer</td>
-								<td>1</td>
-								<td>There are two different modes:<br />
-									Commence parallaxing items only when they appear within the viewport (mode 1, default) *<br /><br />
-									Parallax items universally, irrespective of where they are on the page. (mode 0)
-								</td>
-							</tr>
-							<tr>
-								<td>range</td>
-								<td>integer</td>
-								<td>200</td>
-								<td>The total distance (in px) to parallax an element. Only applies when parallax mode = 1</td>
-							</tr>
-							<tr>
-								<td>data-parallax-speed</td>
-								<td>string</td>
-								<td>0</td>
-								<td>Data attribute on the element specifying the speed of parallax. Some examples:<br />
-									<b>-1</b>: translate up as fast as you scroll up (ie. moving upwards at 2x the scroll)<br />
-									<b>0</b>: normal (ie. no translation)<br />
-									<strong>1</strong>: translate down as fast as you scroll up (ie. "fixed" position)<br />
-								</td>
-							</tr>
-						</tbody>
-					</table>
-					<p>* note: if an element loads within the viewport, the engine will calculate the amount of parallax based on
-					its position and adjust accordingly. Because of this, it may be a good idea to only fire the init() function
-					after all assets (ie. images, etc) have loaded.</p>
-				</div>
+				<table class="table table-bordered table-striped">
+					<thead>
+						<tr>
+							<th style="width: 100px;">name</th>
+							<th style="width: 50px;">type</th>
+							<th>description</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>el</td>
+							<td>string</td>
+							<td>selector (or HTMLElement) of thing to scroll-ify</td>
+						</tr>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+		<section data-nav="Methods" id="methods">
+			<div class="container">
+				<h2>Methods</h2>
+				<table class="table table-bordered table-striped">
+					<thead>
+						<tr>
+							<th style="width: 100px;">name</th>
+							<th style="width: 50px;">arguments</th>
+							<th>description</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>useEffect</td>
+							<td>effect(String), options(Object)</td>
+							<td>							</td>
+						</tr>
+						<tr>
+							<td>addEffect</td>
+							<td>name(String), effect(Function)</td>
+							<td> 								</td>
+						</tr>
+					</tbody>
+				</table>
+
 			</div>
 		</section>
 
@@ -228,18 +229,23 @@
 		window.addEventListener('DOMContentLoaded', function() {
 			var elements = document.querySelectorAll('[data-scrollify]');
 
-			// new Scrollify('#tester')
-			// 	.useEffect('parallax', { /* opts */ })														// use one of the built-in effects
+			// use the built-in pin effect
+			// options: "where" : "duration" (ie. how many pixels)
+			new Scrollify('#pin')
+				.useEffect('pin', {'40%': 300});
 			// 	.addEffect('spin', function(pos) { this.style.transform = 'rotate('+ (pos*2) +'deg)'; })	// or add your own
-			// 	.useEffect('trigger', {'class':'red'});
+			// 	.useEffect('toggle', {'class':'red'});
 
+
+			// Toggle any class(es) on/off
+			// TODO: reverse order of options (ie. %: class) to be consistent w/ pin ?
 			new Scrollify('#transformer')
-				// .useEffect('parallax', {'range': 200 })
-				// .useEffect('pin', {'40%': '300px'})
-				.useEffect('trigger', {'red': '20%',
+				.useEffect('toggle', {'red': '20%',
 									   					'blue': '50%',
 									 					  'green': '70%'});
 
+
+			// Set various transformation in the data- prop of each element, and apply that
 			Array.prototype.forEach.call(elements, function(el) {
 				var data = eval('(' + el.dataset.scrollify +')');
 				var effect = data[0];

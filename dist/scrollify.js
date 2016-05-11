@@ -31,18 +31,19 @@ for (var i in transforms) {
 	}
 }
 
+// Math.easeInOutQuad = function (t, b, c, d) { t /= d/2; if (t < 1) { return c/2*t*t + b; } t--; return -c/2 * (t*(t-2) - 1) + b; };
+// Math.easeOutCubic = function (t, b, c, d) { t /= d; t--; return c*(t*t*t + 1) + b; };
+
 /**
- * A list of some default "Effects" or "Transformations" that may be applied
+ * A list of some default "transformations" that may be applied
+ * NOTE: don't use arrow fn's here as they proxy "this"
  * @type {Object}
  */
 var effectList = {
+
 	/**
-  * speed, range
-  * NOTE: should only use speed OR range, not both
-  * NOTE: don't use arrow fn's here as they proxy "this"
+  * Parallax an element. Options include parallax speed OR parallax range
   */
-	// TODO: if element *begins* onscreen, the parallax algorithm will need
-	// to "settle" ie. find the limit as bounding rects converge
 
 	parallax: function parallax(opts) {
 		var offset = 0;
@@ -59,18 +60,53 @@ var effectList = {
 	},
 
 
-	// start pos, durations
-	pin: function pin(position) {},
+	/**
+  * Pin an element for a specific duration
+  * ... while this works, it is pretty ugly and candidate for improvement
+  */
+	pin: function pin(opts) {
+		var _this = this;
 
+		var waypoints = Object.keys(opts);
+		var percent = this.percent * 100;
 
-	// trigger, classname
-	trigger: function trigger(opts) {
+		waypoints.forEach(function (where) {
+			if (percent < parseInt(where)) {
+
+				var distance = opts[where];
+				var absolute = _this.absolute;
+				var current;
+
+				if (_this.current) {
+					current = _this.current;
+				} else {
+					current = absolute;
+					_this.current = current;
+				}
+
+				var end = current + distance; // (this assumes current will be "frozen" and unchanged while pinned)
+				var offset = absolute - current;
+
+				if (absolute < end) {
+					_this.el.style[transform] = 'translate(0, ' + offset + 'px)';
+				}
+			} else {
+				// this.el.style[transform] = 'translate(0, 0)';
+			}
+		});
+	},
+
+	// initial
+	// percent
+	// absolute
+
+	/**
+  * Toggle a class on or off
+  */
+	toggle: function toggle(opts) {
 		var classes = Object.keys(opts);
 		var el = this.el;
 		var percent = this.percent * 100;
-
-		// var css = classes[0];		// just taking 1st arbitrarily for now
-		// var when = parseInt(opts[css]);
 
 		classes.forEach(function (css) {
 			var when = parseInt(opts[css]);
@@ -89,7 +125,7 @@ var effectList = {
 
 var Scrollify = function () {
 	function Scrollify(element) {
-		var _this = this;
+		var _this2 = this;
 
 		_classCallCheck(this, Scrollify);
 
