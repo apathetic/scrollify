@@ -53,38 +53,36 @@ var effectList = {
 	 * Pin an element for a specific duration
 	 * ... while this works, it is pretty ugly and candidate for improvement
 	 */
-	pin(opts) {
-		let waypoints = Object.keys(opts);
-		let percent = this.percent * 100;
+	// pin(opts) {
+	// 	let waypoints = Object.keys(opts);
+	// 	let percent = this.percent * 100;
 
-		waypoints.forEach(where => {
-			if (percent < parseInt(where)) {
+	// 	waypoints.forEach(where => {
+	// 		if (percent < parseInt(where)) {
 
-				let distance = opts[where];
-				let absolute = this.absolute;
-				var current;
+	// 			let distance = opts[where];
+	// 			let absolute = this.absolute;
+	// 			var current;
 
-				if (this.current) {
-					current = this.current;
-				} else {
-					current = absolute;
-					this.current = current;
-				}
+	// 			if (this.current) {
+	// 				current = this.current;
+	// 			} else {
+	// 				current = absolute;
+	// 				this.current = current;
+	// 			}
 
-				let end = current + distance;	// (this assumes current will be "frozen" and unchanged while pinned)
-				let offset = absolute - current;
+	// 			let end = current + distance;	// (this assumes current will be "frozen" and unchanged while pinned)
+	// 			let offset = absolute - current;
 
-				if (absolute < end) {
-					this.el.style[transform] = 'translate(0, '+ offset +'px)';
-				}
-			} else {
-				// this.el.style[transform] = 'translate(0, 0)';
-			}
-		});
-	},
-  // initial
-  // percent
-  // absolute
+	// 			if (absolute < end) {
+	// 				this.el.style[transform] = 'translate(0, '+ offset +'px)';
+	// 			}
+	// 		} else {
+	// 			// this.el.style[transform] = 'translate(0, 0)';
+	// 		}
+	// 	});
+	// },
+
 
 
 	/**
@@ -135,7 +133,7 @@ export default class Scrollify {
 	 */
 	initialize() {
 		this.elements.map((data) => {
-			let BCR = data.el.getBoundingClientRect();
+			let BCR = data.el.getBoundingClientRect();	// TODO use offsetTop
 
 			data.initial = {
 				top:  BCR.top + window.scrollY,
@@ -185,7 +183,8 @@ export default class Scrollify {
 	 *
 	 */
 	onResize() {
-		this.initialize();
+		// this.initialize();
+		this.update();
 	}
 
 	/**
