@@ -113,48 +113,40 @@ var effectList = {
 export default class Scrollify {
 
 	constructor(element) {
+		let elements = (element instanceof HTMLElement) ? [element] : document.querySelectorAll(element);
+		if ( !elements.length || !transform ) { return false; }
+
 		this.ticking = false;
 		this.scroll = window.scrollY;
 		this.effects = [];
-		this.elements = [];
+		this.elements = Array.from(elements).map((el) => ({ el: el, percent: 0, absolute: 0 }));
 
-		const elements = (element instanceof HTMLElement) ? [element] : document.querySelectorAll(element);
+		this.initialize();
 
-		if ( !elements.length || !transform ) { return false; }
+		window.addEventListener('scroll', (e) => this.onScroll(e));
+		window.addEventListener('resize', (e) => this.onResize(e));
+	}
 
-		// create a "data" Object for each element, containing position information and a reference to the DOM node
-		Array.from(elements, (el) => {
+	/**
+	 * Initialize the "data" Object for each element, which contains position information as well
+	 * as a reference to the DOM node. The calculatation needs to be made "as if from an initial
+	 * scroll position of 0".
+	 * @return {void}
+	 */
+	initialize() {
+		this.elements.map((data) => {
+			let BCR = data.el.getBoundingClientRect();
 
-			// ***** NOTE: this calculation needs to be made "as if from an initial scroll position of 0"
-			// let BCR = el.getBoundingClientRect();
-			// BCR.top -= window.scrollY;
-			// BCR.bottom -= window.scrollY;
-			// let BCR = Object.assign({}, temp);
-
-			// probably a better way to do this...
-			let BCR = el.getBoundingClientRect();
-			let initial = {
+			data.initial = {
 				top:  BCR.top + window.scrollY,
 				bottom: BCR.bottom + window.scrollY,
 				height: BCR.height
 			};
 
-			// el['transform'] = transform;		// create a consistent ref, here? somehow but not like this exactly
-
-			let data = {
-				el: el,
-				initial: initial,
-				percent: 0,									// a value from 1 to 0, starting when the element first appears at the bottom until it disappears at the top
-				absolute: 0									// the absolute number of pixels the element has travelled since coming into view
-			}
-
-			this.elements.push(data);
-			this.calculate(data, true);		// set initial details
+			this.calculate(data);
+			return data;
 		});
-
-		window.addEventListener('scroll', (e) => this.onScroll(e));
-		window.addEventListener('resize', (e) => this.onResize(e));
-	}
+  }
 
 	/**
 	 *
@@ -193,9 +185,7 @@ export default class Scrollify {
 	 *
 	 */
 	onResize() {
-		// this.height = window.innerHeight;
-		// TODO may have to also recalculate each elements' new dimensions, if changed
-		this.update();
+		this.initialize();
 	}
 
 	/**
