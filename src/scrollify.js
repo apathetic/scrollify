@@ -126,6 +126,7 @@ export default class Scrollify {
 	 */
 	constructor(element, scene={}) {
 		let elements = (element instanceof HTMLElement) ? [element] : document.querySelectorAll(element);
+
 		if ( !elements.length || !transform ) { return false; }
 
 		this.ticking = false;
@@ -187,7 +188,7 @@ export default class Scrollify {
 	useEffect(name, options) {
 		let curry = (fn, options) => {
 			return function() {       // NOTE: don't use => function here as we do NOT want to bind "this"
-				fn.call(this, options);
+        fn.call(this, options); // eslint-disable-line
 			}
 		}
 
