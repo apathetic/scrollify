@@ -10,6 +10,9 @@
 
 // TODO add weakmap support for public / private methods
 
+// import {easeInOutCubic} from './easings';
+import Sticky from './sticky';
+
 
 /**
  * Feature detection: CSS transforms
@@ -247,6 +250,11 @@ export default class Scrollify {
 		}
 
 		this.effects.push(curry(effectList[name], options));
+
+		if (name == 'stick') {
+			new Sticky(this.element, true);
+		}
+
 		return this;
 	}
 

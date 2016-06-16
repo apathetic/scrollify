@@ -244,6 +244,7 @@
 					'start': 0.5,													//   'start': when at 50% of the viewport
 					'duration': 300												//   'duration': 300 pixels
 				})
+				.do('stick', {})
 				.do('toggle', { 0.2: 'red',							// the effect to apply, and when (within the progress of the scene)
 												0.5: 'blue',
 											  0.7: 'green'

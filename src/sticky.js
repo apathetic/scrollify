@@ -16,9 +16,8 @@
  * @param {Boolean} bounded: Whether to apply stickiness to the bottom of the parent container.
  * @return {void}
  */
-export function sticky(sticky, bounded) {
-  sticky = sticky instanceof HTMLElement ?
-           sticky : document.querySelector(sticky);
+export default function Sticky(sticky, bounded) {
+  sticky = sticky instanceof HTMLElement ? sticky : document.querySelector(sticky);
   bounded = bounded || sticky.getAttribute('data-bounded') || false;
 
   if (!sticky) { return false; }
