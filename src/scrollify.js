@@ -67,7 +67,7 @@ var effectList = {
 				el.classList.remove(css);
 			}
 		});
-	}
+	},
 
 	/**
 	 * Pin an element for a specific duration
@@ -195,6 +195,7 @@ export default class Scrollify {
 	 *
 	 */
 	scene(options) {
+			return this;
 
 			// scene:
 			let start, duration;
@@ -208,7 +209,6 @@ export default class Scrollify {
 			data.start = (start * window.innerHeight) + BCR.top + window.scrollY;
 			data.duration = duration ? duration : (stop-start) * window.innerHeight;
 			//
-			return this;
 	}
 
   /**
