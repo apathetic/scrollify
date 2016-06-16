@@ -133,15 +133,14 @@ var effectList = {
  */
 export default class Scrollify {
 
-	constructor(element, scene={}) {
-		let elements = (element instanceof HTMLElement) ? [element] : document.querySelectorAll(element);
-
-		if ( !elements.length || !transform ) { return false; }
+	constructor(element) {
+		if (element instanceof HTMLElement == false) { element = document.querySelectorAll(element); }
+		if (!elements.length || !transform ) { return false; }
 
 		this.ticking = false;
 		this.scroll = window.scrollY;
 		this.effects = [];
-		this.elements = Array.from(elements).map((el) => ({ el: el, percent: 0, absolute: 0 }));
+		this.data = { el: element, percent: 0, absolute: 0 };
 
 		this.initialize();
 
@@ -156,19 +155,17 @@ export default class Scrollify {
 	 * @return {void}
 	 */
 	initialize() {
-		this.elements.map((data) => {
-			let BCR = data.el.getBoundingClientRect();
+		let data = this.data;
+		let BCR = data.el.getBoundingClientRect();
 
-			data.el.style.transform = '';		// remove any transformations, as we need "un-transformed"
-																			// data to compute the element's initial position.
-			data.initial = {
-				top: BCR.top + window.scrollY,
-				height: BCR.height
-			};
+		data.el.style.transform = '';		// remove any transformations, as we need "un-transformed"
+																		// data to compute the element's initial position.
+		data.initial = {
+			top: BCR.top + window.scrollY,
+			height: BCR.height
+		};
 
-			this.calculate(data, true);
-			return data;
-		});
+		this.calculate(data, true);
 	}
 
 	/**
@@ -190,20 +187,39 @@ export default class Scrollify {
 	 *
 	 */
 	scene(options) {
-			return this;
+		let start = opts.start || null;
+		let duration = opts.duration || null;
+		let end = opts.end || null;
+		let top;
 
-			// scene:
-			let start, duration;
-			if (duration && !start) { start = (end * window.innerHeight - duration) / window.innerHeight; }
-			if (start && Array.isArray(start)) {
-				BCR = document.querySelector(start[0]).getBoundingClientRect().top; // TODO use offsetTop
-				start = start[1]
-			}
+		if (duration && !start) { start = (end * window.innerHeight - duration) / window.innerHeight; }
+		if (start && Array.isArray(start)) {
+			top = document.querySelector(start[0]).getBoundingClientRect().top;
+			start = start[1]
+		} else {
+			top =	data.el.getBoundingClientRect().top;
+		}
 
-			//
-			data.start = (start * window.innerHeight) + BCR.top + window.scrollY;
-			data.duration = duration ? duration : (stop-start) * window.innerHeight;
-			//
+		// if (start) {
+		// 	if (Array.isArray(start)) {
+		// 		top = document.querySelector(start[0]).getBoundingClientRect().top;
+		// 		start = start[1];
+		// 	} else {
+		// 	top =	data.el.getBoundingClientRect().top;
+		// 	}
+		// } else {
+		// 	if (duration) {
+		// 		start = (end * window.innerHeight - duration) / window.innerHeight;
+		// 	}
+		// }
+
+		//
+		this.start = (start * window.innerHeight) + top + window.scrollY;
+		this.duration = duration ? duration : (stop-start) * window.innerHeight;
+		//
+
+		console.log(this);
+		return this;
 	}
 
   /**
