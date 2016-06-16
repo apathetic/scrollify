@@ -73,9 +73,11 @@
 			<div class="container">
 				<h2>Demo</h2>
 
+				<div class="sticky-container">
 				<p id="pin">Note: be careful about applying multiple effects to a single element. As
 				an element may only have one <code>"transform: ..."</code> on it at a time, you may
 				experience strange behaviour if you try to apply several things at once.</p>
+				</div>
 
 				<p> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
@@ -236,17 +238,18 @@
 			// 	.addEffect('spin', function(pos) { this.style.transform = 'rotate('+ (pos*2) +'deg)'; })	// or add your own
 			// 	.do('toggle', {'class':'red'});
 
-/*
-			new Scrollify('#transformer')							// the element to target
+/* */
+			new Scrollify('#pin')											// the element to target
 				.scene({																// start / stop, duration etc. of the effect
-					'start': [],
-					'duration': 300
+					'start': 0.5,													//   'start': when at 50% of the viewport
+					'duration': 300												//   'duration': 300 pixels
 				})
-				.do('toggle', {'red': '0.2',						// the effect to apply, and when (within the progress of the scene)
-												'blue': '0.5',
-												'green': '0.7'});
+				.do('toggle', { 0.2: 'red',							// the effect to apply, and when (within the progress of the scene)
+												0.5: 'blue',
+											  0.7: 'green'
+											});
 
-*/
+/* */
 
 			new Scrollify('#transformer')
 				.do('toggle', { 0.2: 'red',

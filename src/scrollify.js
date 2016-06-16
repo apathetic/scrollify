@@ -134,13 +134,14 @@ var effectList = {
 export default class Scrollify {
 
 	constructor(element) {
-		if (element instanceof HTMLElement == false) { element = document.querySelectorAll(element); }
-		if (!elements.length || !transform ) { return false; }
+		if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
+		if (!element || !transform ) { return false; }
 
+		this.element = element;
 		this.ticking = false;
-		this.scroll = window.scrollY;
 		this.effects = [];
-		this.data = { el: element, percent: 0, absolute: 0 };
+		this.data = { el: element, progress: 0, absolute: 0 };
+		this.scroll = window.scrollY;
 
 		this.initialize();
 
@@ -155,17 +156,16 @@ export default class Scrollify {
 	 * @return {void}
 	 */
 	initialize() {
-		let data = this.data;
-		let BCR = data.el.getBoundingClientRect();
+		let BCR = this.element.getBoundingClientRect();
 
-		data.el.style.transform = '';		// remove any transformations, as we need "un-transformed"
-																		// data to compute the element's initial position.
-		data.initial = {
+		this.element.style.transform = '';		// remove any transformations, as we need "un-transformed"
+																					// data to compute the element's initial position.
+		this.data.initial = {
 			top: BCR.top + window.scrollY,
 			height: BCR.height
 		};
 
-		this.calculate(data, true);
+		this.calculate();
 	}
 
 	/**
@@ -186,7 +186,7 @@ export default class Scrollify {
 	 *         easing...? start, to, from, duration
 	 *
 	 */
-	scene(options) {
+	scene(opts) {
 		let start = opts.start || null;
 		let duration = opts.duration || null;
 		let end = opts.end || null;
@@ -197,7 +197,7 @@ export default class Scrollify {
 			top = document.querySelector(start[0]).getBoundingClientRect().top;
 			start = start[1]
 		} else {
-			top =	data.el.getBoundingClientRect().top;
+			top =	this.element.getBoundingClientRect().top;
 		}
 
 		// if (start) {
@@ -276,7 +276,7 @@ export default class Scrollify {
    * @return {void}
    */
 	update() {
-		Array.from(this.elements, (data) => this.calculate(data) );
+		this.calculate();
 		this.ticking = false;
 	}
 
@@ -285,26 +285,25 @@ export default class Scrollify {
    * @param  {Object} data: An Object containing position information and the element to udpate.
    * @return {void}
    */
-	calculate(data) {
-		let height = window.innerHeight;
+	calculate() {
+		let data = this.data;
+		let winHeight = window.innerHeight;
 		let start = data.initial.top - this.scroll;
-		let h = data.initial.height;
-		// let percent;
+		let height = data.initial.height;
 		let progress;
 
 		// dont do nuthin until this here thing is within range (ie. top edge peeks out from the bottom of the screen)
-		// if (height < start || 0 > end) { return; }   // note: this wont work as the position of each element changes at different rates.
-		if (height < data.el.getBoundingClientRect().top || 0 > data.el.getBoundingClientRect().bottom) { return; } // use *actual* position data
+		if (winHeight < this.element.getBoundingClientRect().top || 0 > this.element.getBoundingClientRect().bottom) { return; } // use *actual* position data
 
-		// Calculate how far across the screen the element is. "1" is when the top edge of the element first peeks out
-		// from the bottom of the viewport, and "0" is when the bottom edge disappears beyond the top of the viewport:
-		// percent = Math.min(1, start / height);     // 1 --> 0
-		progress = 1 - ((start+h) / (height+h));
+		// Calculate how far across the screen the element is. "0" is when the top edge of the element first peeks out
+		// from the bottom of the viewport, and "1" is when the bottom edge disappears beyond the top of the viewport:
+		// percent = Math.min(1, start / winHeight);     // 1 --> 0
+		progress = 1 - ((start + height) / (winHeight + height));
 
 
 		// update data Object
 		// data.percent = percent;
-		data.absolute = height - start;
+		data.absolute = winHeight - start;
 		data.progress = progress;
 
 																// start      to  from  end
