@@ -55,13 +55,13 @@ var effectList = {
 	 * @return {void}
 	 */
 	toggle(opts) {
-		let classes = Object.keys(opts);
+		let times = Object.keys(opts);		// times
 		let el = this.el;
-		let percent = this.percent * 100;
+		let now = this.progress;
 
-		classes.forEach(function(css) {
-			let when = parseInt(opts[css]);
-			if (percent > when) {
+		times.forEach(function(time) {
+			let css = opts[time];
+			if (now > time) {
 				el.classList.add(css);
 			} else {
 				el.classList.remove(css);
@@ -157,21 +157,16 @@ export default class Scrollify {
 	 */
 	initialize() {
 		this.elements.map((data) => {
-			let BCR = data.el.getBoundingClientRect();  // TODO use offsetTop
-			// let off = data.el;
-			// let y = window.scrollY;
-			// while (off) {
-			// 	y += off.offsetTop;
-			// 	off = off.offsetParent;
-			// }
+			let BCR = data.el.getBoundingClientRect();
 
+			data.el.style.transform = '';		// remove any transformations, as we need "un-transformed"
+																			// data to compute the element's initial position.
 			data.initial = {
-				top:  BCR.top + window.scrollY,
-				bottom: BCR.bottom + window.scrollY,
+				top: BCR.top + window.scrollY,
 				height: BCR.height
 			};
 
-			this.calculate(data);
+			this.calculate(data, true);
 			return data;
 		});
 	}
@@ -224,7 +219,7 @@ export default class Scrollify {
 
   /**
    * Use an particular transformation on an Element.
-   * @param  {String} name: The name of the transformation.
+   * @param  {String|Function} name: The name of the transformation OR an actual function to apply.
    * @param  {Object} options: Any transformation options.
    * @return {void}
    */
@@ -256,8 +251,8 @@ export default class Scrollify {
    * @return {void}
    */
 	onResize() {
-		// this.initialize();  or.. updateScene..?
-		this.update();
+		this.initialize();  // or.. updateScene..?
+		// this.update();
 	}
 
   /**
@@ -277,20 +272,17 @@ export default class Scrollify {
 	calculate(data) {
 		let height = window.innerHeight;
 		let start = data.initial.top - this.scroll;
-		// let end = data.initial.bottom - this.scroll;
 		let h = data.initial.height;
 		// let percent;
 		let progress;
 
 		// dont do nuthin until this here thing is within range (ie. top edge peeks out from the bottom of the screen)
 		// if (height < start || 0 > end) { return; }   // note: this wont work as the position of each element changes at different rates.
-
 		if (height < data.el.getBoundingClientRect().top || 0 > data.el.getBoundingClientRect().bottom) { return; } // use *actual* position data
 
 		// Calculate how far across the screen the element is. "1" is when the top edge of the element first peeks out
 		// from the bottom of the viewport, and "0" is when the bottom edge disappears beyond the top of the viewport:
 		// percent = Math.min(1, start / height);     // 1 --> 0
-		// percent = (start+h) / (height+h);         // 1 --> 0
 		progress = 1 - ((start+h) / (height+h));
 
 

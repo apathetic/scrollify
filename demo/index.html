@@ -236,14 +236,7 @@
 			// 	.addEffect('spin', function(pos) { this.style.transform = 'rotate('+ (pos*2) +'deg)'; })	// or add your own
 			// 	.do('toggle', {'class':'red'});
 
-
-			// TODO: reverse order of options (ie. %: class) to be consistent w/ pin ?
-			new Scrollify('#transformer')
-				.do('toggle', {'red': '20%',
-												'blue': '50%',
-											  'green': '70%'});
-
-
+/*
 			new Scrollify('#transformer')							// the element to target
 				.scene({																// start / stop, duration etc. of the effect
 					'start': [],
@@ -253,6 +246,13 @@
 												'blue': '0.5',
 												'green': '0.7'});
 
+*/
+
+			new Scrollify('#transformer')
+				.do('toggle', { 0.2: 'red',
+												0.5: 'blue',
+											  0.7: 'green'
+											});
 
 			// Set various transformation in the data- prop of each element, and apply that
 			Array.prototype.forEach.call(elements, function(el) {
