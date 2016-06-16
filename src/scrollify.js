@@ -8,6 +8,9 @@
  */
 
 
+// TODO add weakmap support for public / private methods
+
+
 /**
  * Feature detection: CSS transforms
  * @type {Boolean}
@@ -30,7 +33,9 @@ for (let i in transforms) {
 var effectList = {
 
 	/**
-	 * Parallax an element. Options include parallax speed OR parallax range
+	 * Parallax an element.
+   * @type {Object} opts: You may define parallax "speed" or parallax "range" (in pixels).
+	 * @return {void}
 	 */
 	parallax(opts) {
 		let offset = 0;
@@ -38,51 +43,16 @@ var effectList = {
 		if (opts.speed !== undefined) {                 // check speed first
 			offset = this.absolute * opts.speed;
 		} else {                                        // fallback to range
-			offset = this.percent * (opts.range || 0);    // default is "0", no effect
+			offset = this.progresss * (opts.range || 0);  // default is "0", no effect
 		}
 
 		this.el.style[transform] = 'translate(0, '+ offset +'px)';
 	},
 
-
 	/**
-	 * Pin an element for a specific duration
-	 * ... while this works, it is pretty ugly and candidate for improvement
-	 */
-	// pin(opts) {
-	//  let waypoints = Object.keys(opts);
-	//  let percent = this.percent * 100;
-
-	//  waypoints.forEach(where => {
-	//    if (percent < parseInt(where)) {
-
-	//      let distance = opts[where];
-	//      let absolute = this.absolute;
-	//      var current;
-
-	//      if (this.current) {
-	//        current = this.current;
-	//      } else {
-	//        current = absolute;
-	//        this.current = current;
-	//      }
-
-	//      let end = current + distance; // (this assumes current will be "frozen" and unchanged while pinned)
-	//      let offset = absolute - current;
-
-	//      if (absolute < end) {
-	//        this.el.style[transform] = 'translate(0, '+ offset +'px)';
-	//      }
-	//    } else {
-	//      // this.el.style[transform] = 'translate(0, 0)';
-	//    }
-	//  });
-	// },
-
-
-
-	/**
-	 * Toggle a class on or off
+	 * Toggle a class on or off.
+   * @type {Object} opts: The "class" to toggle, and when (ie. at which point in the progress)
+	 * @return {void}
 	 */
 	toggle(opts) {
 		let classes = Object.keys(opts);
@@ -98,6 +68,63 @@ var effectList = {
 			}
 		});
 	}
+
+	/**
+	 * Pin an element for a specific duration
+	 * ... while this works, it is pretty ugly and candidate for improvement
+	 */
+		// pin(opts) {
+		//  let waypoints = Object.keys(opts);
+		//  let percent = this.percent * 100;
+
+		//  waypoints.forEach(where => {
+		//    if (percent < parseInt(where)) {
+
+		//      let distance = opts[where];
+		//      let absolute = this.absolute;
+		//      var current;
+
+		//      if (this.current) {
+		//        current = this.current;
+		//      } else {
+		//        current = absolute;
+		//        this.current = current;
+		//      }
+
+		//      let end = current + distance; // (this assumes current will be "frozen" and unchanged while pinned)
+		//      let offset = absolute - current;
+
+		//      if (absolute < end) {
+		//        this.el.style[transform] = 'translate(0, '+ offset +'px)';
+		//      }
+		//    } else {
+		//      // this.el.style[transform] = 'translate(0, 0)';
+		//    }
+		//  });
+		// },
+
+	/**
+	 * Dummy effect for testing, at the moment
+	 */
+  translateX(opts) {
+    let offset = this.absolute;
+    let on = Object.keys(opts);
+    let delay = window.innerHeight;	// start translating after one window-height of scrolling
+
+    offset -= delay;
+
+    // if (this.percent < 0.5) {    // test: start translating when element is centered in viewport
+    //   offset -= delay;
+    // } else {
+    //   offset = 0;
+    // }
+
+    //  ease = easeInQuad(elapsed,     start, end, duration);
+    let distance = 500;
+    let ease = easeInQuad(this.percent * 100, 0, distance, 100);
+
+    this.el.style[transform] = 'translate3d(' + ease + 'px, 0, 0)';
+  }
 }
 
 
@@ -106,24 +133,6 @@ var effectList = {
  */
 export default class Scrollify {
 
-	/**
-	 * params: any TWO of: start / stop / duration.
-	 *         start: a percentage of the viewport (eg. 0.5) OR a reference element's position (eg ['#toggle', 0.3] )
-	 *         stop: a percentage of the viewport OR a reference element's position
-	 *         duration: the duration in pixels
-	 *
-	 *         default is 0 - 100% (making duration the window height + element height)
-	 *
-	 *         examples:
-	 *          { start: 0, stop: 0.5 }
-	 *          { start: 0.1, duration: '400px' }
-	 *          { duration: 100px, stop: 1.0 }
-	 *          { start: ['#toggle', 0.3], stop: ['#toggle', 0.5] }
-	 *          { start: ['#toggle', 0.3], duration: '300px' }
-	 *
-	 *         easing...? start, to, from, duration
-	 *
-	 */
 	constructor(element, scene={}) {
 		let elements = (element instanceof HTMLElement) ? [element] : document.querySelectorAll(element);
 
@@ -149,12 +158,43 @@ export default class Scrollify {
 	initialize() {
 		this.elements.map((data) => {
 			let BCR = data.el.getBoundingClientRect();  // TODO use offsetTop
+			// let off = data.el;
+			// let y = window.scrollY;
+			// while (off) {
+			// 	y += off.offsetTop;
+			// 	off = off.offsetParent;
+			// }
 
 			data.initial = {
 				top:  BCR.top + window.scrollY,
 				bottom: BCR.bottom + window.scrollY,
 				height: BCR.height
 			};
+
+			this.calculate(data);
+			return data;
+		});
+	}
+
+	/**
+	 * params: any TWO of: start / stop / duration.
+	 *         start: a percentage of the viewport (eg. 0.5) OR a reference element's position (eg ['#toggle', 0.3] )
+	 *         stop: a percentage of the viewport OR a reference element's position
+	 *         duration: the duration in pixels
+	 *
+	 *         default is 0 - 100% (making duration the window height + element height)
+	 *
+	 *         examples:
+	 *          { start: 0, stop: 0.5 }
+	 *          { start: 0.1, duration: '400px' }
+	 *          { duration: 100px, stop: 1.0 }
+	 *          { start: ['#toggle', 0.3], stop: ['#toggle', 0.5] }
+	 *          { start: ['#toggle', 0.3], duration: '300px' }
+	 *
+	 *         easing...? start, to, from, duration
+	 *
+	 */
+	scene(options) {
 
 			// scene:
 			let start, duration;
@@ -168,37 +208,41 @@ export default class Scrollify {
 			data.start = (start * window.innerHeight) + BCR.top + window.scrollY;
 			data.duration = duration ? duration : (stop-start) * window.innerHeight;
 			//
-
-			this.calculate(data);
-			return data;
-		});
+			return this;
 	}
 
-	/**
-	 *
-	 */
+  /**
+   * Add a custom effect to Scrollify.
+   * @param  {String} name: The name of the transformation to add.
+   * @param  {Function} effect: The function that produces the tranformation.
+   * @return {void}
+   */
 	addEffect(name, effect) {
 		effectList[name] = effect;
 		return this;
 	}
 
-	/**
-	 *
-	 */
-	useEffect(name, options) {
+  /**
+   * Use an particular transformation on an Element.
+   * @param  {String} name: The name of the transformation.
+   * @param  {Object} options: Any transformation options.
+   * @return {void}
+   */
+	do(name, options) {
 		let curry = (fn, options) => {
 			return function() {       // NOTE: don't use => function here as we do NOT want to bind "this"
         fn.call(this, options); // eslint-disable-line
 			}
 		}
 
-		this.effects.push( curry(effectList[name], options) );
+		this.effects.push(curry(effectList[name], options));
 		return this;
 	}
 
-	/**
-	 *
-	 */
+  /**
+   * onScroll Handler
+   * @return {void}
+   */
 	onScroll() {
 		if (!this.ticking) {
 			this.ticking = true;
@@ -207,31 +251,36 @@ export default class Scrollify {
 		}
 	}
 
-	/**
-	 *
-	 */
+  /**
+   * onResize Handler
+   * @return {void}
+   */
 	onResize() {
-		// this.initialize();
+		// this.initialize();  or.. updateScene..?
 		this.update();
 	}
 
-	/**
-	 *
-	 */
+  /**
+   * Update the transformation of every element.
+   * @return {void}
+   */
 	update() {
 		Array.from(this.elements, (data) => this.calculate(data) );
 		this.ticking = false;
 	}
 
-	/**
-	 *
-	 */
+  /**
+   * Calculate the transformation of each element
+   * @param  {Object} data: An Object containing position information and the element to udpate.
+   * @return {void}
+   */
 	calculate(data) {
 		let height = window.innerHeight;
 		let start = data.initial.top - this.scroll;
 		// let end = data.initial.bottom - this.scroll;
 		let h = data.initial.height;
-		let percent;
+		// let percent;
+		let progress;
 
 		// dont do nuthin until this here thing is within range (ie. top edge peeks out from the bottom of the screen)
 		// if (height < start || 0 > end) { return; }   // note: this wont work as the position of each element changes at different rates.
@@ -241,11 +290,14 @@ export default class Scrollify {
 		// Calculate how far across the screen the element is. "1" is when the top edge of the element first peeks out
 		// from the bottom of the viewport, and "0" is when the bottom edge disappears beyond the top of the viewport:
 		// percent = Math.min(1, start / height);     // 1 --> 0
-		percent = (start+h) / (height+h);         // 1 --> 0
+		// percent = (start+h) / (height+h);         // 1 --> 0
+		progress = 1 - ((start+h) / (height+h));
+
 
 		// update data Object
-		data.percent = percent;           // [TODO] should this be 0 -> 100 ...?
+		// data.percent = percent;
 		data.absolute = height - start;
+		data.progress = progress;
 
 																// start      to  from  end
 		// let easing = easeInOutQuad(data.start, 100, 0, data.start+data.duration);

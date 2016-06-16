@@ -85,11 +85,11 @@
 				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
 				<div>
-					<div class="parallax item" data-scrollify="['parallax', {speed:0.4}]"> 1 </div>
-					<div class="parallax item" data-scrollify="['parallax', {speed:0.2}]"> 2 </div>
-					<div class="parallax item" data-scrollify="['parallax', {speed:0.0}]"> 3 </div>
-					<div class="parallax item" data-scrollify="['parallax', {speed:-.2}]"> 4 </div>
-					<div class="parallax item" data-scrollify="['parallax', {speed:-.4}]"> 5 </div>
+					<div class="parallax item" data-scrollify="['parallax', { speed:0.4 }]"> 1 </div>
+					<div class="parallax item" data-scrollify="['parallax', { speed:0.2 }]"> 2 </div>
+					<div class="parallax item" data-scrollify="['parallax', { speed:0.0 }]"> 3 </div>
+					<div class="parallax item" data-scrollify="['parallax', { speed:-.2 }]"> 4 </div>
+					<div class="parallax item" data-scrollify="['parallax', { speed:-.4 }]"> 5 </div>
 				</div>
 
 				<p class="parallax" data-scrollify="['parallax', {speed:-0.3}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
@@ -107,16 +107,16 @@
 				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
 				<p class="scrollify" data-scroll="[ {parallax:{speed:1.4}}, {pin:40} ]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
-				<p class="scrollify" data-scroll="pin(30)">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
-				<p class="scrollify" data-scroll="toggle('move', 20)">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
-				<p class="scrollify" data-scroll="custom(30)">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+				<p class="scrollify" data-scroll="['pin']">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+				<p class="scrollify" data-scroll="['move', {x: 20}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+				<p class="scrollify" data-scroll="['rotate', 180]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
 
 				<div class="clip">
-					<div class="parallax" data-scrollify="['parallax', {speed:0.2}]"></div>
+					<div class="parallax" data-scrollify="['parallax', { speed:0.2 }]"></div>
 				</div>
 
 				<div class="clip">
-					<div class="backwards parallax" data-scrollify="['parallax', {speed:0.2}]"></div>
+					<div class="backwards parallax" data-scrollify="['parallax', { speed:0.2 }]"></div>
 				</div>
 			</div>
 
@@ -149,7 +149,7 @@
 		speed: 0.2
 	};
 
-	new Scrollify(element).useEffect('parallax', options);
+	new Scrollify(element).do('parallax', options);
 				</code></pre>
 
 				<!-- OR: Scrollify.prototype.addEffect('rotate', function(data) { ...  }); -->
@@ -157,8 +157,8 @@
 	// roll your own custom effect:
 	new Scrollify('#custom')
 		.addEffect('rotate', function(data) {
-			var degrees = 360 * data.percent;
-			data.el.transform = 'rotate('+degrees+'deg)';
+			var degrees = 360 * data.progress;
+			data.el.style[transform] = 'rotate('+degrees+'deg)';
 		});
 				</code></pre>
 			</div>
@@ -232,17 +232,26 @@
 			// use the built-in pin effect
 			// options: "where" : "duration" (ie. how many pixels)
 			// new Scrollify('#pin')
-			// 	.useEffect('pin', {'40%': 300});
+			// 	.do('pin', {'40%': 300});
 			// 	.addEffect('spin', function(pos) { this.style.transform = 'rotate('+ (pos*2) +'deg)'; })	// or add your own
-			// 	.useEffect('toggle', {'class':'red'});
+			// 	.do('toggle', {'class':'red'});
 
 
-			// Toggle any class(es) on/off
 			// TODO: reverse order of options (ie. %: class) to be consistent w/ pin ?
 			new Scrollify('#transformer')
-				.useEffect('toggle', {'red': '20%',
-									   					'blue': '50%',
-									 					  'green': '70%'});
+				.do('toggle', {'red': '20%',
+												'blue': '50%',
+											  'green': '70%'});
+
+
+			new Scrollify('#transformer')							// the element to target
+				.scene({																// start / stop, duration etc. of the effect
+					'start': [],
+					'duration': 300
+				})
+				.do('toggle', {'red': '0.2',						// the effect to apply, and when (within the progress of the scene)
+												'blue': '0.5',
+												'green': '0.7'});
 
 
 			// Set various transformation in the data- prop of each element, and apply that
@@ -250,7 +259,7 @@
 				var data = eval('(' + el.dataset.scrollify +')');
 				var effect = data[0];
 				var opts = data[1];
-				new Scrollify(el).useEffect(effect, opts);
+				new Scrollify(el).do(effect, opts);
 			});
 
 		});
