@@ -239,7 +239,7 @@
 			// 	.do('toggle', {'class':'red'});
 
 /* */
-			new Scrollify('#pin')											// the element to target
+			new Scrollify('#pin', 'pin')											// the element to target
 				.scene({																// start / stop, duration etc. of the effect
 					'start': 0.5,													//   'start': when at 50% of the viewport
 					'duration': 300												//   'duration': 300 pixels
@@ -252,7 +252,7 @@
 
 /* */
 
-			new Scrollify('#transformer')
+			new Scrollify('#transformer', 'trans')
 				.do('toggle', { 0.2: 'red',
 												0.5: 'blue',
 											  0.7: 'green'

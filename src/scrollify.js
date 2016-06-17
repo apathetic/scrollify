@@ -136,15 +136,16 @@ var effectList = {
  */
 export default class Scrollify {
 
-	constructor(element) {
+	constructor(element, debug) {
 		if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
 		if (!element || !transform ) { return false; }
 
-		this.element = element;
+		this.trigger = element;		// by default. Update if there is a Scene with a particular trigger element
 		this.ticking = false;
 		this.effects = [];
 		this.data = { el: element, progress: 0, absolute: 0 };
 		this.scroll = window.scrollY;
+		this.debug = debug;
 
 		this.initialize();
 
@@ -156,17 +157,28 @@ export default class Scrollify {
 	 * Initialize the "data" Object for each element, which contains position information as well
 	 * as a reference to the DOM node. The calculatation needs to be made "as if from an initial
 	 * scroll position of 0".
+   * @param  {Number} where: The location to start the effect. 1 is bottom, 0 is top of viewport.
 	 * @return {void}
 	 */
-	initialize() {
-		let BCR = this.element.getBoundingClientRect();
+	initialize(where = 1) {		// default: start where they appear on screen, at bottom
+		let BCR = this.trigger.getBoundingClientRect();
 
-		this.element.style.transform = '';		// remove any transformations, as we need "un-transformed"
-																					// data to compute the element's initial position.
-		this.data.initial = {
-			top: BCR.top + window.scrollY,
-			height: BCR.height
-		};
+		// this.element.style.transform = '';		// remove any transformations, as we need "un-transformed"
+																						// data to compute the element's initial position.
+
+		// find position in the document:
+    let top = 0;	// window.scrollY;
+    let trigger = this.trigger;
+    do {
+        top += trigger.offsetTop  || 0;
+        trigger = trigger.offsetParent;
+    } while(trigger);
+
+		// Calculate how far across the screen the element is. "0" is where the top edge of the element first peeks out
+		// from the bottom of the viewport, and "1" is where the bottom edge disappears beyond the top of the viewport:
+
+		this.start = top - (where * window.innerHeight);
+		this.duration = window.innerHeight + this.trigger.offsetHeight;
 
 		this.calculate();
 	}
@@ -192,36 +204,23 @@ export default class Scrollify {
 	scene(opts) {
 		let start = opts.start || null;
 		let duration = opts.duration || null;
-		let end = opts.end || null;
-		let top;
+		// let end = opts.end || null;
+		// let top;
 
-		if (duration && !start) { start = (end * window.innerHeight - duration) / window.innerHeight; }
-		if (start && Array.isArray(start)) {
-			top = document.querySelector(start[0]).getBoundingClientRect().top;
-			start = start[1]
-		} else {
-			top =	this.element.getBoundingClientRect().top;
+		if (!start) { conosle.log('missing start'); return; }
+
+		// if (duration && end && !start) {
+		// 	start = (end * window.innerHeight - duration);
+
+		if (Array.isArray(start)) {
+			this.target = document.querySelector(start[0]);
+			this.initialize(start[1]);
 		}
 
-		// if (start) {
-		// 	if (Array.isArray(start)) {
-		// 		top = document.querySelector(start[0]).getBoundingClientRect().top;
-		// 		start = start[1];
-		// 	} else {
-		// 	top =	data.el.getBoundingClientRect().top;
-		// 	}
-		// } else {
-		// 	if (duration) {
-		// 		start = (end * window.innerHeight - duration) / window.innerHeight;
-		// 	}
-		// }
+		if (duration) {
+		  this.duration = duration;
+		}
 
-		//
-		this.start = (start * window.innerHeight) + top + window.scrollY;
-		this.duration = duration ? duration : (stop-start) * window.innerHeight;
-		//
-
-		console.log(this);
 		return this;
 	}
 
@@ -295,24 +294,26 @@ export default class Scrollify {
    */
 	calculate() {
 		let data = this.data;
-		let winHeight = window.innerHeight;
-		let start = data.initial.top - this.scroll;
-		let height = data.initial.height;
+		let start = this.start;
+		let duration = this.duration;
+		let scroll = this.scroll;
 		let progress;
 
+		progress = (scroll - start) / duration;
+		if (progress < 0 || progress > 1) { return; }
+
 		// dont do nuthin until this here thing is within range (ie. top edge peeks out from the bottom of the screen)
-		if (winHeight < this.element.getBoundingClientRect().top || 0 > this.element.getBoundingClientRect().bottom) { return; } // use *actual* position data
-
-		// Calculate how far across the screen the element is. "0" is when the top edge of the element first peeks out
-		// from the bottom of the viewport, and "1" is when the bottom edge disappears beyond the top of the viewport:
-		// percent = Math.min(1, start / winHeight);     // 1 --> 0
-		progress = 1 - ((start + height) / (winHeight + height));
-
+		// if (start < scroll && scroll > start + duration) { return; }
+		// progress = (scroll - start) / duration;
 
 		// update data Object
 		// data.percent = percent;
-		data.absolute = winHeight - start;
+		data.absolute = scroll - start;
 		data.progress = progress;
+
+		if (this.debug) {
+			console.log(this.debug, progress);
+		}
 
 																// start      to  from  end
 		// let easing = easeInOutQuad(data.start, 100, 0, data.start+data.duration);
