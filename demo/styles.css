@@ -21,7 +21,7 @@ p.parallax { color: #ddd; z-index:-1 }
 
 .clip .parallax {
 	position: absolute;
-		background-image: url("images/pastoral.jpg");
+	background-image: url("images/pastoral.jpg");
 	background-position: 50% 50%;
 	background-size: cover;
 	top: -250px;
@@ -30,7 +30,7 @@ p.parallax { color: #ddd; z-index:-1 }
 }
 
 .clip .backwards.parallax {
-		background-image: url("images/pasture.jpg");
+	background-image: url("images/pasture.jpg");
 }
 
 

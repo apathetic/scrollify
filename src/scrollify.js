@@ -37,37 +37,40 @@ var effectList = {
 
 	/**
 	 * Parallax an element.
-   * @type {Object} opts: You may define parallax "speed" or parallax "range" (in pixels).
+	 * @type {Object} opts: You may define parallax "speed" or parallax "range" (in pixels).
 	 * @return {void}
 	 */
-	parallax(opts) {
+	parallax(data) {
 		let offset = 0;
+		let opts = this.options;
 
 		if (opts.speed !== undefined) {                 // check speed first
-			offset = this.absolute * opts.speed;
+			offset = data.absolute * opts.speed;
 		} else {                                        // fallback to range
-			offset = this.progresss * (opts.range || 0);  // default is "0", no effect
+			offset = data.progress * (opts.range || 0);   // default is "0", no effect
 		}
 
-		this.el.style[transform] = 'translate(0, '+ offset +'px)';
+		this.element.style[transform] = 'translate(0, '+ offset +'px)';
 	},
 
 	/**
 	 * Toggle a class on or off.
-   * @type {Object} opts: The "class" to toggle, and when (ie. at which point in the progress)
+	 * @type {Object} opts: The "class" to toggle, and when (ie. at which point in the progress)
+	 * @this: an object containing Options + element reference
 	 * @return {void}
 	 */
-	toggle(opts) {
+	toggle(data) {
+		let opts = this.options;
+		let element = this.element;
 		let times = Object.keys(opts);		// times
-		let el = this.el;
-		let now = this.progress;
+		let now = data.progress;
 
 		times.forEach(function(time) {
 			let css = opts[time];
 			if (now > time) {
-				el.classList.add(css);
+				element.classList.add(css);
 			} else {
-				el.classList.remove(css);
+				element.classList.remove(css);
 			}
 		});
 	},
@@ -109,25 +112,25 @@ var effectList = {
 	/**
 	 * Dummy effect for testing, at the moment
 	 */
-  translateX(opts) {
-    let offset = this.absolute;
-    let on = Object.keys(opts);
-    let delay = window.innerHeight;	// start translating after one window-height of scrolling
+	translateX(opts) {
+		let offset = this.absolute;
+		let on = Object.keys(opts);
+		let delay = window.innerHeight;	// start translating after one window-height of scrolling
 
-    offset -= delay;
+		offset -= delay;
 
-    // if (this.percent < 0.5) {    // test: start translating when element is centered in viewport
-    //   offset -= delay;
-    // } else {
-    //   offset = 0;
-    // }
+		// if (this.percent < 0.5) {    // test: start translating when element is centered in viewport
+		//   offset -= delay;
+		// } else {
+		//   offset = 0;
+		// }
 
-    //  ease = easeInQuad(elapsed,     start, end, duration);
-    let distance = 500;
-    let ease = easeInQuad(this.percent * 100, 0, distance, 100);
+		//  ease = easeInQuad(elapsed,     start, end, duration);
+		let distance = 500;
+		let ease = easeInQuad(this.percent * 100, 0, distance, 100);
 
-    this.el.style[transform] = 'translate3d(' + ease + 'px, 0, 0)';
-  }
+		this.el.style[transform] = 'translate3d(' + ease + 'px, 0, 0)';
+	}
 }
 
 
@@ -141,13 +144,13 @@ export default class Scrollify {
 		if (!element || !transform ) { return false; }
 
 		this.trigger = element;		// by default. Update if there is a Scene with a particular trigger element
+		this.element = element;
 		this.ticking = false;
-		this.effects = [];
+		this.scenes = [];
+		// this.effects = [];
 		this.data = { el: element, progress: 0, absolute: 0 };
 		this.scroll = window.scrollY;
 		this.debug = debug;
-
-		this.initialize();
 
 		window.addEventListener('scroll', (e) => this.onScroll(e));
 		window.addEventListener('resize', (e) => this.onResize(e));
@@ -157,30 +160,25 @@ export default class Scrollify {
 	 * Initialize the "data" Object for each element, which contains position information as well
 	 * as a reference to the DOM node. The calculatation needs to be made "as if from an initial
 	 * scroll position of 0".
-   * @param  {Number} where: The location to start the effect. 1 is bottom, 0 is top of viewport.
+	 * @param  {Number} where: The location to start the effect. 1 is bottom, 0 is top of viewport.
 	 * @return {void}
 	 */
-	initialize(where = 1) {		// default: start where they appear on screen, at bottom
-		let BCR = this.trigger.getBoundingClientRect();
-
-		// this.element.style.transform = '';		// remove any transformations, as we need "un-transformed"
-																						// data to compute the element's initial position.
+	initializeScene(scene) {
+		let trigger = scene.trigger;
+		let BCR = trigger.getBoundingClientRect();
+		let where = 1;
+		let top = 0;	// window.scrollY;
 
 		// find position in the document:
-    let top = 0;	// window.scrollY;
-    let trigger = this.trigger;
-    do {
-        top += trigger.offsetTop  || 0;
-        trigger = trigger.offsetParent;
-    } while(trigger);
+		do {
+				top += trigger.offsetTop || 0;
+				trigger = trigger.offsetParent;
+		} while(trigger);
 
-		// Calculate how far across the screen the element is. "0" is where the top edge of the element first peeks out
-		// from the bottom of the viewport, and "1" is where the bottom edge disappears beyond the top of the viewport:
+		scene.start = top - (where * window.innerHeight);
+		scene.duration = window.innerHeight + trigger.offsetHeight;
 
-		this.start = top - (where * window.innerHeight);
-		this.duration = window.innerHeight + this.trigger.offsetHeight;
-
-		this.calculate();
+		this.calculate(scene);
 	}
 
 	/**
@@ -201,66 +199,109 @@ export default class Scrollify {
 	 *         easing...? start, to, from, duration
 	 *
 	 */
-	scene(opts) {
+	addScene(opts) {
 		let start = opts.start || null;
 		let duration = opts.duration || null;
-		// let end = opts.end || null;
-		// let top;
+		let effects = opts.effects;
+		// let curry = (fn, options) => {
+		// 	return function() {       // NOTE: don't use => function here as we do NOT want to bind "this"
+	//       let context = {
+	//       	'options': options,
+	//       	'element': element
+	//       };
+	//       fn.call(context, this); // eslint-disable-line
+		// 	}
+		// };
 
-		if (!start) { conosle.log('missing start'); return; }
+		let scene = {
+			'start': start,
+			'duration': duration,
+			// 'effect': curry(effectList[effectName], effectOptions)
+			'effects': []
+		};
+
+		if (!start) { console.log('Scrollify [error]: Cannot add Scene. Missing "start" argument.'); return; }
+
+		this.effects.forEach((effect) => {
+			let effectName = opts.effects[0];
+			let effectOptions = options.effects[1] || null;
+			this.addEffect(effectName, effectOptions, scene);
+		});
 
 		// if (duration && end && !start) {
 		// 	start = (end * window.innerHeight - duration);
 
 		if (Array.isArray(start)) {
 			this.target = document.querySelector(start[0]);
-			this.initialize(start[1]);
+			this.initializeScene(start[1]);
 		}
 
 		if (duration) {
-		  this.duration = duration;
+			this.duration = duration;
 		}
 
+		// scene.effects.push(curry(effectList[effectName], effectOptions));
+
+		this.scenes.push(scene);
+
 		return this;
 	}
 
-  /**
-   * Add a custom effect to Scrollify.
-   * @param  {String} name: The name of the transformation to add.
-   * @param  {Function} effect: The function that produces the tranformation.
-   * @return {void}
-   */
-	addEffect(name, effect) {
-		effectList[name] = effect;
-		return this;
-	}
+	/**
+	 * Add a custom effect to Scrollify.
+	 * @param  {String} name: The name of the transformation to add.
+	 * @param  {Function} effect: The function that produces the tranformation.
+	 * @return {void}
+	 */
+	 // TODO use 'effect' and type-check arguments for Function
+	// addEffect(name, effect) {
+	// 	effectList[name] = effect;
+	// 	return this;
+	// }
 
-  /**
-   * Use an particular transformation on an Element.
-   * @param  {String|Function} name: The name of the transformation OR an actual function to apply.
-   * @param  {Object} options: Any transformation options.
-   * @return {void}
-   */
-	do(name, options) {
-		let curry = (fn, options) => {
-			return function() {       // NOTE: don't use => function here as we do NOT want to bind "this"
-        fn.call(this, options); // eslint-disable-line
+	/**
+	 * Use an particular transformation on an Element.
+	 * @param  {String|Function} name: The name of the transformation OR an actual function to apply.
+	 * @param  {Object} options: Any transformation options.
+	 * @return {void}
+	 */
+	addEffect(name, options, scene) {
+		let element = this.element;
+
+		// if no scene (ie "effect" was called directly on Scrollify), set up a default scene
+		if (!scene) {
+			let sceneOpts = {
+				'start': 0,		// 		scene.start = top - (where * window.innerHeight);
+				'duration': window.innerHeight + element.offsetHeight,
+				'effects': [name, options]
+			};
+			return this.addScene(sceneOpts);
+		} else {
+
+			let curry = (fn, options) => {
+				return function() {       // NOTE: don't use => function here as we do NOT want to bind "this"
+					let context = {
+						'options': options,
+						'element': element
+					};
+					fn.call(context, this); // eslint-disable-line
+				}
+			}
+
+			scene.effects.push(curry(effectList[name], options));
+
+			if (name == 'stick') {
+				new Sticky(element, true);
 			}
 		}
 
-		this.effects.push(curry(effectList[name], options));
-
-		if (name == 'stick') {
-			new Sticky(this.element, true);
-		}
-
 		return this;
 	}
 
-  /**
-   * onScroll Handler
-   * @return {void}
-   */
+	/**
+	 * onScroll Handler
+	 * @return {void}
+	 */
 	onScroll() {
 		if (!this.ticking) {
 			this.ticking = true;
@@ -269,47 +310,54 @@ export default class Scrollify {
 		}
 	}
 
-  /**
-   * onResize Handler
-   * @return {void}
-   */
+	/**
+	 * onResize Handler
+	 * @return {void}
+	 */
 	onResize() {
-		this.initialize();  // or.. updateScene..?
+		// this.throttle(this.initializeScene);
+		this.scenes.forEach((scene) => this.initializeScene(scene));
+		// this.initializeScene();  // or.. updateScene..?
 		// this.update();
 	}
 
-  /**
-   * Update the transformation of every element.
-   * @return {void}
-   */
+	/**
+	 * Limit frequency of DOM updates on resize
+	 */
+	throttle() {
+
+	}
+
+	/**
+	 * Update the transformations for every scene.
+	 * @return {void}
+	 */
 	update() {
-		this.calculate();
+		this.scenes.forEach((scene) => this.calculate(scene));
 		this.ticking = false;
 	}
 
-  /**
-   * Calculate the transformation of each element
-   * @param  {Object} data: An Object containing position information and the element to udpate.
-   * @return {void}
-   */
-	calculate() {
-		let data = this.data;
-		let start = this.start;
-		let duration = this.duration;
+	/**
+	 * Calculate the transformations for each scene.
+	 * @param  {Object} scene: An Object containing start and duration information as well as the transformations to apply.
+	 * @return {void}
+	 */
+	calculate(scene) {
+		// let data = this.data;
+		let start = scene.start;
+		let duration = scene.duration;
 		let scroll = this.scroll;
-		let progress;
-
-		progress = (scroll - start) / duration;
-		if (progress < 0 || progress > 1) { return; }
+		let progress = (scroll - start) / duration;
 
 		// dont do nuthin until this here thing is within range (ie. top edge peeks out from the bottom of the screen)
-		// if (start < scroll && scroll > start + duration) { return; }
-		// progress = (scroll - start) / duration;
+		// if (progress < 0 || progress > 1) { return; }
 
-		// update data Object
-		// data.percent = percent;
-		data.absolute = scroll - start;
-		data.progress = progress;
+		// Use *actual* position data. An element may be onscreen while its reference (trigger) element is not.
+		if (this.element.getBoundingClientRect().top > window.innerHeight ||
+				this.element.getBoundingClientRect().bottom < 0
+		) {
+			return;
+		}
 
 		if (this.debug) {
 			console.log(this.debug, progress);
@@ -319,6 +367,11 @@ export default class Scrollify {
 		// let easing = easeInOutQuad(data.start, 100, 0, data.start+data.duration);
 
 		// cycle through any registered transformations
-		this.effects.forEach((effect) => { effect.call(data) });
+		scene.effects.forEach((effect) => {
+			effect.call({
+				'progress': progress,
+				'absolute': scroll - start
+			});
+		});
 	}
 }

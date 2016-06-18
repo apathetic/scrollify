@@ -51,9 +51,9 @@
 				  possible and bundled within. However, you may also easily create your own custom scroll
 				  function, and pass it in to Scrollify. The built-in effects include:<p>
 				<ul class="bullets">
-<!-- 					<li><strong>Pin</strong>: sticks an element to a particular point and holds in there for a
+					<li><strong>Stick</strong>: sticks an element to a particular point and holds in there for a
 						pre-defined number of pixels.</li>
- -->					<li><strong>Parallax</strong>: move stuff on scroll. A subtle effect that transistions elements
+					<li><strong>Parallax</strong>: move stuff on scroll. A subtle effect that transistions elements
 						more slowly (or perhaps quickly) than the speed of the user-scroll.</li>
 					<li><strong>Toggle</strong>: turn a CSS class on or off if the element crosses a particular
 						threshold on the page.</li>
@@ -73,10 +73,12 @@
 			<div class="container">
 				<h2>Demo</h2>
 
-				<div class="sticky-container">
-				<p id="pin">Note: be careful about applying multiple effects to a single element. As
-				an element may only have one <code>"transform: ..."</code> on it at a time, you may
-				experience strange behaviour if you try to apply several things at once.</p>
+				<div class="ref">
+					<p id="stick">
+						<code>stick</code> me and do all sort of other random effects to me. 						Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+						Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+						tempor incididunt ut labore et dolore magna aliqua.
+					</p>
 				</div>
 
 				<p> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
@@ -86,7 +88,7 @@
 				cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
 				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
-				<div>
+				<div class="ref">
 					<div class="parallax item" data-scrollify="['parallax', { speed:0.4 }]"> 1 </div>
 					<div class="parallax item" data-scrollify="['parallax', { speed:0.2 }]"> 2 </div>
 					<div class="parallax item" data-scrollify="['parallax', { speed:0.0 }]"> 3 </div>
@@ -94,12 +96,16 @@
 					<div class="parallax item" data-scrollify="['parallax', { speed:-.4 }]"> 5 </div>
 				</div>
 
-				<p class="parallax" data-scrollify="['parallax', {speed:-0.3}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-				quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-				cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+				<p class="parallax" data-scrollify="['parallax', {speed:-0.3}]">
+					<span>
+						Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+						tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+						quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+						consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+						cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+						proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+					</span>
+				</p>
 
 				<p class="scrollify" id="transformer"><strong>This element is toggling various classes on and off. At 20%, 50%, and 70%.</strong> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
@@ -113,11 +119,11 @@
 				<p class="scrollify" data-scroll="['move', {x: 20}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
 				<p class="scrollify" data-scroll="['rotate', 180]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
 
-				<div class="clip">
+				<div class="clip ref">
 					<div class="parallax" data-scrollify="['parallax', { speed:0.2 }]"></div>
 				</div>
 
-				<div class="clip">
+				<div class="clip ref">
 					<div class="backwards parallax" data-scrollify="['parallax', { speed:0.2 }]"></div>
 				</div>
 			</div>
@@ -144,21 +150,33 @@
 		<section data-nav="Code" id="code">
 			<div class="container">
 				<h2>Code</h2>
+
+				<p>All elements to <em>Scrollify</em> are required to be wrapped in an empty element. This wrapper element
+				will serve as a reference point for any tranformations, offsets, manipulation, etc. to the targeted element.</p>
+
+				<pre><code class="language-markup">
+	&lt;div class="ref">&lt;!-- the reference element -->
+		&lt;img class="scrollify" src="photo.jpg">&lt;!-- target element -->
+	&lt;/div>
+				</code></pre>
+
+
 				<pre><code class="language-javascript">
-	// use a built-in effect:
+	// set up some options, including the element to Scrollify
 	var element = document.querySelector('.scrollify');
 	var options = {
 		speed: 0.2
 	};
 
-	new Scrollify(element).do('parallax', options);
+	// create a new Scrollify instance using a built-in effect, "parallax":
+	new Scrollify(element).with('parallax', options);
 				</code></pre>
 
 				<!-- OR: Scrollify.prototype.addEffect('rotate', function(data) { ...  }); -->
 				<pre><code class="language-javascript">
-	// roll your own custom effect:
+	// Or, roll your own custom effect:
 	new Scrollify('#custom')
-		.addEffect('rotate', function(data) {
+		.with(function(data) {
 			var degrees = 360 * data.progress;
 			data.el.style[transform] = 'rotate('+degrees+'deg)';
 		});
@@ -229,42 +247,39 @@
 	<script src="../dist/scrollify.js"></script>
 	<script>
 		window.addEventListener('DOMContentLoaded', function() {
-			var elements = document.querySelectorAll('[data-scrollify]');
-
-			// use the built-in pin effect
-			// options: "where" : "duration" (ie. how many pixels)
-			// new Scrollify('#pin')
-			// 	.do('pin', {'40%': 300});
-			// 	.addEffect('spin', function(pos) { this.style.transform = 'rotate('+ (pos*2) +'deg)'; })	// or add your own
-			// 	.do('toggle', {'class':'red'});
-
-/* */
-			new Scrollify('#pin', 'pin')											// the element to target
-				.scene({																// start / stop, duration etc. of the effect
-					'start': 0.5,													//   'start': when at 50% of the viewport
-					'duration': 300												//   'duration': 300 pixels
-				})
-				.do('stick', {})
-				.do('toggle', { 0.2: 'red',							// the effect to apply, and when (within the progress of the scene)
-												0.5: 'blue',
-											  0.7: 'green'
-											});
-
-/* */
-
-			new Scrollify('#transformer', 'trans')
-				.do('toggle', { 0.2: 'red',
-												0.5: 'blue',
-											  0.7: 'green'
-											});
 
 			// Set various transformation in the data- prop of each element, and apply that
+			var elements = document.querySelectorAll('[data-scrollify]');
+
 			Array.prototype.forEach.call(elements, function(el) {
 				var data = eval('(' + el.dataset.scrollify +')');
 				var effect = data[0];
 				var opts = data[1];
-				new Scrollify(el).do(effect, opts);
+				new Scrollify(el).addEffect(effect, opts);
 			});
+
+			// options: "where" : "duration" (ie. how many pixels)
+			// new Scrollify('#pin')
+			// 	.with('pin', {'40%': 300});
+			// 	.addEffect('spin', function(pos) { this.style.transform = 'rotate('+ (pos*2) +'deg)'; })	// or add your own
+			// 	.with('toggle', {'class':'red'});
+
+
+			// use the built-in stick effect
+			new Scrollify('#stick')							// the element to target
+				.addScene({												// start / stop, duration etc. of the effect
+					'start': 0.5,										//   - 'start': when at 50% of the viewport
+					'duration': 300,								//   - 'duration': 300 pixels
+					'effects': [
+						'stick', { }
+					]
+				})
+
+			// use the built-in toggle (class) effect
+			new Scrollify('#transformer', 'trans')
+				.addEffect('toggle', { 0.2: 'red',			// the effect to apply, and when (within the progress of the scene)
+															0.5: 'blue',
+														 	0.7: 'green' });
 
 		});
 	</script>
