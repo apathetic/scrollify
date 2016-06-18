@@ -30,6 +30,7 @@ for (let i in transforms) {
 
 /**
  * A list of some default "transformations" that may be applied
+ * Options are applied at initialize, and are curried in via "this".
  * NOTE: don't use arrow fn's here as they proxy "this"
  * @type {Object}
  */
@@ -76,40 +77,6 @@ var effectList = {
 	},
 
 	/**
-	 * Pin an element for a specific duration
-	 * ... while this works, it is pretty ugly and candidate for improvement
-	 */
-		// pin(opts) {
-		//  let waypoints = Object.keys(opts);
-		//  let percent = this.percent * 100;
-
-		//  waypoints.forEach(where => {
-		//    if (percent < parseInt(where)) {
-
-		//      let distance = opts[where];
-		//      let absolute = this.absolute;
-		//      var current;
-
-		//      if (this.current) {
-		//        current = this.current;
-		//      } else {
-		//        current = absolute;
-		//        this.current = current;
-		//      }
-
-		//      let end = current + distance; // (this assumes current will be "frozen" and unchanged while pinned)
-		//      let offset = absolute - current;
-
-		//      if (absolute < end) {
-		//        this.el.style[transform] = 'translate(0, '+ offset +'px)';
-		//      }
-		//    } else {
-		//      // this.el.style[transform] = 'translate(0, 0)';
-		//    }
-		//  });
-		// },
-
-	/**
 	 * Dummy effect for testing, at the moment
 	 */
 	translateX(opts) {
@@ -143,42 +110,14 @@ export default class Scrollify {
 		if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
 		if (!element || !transform ) { return false; }
 
-		this.trigger = element;		// by default. Update if there is a Scene with a particular trigger element
 		this.element = element;
 		this.ticking = false;
 		this.scenes = [];
-		// this.effects = [];
-		this.data = { el: element, progress: 0, absolute: 0 };
 		this.scroll = window.scrollY;
 		this.debug = debug;
 
 		window.addEventListener('scroll', (e) => this.onScroll(e));
 		window.addEventListener('resize', (e) => this.onResize(e));
-	}
-
-	/**
-	 * Initialize the "data" Object for each element, which contains position information as well
-	 * as a reference to the DOM node. The calculatation needs to be made "as if from an initial
-	 * scroll position of 0".
-	 * @param  {Number} where: The location to start the effect. 1 is bottom, 0 is top of viewport.
-	 * @return {void}
-	 */
-	initializeScene(scene) {
-		let trigger = scene.trigger;
-		let BCR = trigger.getBoundingClientRect();
-		let where = 1;
-		let top = 0;	// window.scrollY;
-
-		// find position in the document:
-		do {
-				top += trigger.offsetTop || 0;
-				trigger = trigger.offsetParent;
-		} while(trigger);
-
-		scene.start = top - (where * window.innerHeight);
-		scene.duration = window.innerHeight + trigger.offsetHeight;
-
-		this.calculate(scene);
 	}
 
 	/**
@@ -200,67 +139,64 @@ export default class Scrollify {
 	 *
 	 */
 	addScene(opts) {
-		let start = opts.start || null;
+		let start = (opts.start === undefined) ? false : opts.start;
 		let duration = opts.duration || null;
 		let effects = opts.effects;
-		// let curry = (fn, options) => {
-		// 	return function() {       // NOTE: don't use => function here as we do NOT want to bind "this"
-	//       let context = {
-	//       	'options': options,
-	//       	'element': element
-	//       };
-	//       fn.call(context, this); // eslint-disable-line
-		// 	}
-		// };
+		let trigger = opts.trigger || this.element; // .parentNode;
 
 		let scene = {
+			'trigger': trigger,
 			'start': start,
 			'duration': duration,
-			// 'effect': curry(effectList[effectName], effectOptions)
 			'effects': []
 		};
 
-		if (!start) { console.log('Scrollify [error]: Cannot add Scene. Missing "start" argument.'); return; }
+		if (start === false) { console.log('Scrollify [error]: Cannot add Scene. Missing "start" argument.'); return; }
 
-		this.effects.forEach((effect) => {
+		effects.forEach((effect) => {
 			let effectName = opts.effects[0];
-			let effectOptions = options.effects[1] || null;
+			let effectOptions = opts.effects[1] || null;
 			this.addEffect(effectName, effectOptions, scene);
 		});
 
 		// if (duration && end && !start) {
 		// 	start = (end * window.innerHeight - duration);
 
-		if (Array.isArray(start)) {
-			this.target = document.querySelector(start[0]);
-			this.initializeScene(start[1]);
-		}
-
 		if (duration) {
 			this.duration = duration;
 		}
 
-		// scene.effects.push(curry(effectList[effectName], effectOptions));
-
+		this.updateScene(scene);
 		this.scenes.push(scene);
 
 		return this;
 	}
 
 	/**
-	 * Add a custom effect to Scrollify.
-	 * @param  {String} name: The name of the transformation to add.
-	 * @param  {Function} effect: The function that produces the tranformation.
+	 * Update each scene.
+	 * @param  {Object} scene: The scene to update.
 	 * @return {void}
 	 */
-	 // TODO use 'effect' and type-check arguments for Function
-	// addEffect(name, effect) {
-	// 	effectList[name] = effect;
-	// 	return this;
-	// }
+	updateScene(scene) {
+		let trigger = scene.trigger;
+		let BCR = trigger.getBoundingClientRect();
+		let where = 1;
+		let top = 0;	// window.scrollY;
+
+		// find position in the document:
+		do {
+				top += trigger.offsetTop || 0;
+				trigger = trigger.offsetParent;
+		} while(trigger);
+
+		scene.start = top - (where * window.innerHeight);
+		// scene.duration = window.innerHeight + trigger.offsetHeight;
+
+		this.calculate(scene);
+	}
 
 	/**
-	 * Use an particular transformation on an Element.
+	 * Add a particular transformation to a scene.
 	 * @param  {String|Function} name: The name of the transformation OR an actual function to apply.
 	 * @param  {Object} options: Any transformation options.
 	 * @return {void}
@@ -268,16 +204,8 @@ export default class Scrollify {
 	addEffect(name, options, scene) {
 		let element = this.element;
 
-		// if no scene (ie "effect" was called directly on Scrollify), set up a default scene
-		if (!scene) {
-			let sceneOpts = {
-				'start': 0,		// 		scene.start = top - (where * window.innerHeight);
-				'duration': window.innerHeight + element.offsetHeight,
-				'effects': [name, options]
-			};
-			return this.addScene(sceneOpts);
-		} else {
-
+		if (scene) {
+			let effect = (typeof name == 'function') ? name : effectList[name];
 			let curry = (fn, options) => {
 				return function() {       // NOTE: don't use => function here as we do NOT want to bind "this"
 					let context = {
@@ -288,11 +216,20 @@ export default class Scrollify {
 				}
 			}
 
-			scene.effects.push(curry(effectList[name], options));
+			scene.effects.push(curry(effect, options));
 
 			if (name == 'stick') {
 				new Sticky(element, true);
 			}
+
+		} else {
+			// if no scene (ie "effect" was called directly on Scrollify), set up a default scene
+			let sceneOpts = {
+				'start': 0,		// 		scene.start = top - (where * window.innerHeight);
+				'duration': window.innerHeight + element.offsetHeight,
+				'effects': [name, options]
+			};
+			return this.addScene(sceneOpts);
 		}
 
 		return this;
@@ -315,10 +252,8 @@ export default class Scrollify {
 	 * @return {void}
 	 */
 	onResize() {
-		// this.throttle(this.initializeScene);
-		this.scenes.forEach((scene) => this.initializeScene(scene));
-		// this.initializeScene();  // or.. updateScene..?
-		// this.update();
+		// this.throttle(this.updateScene);
+		this.scenes.forEach((scene) => this.updateScene(scene));
 	}
 
 	/**
