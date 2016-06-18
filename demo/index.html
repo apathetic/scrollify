@@ -75,9 +75,11 @@
 
 				<div class="ref" style="padding-bottom: 300px;">
 					<p id="stick">
-						<code>stick</code> me and do all sort of other random effects to me. 						Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-						Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-						tempor incididunt ut labore et dolore magna aliqua.
+						<code>stick</code> me and do all sort of other random effects to me. I'll
+						Hang around for <strong>300 px</strong>. Lorem ipsum dolor sit amet,
+						consectetur adipisicing elit, sed do eiusmod. Lorem ipsum dolor sit amet,
+						consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore
+						et dolore magna aliqua.
 					</p>
 				</div>
 
@@ -114,10 +116,10 @@
 				cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
 				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
-				<p class="scrollify" data-scroll="[ {parallax:{speed:1.4}}, {pin:40} ]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
-				<p class="scrollify" data-scroll="['pin']">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
-				<p class="scrollify" data-scroll="['move', {x: 20}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
-				<p class="scrollify" data-scroll="['rotate', 180]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+				<p class="scrollify" data-scrollify="['rotate', {deg: 45}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+				<p class="scrollify" data-scrollify="['rotate', {deg: 90}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+				<p class="scrollify" data-scrollify="['rotate', {deg: 180}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+				<p class="scrollify" data-scrollify="['rotate', {deg: 360}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
 
 				<div class="clip ref">
 					<div class="parallax" data-scrollify="['parallax', { speed:0.2 }]"></div>
@@ -250,11 +252,18 @@
 
 			// Set various transformation in the data- prop of each element, and apply that
 			var elements = document.querySelectorAll('[data-scrollify]');
+			var rotate = function(data) {
+				var degrees = this.options.deg * data.progress;
+				this.element.style.transform = 'rotate('+ degrees +'deg)';
+			};
 
 			Array.prototype.forEach.call(elements, function(el) {
 				var data = eval('(' + el.dataset.scrollify +')');
 				var effect = data[0];
 				var opts = data[1];
+
+				if (effect == 'rotate') { effect = rotate };
+
 				new Scrollify(el).addEffect(effect, opts);
 			});
 
@@ -276,7 +285,7 @@
 				})
 
 			// use the built-in toggle (class) effect
-			new Scrollify('#transformer', 'trans')
+			new Scrollify('#transformer')
 				.addEffect('toggle', { 0.2: 'red',			// the effect to apply, and when (within the progress of the scene)
 															0.5: 'blue',
 														 	0.7: 'green' });
