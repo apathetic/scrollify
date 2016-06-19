@@ -1,10 +1,19 @@
 main { overflow:hidden; }
 
-.sticky {
+main .sticky {
 	left: auto !important;
+	background: #ec008c;
+	color: #fff;
 }
+
+main .bottom {
+	bottom: 0;
+}
+
 #stick {
 	position: absolute;
+	padding: 1em;
+	border: 1px solid #333;
 }
 
 p { margin-bottom:1em; clear:both; }

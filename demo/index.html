@@ -73,15 +73,15 @@
 			<div class="container">
 				<h2>Demo</h2>
 
-				<div class="ref" style="padding-bottom: 300px;">
-					<p id="stick">
+				<p class="ref" style="padding-bottom: 300px;">
+					<span id="stick">
 						<code>stick</code> me and do all sort of other random effects to me. I'll
-						Hang around for <strong>300 px</strong>. Lorem ipsum dolor sit amet,
+						hang around for <strong>100 px</strong>. Lorem ipsum dolor sit amet,
 						consectetur adipisicing elit, sed do eiusmod. Lorem ipsum dolor sit amet,
 						consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore
 						et dolore magna aliqua.
-					</p>
-				</div>
+					</span>
+				</p>
 
 				<p> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
@@ -171,14 +171,14 @@
 	};
 
 	// create a new Scrollify instance using a built-in effect, "parallax":
-	new Scrollify(element).with('parallax', options);
+	new Scrollify(element).addEffect('parallax', options);
 				</code></pre>
 
 				<!-- OR: Scrollify.prototype.addEffect('rotate', function(data) { ...  }); -->
 				<pre><code class="language-javascript">
 	// Or, roll your own custom effect:
 	new Scrollify('#custom')
-		.with(function(data) {
+		.addEffect(function(data) {
 			var degrees = 360 * data.progress;
 			data.el.style[transform] = 'rotate('+degrees+'deg)';
 		});
@@ -269,9 +269,9 @@
 
 			// options: "where" : "duration" (ie. how many pixels)
 			// new Scrollify('#pin')
-			// 	.with('pin', {'40%': 300});
+			// 	.addEffect('pin', {'40%': 300});
 			// 	.addEffect('spin', function(pos) { this.style.transform = 'rotate('+ (pos*2) +'deg)'; })	// or add your own
-			// 	.with('toggle', {'class':'red'});
+			// 	.addEffect('toggle', {'class':'red'});
 
 
 			// use the built-in stick effect
