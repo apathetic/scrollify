@@ -68,12 +68,8 @@ export default class Scrollify {
 
 		effects.forEach((effect) => {
 			this.addEffect(effect.name, effect.options, scene);
-			if (effect.name == 'stick') this.isSticky = true;
+			if (effect.name == 'stick') scene.isSticky = true;
 		});
-
-		// if (duration) {
-		// 	this.duration = duration;
-		// }
 
 		this.updateScene(scene);
 		this.scenes.push(scene);
@@ -90,12 +86,13 @@ export default class Scrollify {
 		let trigger = scene.trigger;
 		let BCR = trigger.getBoundingClientRect();
 		let where = 1 - scene._start;	// 1
-		let top = 0;	// window.scrollY;
+		let top = 0;
 
 		do {
 			top += trigger.offsetTop || 0;
 			trigger = trigger.offsetParent;
 		} while(trigger);
+		// top = trigger.getBoundingClientRect().top + window.scrollY;
 
 		scene.start = top - (where * window.innerHeight); // (can be negative)
 

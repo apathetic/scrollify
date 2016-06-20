@@ -79,7 +79,7 @@ export function translateX(data) {
  * @param  {[type]} data [description]
  * @return {[type]}      [description]
  */
-let currentState = 'normal';
+let currentState = '_';
 export function stick(data) {
 	let progress = data.progress;
 	let element = this.element;
@@ -94,13 +94,13 @@ export function stick(data) {
 }
 
 function setState(element, state) {
+  let BCR = element.getBoundingClientRect();
+
   if (currentState === state) { return; }
   if (state == 'sticky') {
-    let BCR = element.getBoundingClientRect();
-    applyStyles(BCR, element);
-    element.style.position = 'fixed';
+    applyStyles.call(element, BCR);
   } else {
-    element.style.position = '';
+    applyStyles.call(element, BCR, false);
   }
 
   element.classList.remove(currentState);
@@ -108,9 +108,10 @@ function setState(element, state) {
   currentState = state;
 }
 
-function applyStyles(styles, element) {
+function applyStyles(styles, on=true) {
   for (let prop in styles) {
     if (prop == 'bottom' || prop == 'right') { continue; }
-    element.style[prop] = styles[prop] + 'px';
+    this.style[prop] = (on) ? styles[prop] + 'px' : '';
   }
+  this.style.position = (on) ? 'fixed' : '';
 }
