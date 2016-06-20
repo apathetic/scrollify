@@ -84,9 +84,9 @@ export function stick(data) {
 	let progress = data.progress;
 	let element = this.element;
 
-	if (progress < 0) {
+	if (progress <= 0) {
 		setState(element, 'normal');
-	} else if (progress > 1) {
+	} else if (progress >= 1) {
 		setState(element, 'bottom');
 	} else {
 		setState(element, 'sticky');
@@ -113,5 +113,5 @@ function applyStyles(styles, on=true) {
     if (prop == 'bottom' || prop == 'right') { continue; }
     this.style[prop] = (on) ? styles[prop] + 'px' : '';
   }
-  this.style.position = (on) ? 'fixed' : '';
+  this.style.position = (on) ? 'fixed' : '';  // OR, deal with this via CSS...?
 }

@@ -63,15 +63,18 @@ export default class Scrollify {
 		let start = (opts.start === undefined) ? false : opts.start;
 		let duration = opts.duration || null;
 		let effects = opts.effects || [];
-		let trigger = opts.trigger || this.element; // .parentNode;
+    let trigger = document.querySelector(opts.trigger) || this.element; // .parentNode;
 		let scene = {
 			'trigger': trigger,
-			'_start': start,
+			'triggerPos': start,
 			'duration': duration,
 			'effects': []
 		};
 
-		if (start === false) { console.log('Scrollify [error]: Cannot add Scene. Missing "start" argument.'); return; }
+    if (start === false) {
+      console.log('Scrollify [error]: Cannot add Scene.'); // Missing "start" argument.');
+      return;
+    }
 
 		effects.forEach((effect) => {
 			this.addEffect(effect.name, effect.options, scene);
@@ -92,7 +95,7 @@ export default class Scrollify {
 	updateScene(scene) {
 		let trigger = scene.trigger;
 		let BCR = trigger.getBoundingClientRect();
-		let where = 1 - scene._start;	// 1
+		let where = 1 - scene.triggerPos;
 		let top = 0;
 
 		do {
@@ -106,8 +109,8 @@ export default class Scrollify {
 		if (scene.isSticky) {
 			let d = scene.duration || 0;
 			let h = this.element.getBoundingClientRect().height;
-			this.element.parentNode.style.paddingBottom = (d+h) + 'px';
-			console.log('sticky update', this.element.id);
+
+			this.element.parentNode.style.paddingBottom = d + h + 'px';
 		}
 
 		this.calculate(scene);
@@ -134,6 +137,7 @@ export default class Scrollify {
 						'options': options,
 						'element': element
 					};
+
 					fn.call(context, this); // eslint-disable-line
 				}
 			}
