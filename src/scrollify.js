@@ -34,24 +34,31 @@ export default class Scrollify {
 		window.addEventListener('resize', (e) => this.onResize(e));
 	}
 
-	/**
-	 * params: any TWO of: start / stop / duration.
-	 *         start: a percentage of the viewport (eg. 0.5) OR a reference element's position (eg ['#toggle', 0.3] )
-	 *         stop: a percentage of the viewport OR a reference element's position
-	 *         duration: the duration in pixels
-	 *
-	 *         default is 0 - 100% (making duration the window height + element height)
-	 *
-	 *         examples:
-	 *          { start: 0, stop: 0.5 }
-	 *          { start: 0.1, duration: '400px' }
-	 *          { duration: 100px, stop: 1.0 }
-	 *          { start: ['#toggle', 0.3], stop: ['#toggle', 0.5] }
-	 *          { start: ['#toggle', 0.3], duration: '300px' }
-	 *
-	 *         easing...? start, to, from, duration
-	 *
-	 */
+  /**
+   * Add a new Scene to the Scrollify object. Scene information includes when
+   * to start applying an effect and for how long.
+   * @param  {Object} opts: Various options to apply to the new Scene:
+   *
+   *   start: (required) When to start the effect. It is a 0 - 1 value
+   *          representing the percentage of the viewport (eg. 0.5).
+   *          Any effects in the Scene will begin when the trigger element
+   *          crosses this threshold.
+   *
+   *   duration: The length of the effect, in pixels. Scrollify will
+   *          interpolate that into value into a "progress" variable, bounded
+   *          by 0 - 1. If not supplied, the default value is the height of the
+   *          viewport + element height, meaning the effect will last for as
+   *          long as the element is visible.
+   *
+   *   trigger: If supplied, Scrollify will use this element's position to
+   *          start any Scene effects. If not supplied, the default is to use
+   *          the element itself as a trigger.
+   *
+   *   easing: Ease in/out of an effect. Any value from Robert Penner's easing
+   *          functions is valid.
+   *
+   * @return {void}
+   */
 	addScene(opts) {
 		let start = (opts.start === undefined) ? false : opts.start;
 		let duration = opts.duration || null;
@@ -115,8 +122,8 @@ export default class Scrollify {
 	addEffect(name, options={}, scene) {
 		let element = this.element;
 
-		if (!scene && this.scenes.length == 1) {
-			scene = this.scenes[0];
+    if (!scene && this.scenes.length) {
+      scene = this.scenes[this.scenes.length - 1];  // use the most recently added scene
 		}
 
 		if (scene) {
