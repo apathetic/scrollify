@@ -12,93 +12,8 @@
 
 // import {easeInOutCubic} from './easings';
 import Sticky from './sticky';
-
-
-/**
- * Feature detection: CSS transforms
- * @type {Boolean}
- */
-var transform = false;
-const transforms = ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'];
-for (let i in transforms) {
-	if ( document.body.style[transforms[i]] !== undefined) {
-		transform = transforms[i];
-		break;
-	}
-}
-
-
-/**
- * A list of some default "transformations" that may be applied
- * Options are applied at initialize, and are curried in via "this".
- * NOTE: don't use arrow fn's here as they proxy "this"
- * @type {Object}
- */
-var effectList = {
-
-	/**
-	 * Parallax an element.
-	 * @type {Object} opts: You may define parallax "speed" or parallax "range" (in pixels).
-	 * @return {void}
-	 */
-	parallax(data) {
-		let offset = 0;
-		let opts = this.options;
-
-		if (opts.speed !== undefined) {                 // check speed first
-			offset = data.absolute * opts.speed;
-		} else {                                        // fallback to range
-			offset = data.progress * (opts.range || 0);   // default is "0", no effect
-		}
-
-		this.element.style[transform] = 'translate(0, '+ offset +'px)';
-	},
-
-	/**
-	 * Toggle a class on or off.
-	 * @type {Object} opts: The "class" to toggle, and when (ie. at which point in the progress)
-	 * @this: an object containing Options + element reference
-	 * @return {void}
-	 */
-	toggle(data) {
-		let opts = this.options;
-		let element = this.element;
-		let times = Object.keys(opts);		// times
-		let now = data.progress;
-
-		times.forEach(function(time) {
-			let css = opts[time];
-			if (now > time) {
-				element.classList.add(css);
-			} else {
-				element.classList.remove(css);
-			}
-		});
-	},
-
-	/**
-	 * Dummy effect for testing, at the moment
-	 */
-	translateX(opts) {
-		let offset = this.absolute;
-		let on = Object.keys(opts);
-		let delay = window.innerHeight;	// start translating after one window-height of scrolling
-
-		offset -= delay;
-
-		// if (this.percent < 0.5) {    // test: start translating when element is centered in viewport
-		//   offset -= delay;
-		// } else {
-		//   offset = 0;
-		// }
-
-		//  ease = easeInQuad(elapsed,     start, end, duration);
-		let distance = 500;
-		let ease = easeInQuad(this.percent * 100, 0, distance, 100);
-
-		this.el.style[transform] = 'translate3d(' + ease + 'px, 0, 0)';
-	}
-}
+import * as effectList from './effects';
+import transform from './transform';
 
 
 /**
@@ -141,9 +56,8 @@ export default class Scrollify {
 	addScene(opts) {
 		let start = (opts.start === undefined) ? false : opts.start;
 		let duration = opts.duration || null;
-		let effects = opts.effects;
+		let effects = opts.effects || [];
 		let trigger = opts.trigger || this.element; // .parentNode;
-
 		let scene = {
 			'trigger': trigger,
 			'start': start,
@@ -154,13 +68,8 @@ export default class Scrollify {
 		if (start === false) { console.log('Scrollify [error]: Cannot add Scene. Missing "start" argument.'); return; }
 
 		effects.forEach((effect) => {
-			let effectName = opts.effects[0];
-			let effectOptions = opts.effects[1] || null;
-			this.addEffect(effectName, effectOptions, scene);
+			this.addEffect(effect.name, effect.options, scene);
 		});
-
-		// if (duration && end && !start) {
-		// 	start = (end * window.innerHeight - duration);
 
 		if (duration) {
 			this.duration = duration;
@@ -183,14 +92,12 @@ export default class Scrollify {
 		let where = 1;
 		let top = 0;	// window.scrollY;
 
-		// find position in the document:
 		do {
-				top += trigger.offsetTop || 0;
-				trigger = trigger.offsetParent;
+			top += trigger.offsetTop || 0;
+			trigger = trigger.offsetParent;
 		} while(trigger);
 
 		scene.start = top - (where * window.innerHeight);
-		// scene.duration = window.innerHeight + trigger.offsetHeight;
 
 		this.calculate(scene);
 	}
@@ -201,8 +108,12 @@ export default class Scrollify {
 	 * @param  {Object} options: Any transformation options.
 	 * @return {void}
 	 */
-	addEffect(name, options, scene) {
+	addEffect(name, options={}, scene) {
 		let element = this.element;
+
+		if (!scene && this.scenes.length == 1) {
+			scene = this.scenes[0];
+		}
 
 		if (scene) {
 			let effect = (typeof name == 'function') ? name : effectList[name];
@@ -216,20 +127,25 @@ export default class Scrollify {
 				}
 			}
 
+			// console.log(effect, options);
 			scene.effects.push(curry(effect, options));
 
 			if (name == 'stick') {
+				let d = scene.duration || 0;
+				let h = element.getBoundingClientRect().height;
+				element.parentNode.style.paddingBottom = (d+h) + 'px';
 				new Sticky(element, true);
 			}
 
 		} else {
 			// if no scene (ie "effect" was called directly on Scrollify), set up a default scene
-			let sceneOpts = {
-				'start': 0,		// 		scene.start = top - (where * window.innerHeight);
+			return this.addScene({
+				'start': 0,
 				'duration': window.innerHeight + element.offsetHeight,
-				'effects': [name, options]
-			};
-			return this.addScene(sceneOpts);
+				'effects': [{
+					'name': name, 'options': options
+				}]
+			});
 		}
 
 		return this;

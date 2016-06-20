@@ -73,15 +73,37 @@
 			<div class="container">
 				<h2>Demo</h2>
 
-				<p class="ref" style="padding-bottom: 300px;">
+				<p class="spacer">
 					<span id="stick">
-						<code>stick</code> me and do all sort of other random effects to me. I'll
-						hang around for <strong>100 px</strong>. Lorem ipsum dolor sit amet,
-						consectetur adipisicing elit, sed do eiusmod. Lorem ipsum dolor sit amet,
-						consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore
-						et dolore magna aliqua.
+						<strong>Sticks!</strong> I'll hang around for <strong>300 px</strong>.
+						Lorem ipsum dolor sit amet,	consectetur adipisicing elit, sed do eiusmod.
 					</span>
 				</p>
+
+				<div class="spacer">
+					<div id="sequence">
+						<img src="images/seq/horse_01.jpg" style="opacity:1" alt="">
+						<img src="images/seq/horse_02.jpg" alt="">
+						<img src="images/seq/horse_03.jpg" alt="">
+						<img src="images/seq/horse_04.jpg" alt="">
+						<img src="images/seq/horse_05.jpg" alt="">
+						<img src="images/seq/horse_06.jpg" alt="">
+						<img src="images/seq/horse_07.jpg" alt="">
+						<img src="images/seq/horse_08.jpg" alt="">
+						<img src="images/seq/horse_09.jpg" alt="">
+						<img src="images/seq/horse_10.jpg" alt="">
+						<img src="images/seq/horse_11.jpg" alt="">
+						<img src="images/seq/horse_12.jpg" alt="">
+						<img src="images/seq/horse_13.jpg" alt="">
+						<img src="images/seq/horse_14.jpg" alt="">
+						<img src="images/seq/horse_15.jpg" alt="">
+						<img src="images/seq/horse_16.jpg" alt="">
+						<img src="images/seq/horse_17.jpg" alt="">
+						<img src="images/seq/horse_18.jpg" alt="">
+						<img src="images/seq/horse_19.jpg" alt="">
+						<img src="images/seq/horse_20.jpg" alt="">
+					</div>
+				</div>
 
 				<p> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
@@ -280,7 +302,7 @@
 					'start': 0.5,										//   - 'start': when at 50% of the viewport
 					'duration': 300,								//   - 'duration': 300 pixels
 					'effects': [
-						'stick'
+						{ 'name': 'stick' }
 					]
 				})
 
@@ -289,6 +311,29 @@
 				.addEffect('toggle', { 0.2: 'red',			// the effect to apply, and when (within the progress of the scene)
 															0.5: 'blue',
 														 	0.7: 'green' });
+
+
+			// build an Image Sequence!
+			var images = document.querySelectorAll('#sequence img');
+			var length = images.length - 1;
+			var sequencer = function(data) {
+				var index = parseInt(data.progress * length);
+				index = Math.min(length, Math.max(index, 0));
+				Array.from(images, function(img) { img.style.opacity = 0; });
+				images[index].style.opacity = 1;
+			};
+
+			// create an image scrubber
+			new Scrollify('#sequence')
+				.addScene({
+					'start': 0.5,
+					// 'trigger': '',				// start when the #sequence-trigger element is at 0.5
+					'duration': 100,
+					'effects': [
+						{ 'name': 'stick' },
+						// { 'name': sequencer }
+					]
+				});
 
 		});
 	</script>
