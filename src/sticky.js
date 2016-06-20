@@ -43,8 +43,6 @@ export default function Sticky(sticky, bounded=false) {
   if (!sticky) { return false; }
 
   var parent = sticky.parentNode,
-    // stickyPosition,
-    // parentPosition,
     currentState = '_',
     stateSwitcher,
     determine = {
@@ -87,8 +85,6 @@ export default function Sticky(sticky, bounded=false) {
     currentState = state;
     stateSwitcher = determine[state];
   }
-
-  // stickyPosition = sticky.getBoundingClientRect();
 
   //sticky initial position
   if (sticky.getBoundingClientRect().top < 1) {

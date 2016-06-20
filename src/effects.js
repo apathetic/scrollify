@@ -35,7 +35,7 @@ export function parallax(data) {
 export function toggle(data) {
 	let opts = this.options;
 	let element = this.element;
-	let times = Object.keys(opts);		// times
+	let times = Object.keys(opts);
 	let now = data.progress;
 
 	times.forEach(function(time) {
@@ -49,24 +49,68 @@ export function toggle(data) {
 }
 
 /**
+ * [rotate description]
+ * @param  {[type]} data [description]
+ * @return {[type]}      [description]
+ */
+export function rotate(data) {
+	var degrees = this.options.deg * data.progress;
+	this.element.style.transform = 'rotate('+ degrees +'deg)';
+};
+
+/**
  * Dummy effect for testing, at the moment
  */
-export function translateX(opts) {
-	let offset = this.absolute;
-	let on = Object.keys(opts);
+export function translateX(data) {
+	let offset = data.absolute;
+	let progress = data.progress;
 	let delay = window.innerHeight;	// start translating after one window-height of scrolling
+	let distance = 500;
 
+	offset = progress * distance;
 	offset -= delay;
 
-	// if (this.percent < 0.5) {    // test: start translating when element is centered in viewport
-	//   offset -= delay;
-	// } else {
-	//   offset = 0;
-	// }
+	this.el.style[transform] = 'translate3d(' + offset + 'px, 0, 0)';
+}
 
-	//  ease = easeInQuad(elapsed,     start, end, duration);
-	let distance = 500;
-	let ease = easeInQuad(this.percent * 100, 0, distance, 100);
 
-	this.el.style[transform] = 'translate3d(' + ease + 'px, 0, 0)';
+/**
+ * Sticky Element setsup a sticky element which toggle position fixed on / off.
+ * @param  {[type]} data [description]
+ * @return {[type]}      [description]
+ */
+let currentState = 'normal';
+export function stick(data) {
+	let progress = data.progress;
+	let element = this.element;
+
+	if (progress < 0) {
+		setState(element, 'normal');
+	} else if (progress > 1) {
+		setState(element, 'bottom');
+	} else {
+		setState(element, 'sticky');
+	}
+}
+
+function setState(element, state) {
+  if (currentState === state) { return; }
+  if (state == 'sticky') {
+    let BCR = element.getBoundingClientRect();
+    applyStyles(BCR, element);
+    element.style.position = 'fixed';
+  } else {
+    element.style.position = '';
+  }
+
+  element.classList.remove(currentState);
+  element.classList.add(state);
+  currentState = state;
+}
+
+function applyStyles(styles, element) {
+  for (let prop in styles) {
+    if (prop == 'bottom' || prop == 'right') { continue; }
+    element.style[prop] = styles[prop] + 'px';
+  }
 }

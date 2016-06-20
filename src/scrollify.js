@@ -10,10 +10,10 @@
 
 // TODO add weakmap support for public / private methods
 
-// import {easeInOutCubic} from './easings';
-import Sticky from './sticky';
-import * as effectList from './effects';
+// import Sticky from './sticky';
 import transform from './transform';
+import * as ease from './easings';
+import * as effectList from './effects';
 
 
 /**
@@ -21,7 +21,7 @@ import transform from './transform';
  */
 export default class Scrollify {
 
-	constructor(element, debug) {
+	constructor(element) {
 		if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
 		if (!element || !transform ) { return false; }
 
@@ -29,7 +29,6 @@ export default class Scrollify {
 		this.ticking = false;
 		this.scenes = [];
 		this.scroll = window.scrollY;
-		this.debug = debug;
 
 		window.addEventListener('scroll', (e) => this.onScroll(e));
 		window.addEventListener('resize', (e) => this.onResize(e));
@@ -60,7 +59,7 @@ export default class Scrollify {
 		let trigger = opts.trigger || this.element; // .parentNode;
 		let scene = {
 			'trigger': trigger,
-			'start': start,
+			'_start': start,
 			'duration': duration,
 			'effects': []
 		};
@@ -69,11 +68,12 @@ export default class Scrollify {
 
 		effects.forEach((effect) => {
 			this.addEffect(effect.name, effect.options, scene);
+			if (effect.name == 'stick') this.isSticky = true;
 		});
 
-		if (duration) {
-			this.duration = duration;
-		}
+		// if (duration) {
+		// 	this.duration = duration;
+		// }
 
 		this.updateScene(scene);
 		this.scenes.push(scene);
@@ -89,7 +89,7 @@ export default class Scrollify {
 	updateScene(scene) {
 		let trigger = scene.trigger;
 		let BCR = trigger.getBoundingClientRect();
-		let where = 1;
+		let where = 1 - scene._start;	// 1
 		let top = 0;	// window.scrollY;
 
 		do {
@@ -97,7 +97,14 @@ export default class Scrollify {
 			trigger = trigger.offsetParent;
 		} while(trigger);
 
-		scene.start = top - (where * window.innerHeight);
+		scene.start = top - (where * window.innerHeight); // (can be negative)
+
+		if (scene.isSticky) {
+			let d = scene.duration || 0;
+			let h = this.element.getBoundingClientRect().height;
+			this.element.parentNode.style.paddingBottom = (d+h) + 'px';
+			console.log('sticky update', this.element.id);
+		}
 
 		this.calculate(scene);
 	}
@@ -127,15 +134,7 @@ export default class Scrollify {
 				}
 			}
 
-			// console.log(effect, options);
 			scene.effects.push(curry(effect, options));
-
-			if (name == 'stick') {
-				let d = scene.duration || 0;
-				let h = element.getBoundingClientRect().height;
-				element.parentNode.style.paddingBottom = (d+h) + 'px';
-				new Sticky(element, true);
-			}
 
 		} else {
 			// if no scene (ie "effect" was called directly on Scrollify), set up a default scene
@@ -194,11 +193,10 @@ export default class Scrollify {
 	 * @return {void}
 	 */
 	calculate(scene) {
-		// let data = this.data;
 		let start = scene.start;
 		let duration = scene.duration;
 		let scroll = this.scroll;
-		let progress = (scroll - start) / duration;
+		let progress;	//  = (scroll - start) / duration;
 
 		// dont do nuthin until this here thing is within range (ie. top edge peeks out from the bottom of the screen)
 		// if (progress < 0 || progress > 1) { return; }
@@ -210,12 +208,11 @@ export default class Scrollify {
 			return;
 		}
 
-		if (this.debug) {
-			console.log(this.debug, progress);
+		if (scene.easing) {	// 						start, to, from, end
+			progress = ease[scene.easing](scroll - start, 1.0, 0.0, duration);
+		} else {
+			progress = (scroll - start) / duration;
 		}
-
-																// start      to  from  end
-		// let easing = easeInOutQuad(data.start, 100, 0, data.start+data.duration);
 
 		// cycle through any registered transformations
 		scene.effects.forEach((effect) => {

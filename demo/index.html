@@ -175,8 +175,8 @@
 			<div class="container">
 				<h2>Code</h2>
 
-				<p>All elements to <em>Scrollify</em> are required to be wrapped in an empty element. This wrapper element
-				will serve as a reference point for any tranformations, offsets, manipulation, etc. to the targeted element.</p>
+				<p>All <strong>sticky</strong> elements are required to be wrapped in an empty "spacer" element. This wrapper
+				element serves as a reference point for changes in position to the targeted element.</p>
 
 				<pre><code class="language-markup">
 	&lt;div class="ref">&lt;!-- the reference element -->
@@ -272,34 +272,20 @@
 	<script>
 		window.addEventListener('DOMContentLoaded', function() {
 
-			// Set various transformation in the data- prop of each element, and apply that
 			var elements = document.querySelectorAll('[data-scrollify]');
-			var rotate = function(data) {
-				var degrees = this.options.deg * data.progress;
-				this.element.style.transform = 'rotate('+ degrees +'deg)';
-			};
 
 			Array.prototype.forEach.call(elements, function(el) {
 				var data = eval('(' + el.dataset.scrollify +')');
 				var effect = data[0];
 				var opts = data[1];
-
-				if (effect == 'rotate') { effect = rotate };
-
 				new Scrollify(el).addEffect(effect, opts);
 			});
-
-			// options: "where" : "duration" (ie. how many pixels)
-			// new Scrollify('#pin')
-			// 	.addEffect('pin', {'40%': 300});
-			// 	.addEffect('spin', function(pos) { this.style.transform = 'rotate('+ (pos*2) +'deg)'; })	// or add your own
-			// 	.addEffect('toggle', {'class':'red'});
 
 
 			// use the built-in stick effect
 			new Scrollify('#stick')							// the element to target
 				.addScene({												// start / stop, duration etc. of the effect
-					'start': 0.5,										//   - 'start': when at 50% of the viewport
+					'start': 0.5,										//   - 'start': at 50% of the viewport. 0% is the top of the viewport, 100% (or 1.0) is the bottom
 					'duration': 300,								//   - 'duration': 300 pixels
 					'effects': [
 						{ 'name': 'stick' }
@@ -328,10 +314,11 @@
 				.addScene({
 					'start': 0.5,
 					// 'trigger': '',				// start when the #sequence-trigger element is at 0.5
+					// 'easing': 'easeInCubic',
 					'duration': 100,
 					'effects': [
 						{ 'name': 'stick' },
-						// { 'name': sequencer }
+						{ 'name': sequencer }
 					]
 				});
 
