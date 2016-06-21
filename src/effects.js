@@ -73,7 +73,6 @@ export function translateX(data) {
 	this.el.style[transform] = 'translate3d(' + offset + 'px, 0, 0)';
 }
 
-
 /**
  * Sticky Element setsup a sticky element which toggle position fixed on / off.
  * @param  {[type]} data [description]
@@ -83,6 +82,9 @@ let currentState = '_';
 export function stick(data) {
 	let progress = data.progress;
 	let element = this.element;
+
+  // TODO. SANITY CHECK
+  progress = Math.min(1.0, Math.max(0, progress));
 
 	if (progress <= 0) {
 		setState(element, 'normal');
@@ -103,7 +105,8 @@ function setState(element, state) {
     applyStyles.call(element, BCR, false);
   }
 
-  element.classList.remove(currentState);
+  // element.classList.remove(currentState);
+  element.className = '';
   element.classList.add(state);
   currentState = state;
 }

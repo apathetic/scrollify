@@ -32,6 +32,10 @@ export default class Scrollify {
 
 		window.addEventListener('scroll', (e) => this.onScroll(e));
 		window.addEventListener('resize', (e) => this.onResize(e));
+
+    // TODO: temporary workaround for chrome's scroll jitter bug
+    window.addEventListener("mousewheel", function() {});
+    window.wes = this;
 	}
 
   /**
@@ -60,23 +64,19 @@ export default class Scrollify {
    * @return {void}
    */
 	addScene(opts) {
-		let start = (opts.start === undefined) ? false : opts.start;
-		let duration = opts.duration || null;
+		let triggerPos = opts.start || 0;
+		let duration = opts.duration || window.innerHeight + this.element.offsetHeight;
 		let effects = opts.effects || [];
     let trigger = document.querySelector(opts.trigger) || this.element; // .parentNode;
 		let scene = {
+			'active': true,
 			'trigger': trigger,
-			'triggerPos': start,
+			'triggerPos': triggerPos,
 			'duration': duration,
 			'effects': []
 		};
 
-    if (start === false) {
-      console.log('Scrollify [error]: Cannot add Scene.'); // Missing "start" argument.');
-      return;
-    }
-
-		effects.forEach((effect) => {
+		effects.map((effect) => {
 			this.addEffect(effect.name, effect.options, scene);
 			if (effect.name == 'stick') scene.isSticky = true;
 		});
@@ -102,6 +102,7 @@ export default class Scrollify {
 			top += trigger.offsetTop || 0;
 			trigger = trigger.offsetParent;
 		} while(trigger);
+		// VS. ?
 		// top = trigger.getBoundingClientRect().top + window.scrollY;
 
 		scene.start = top - (where * window.innerHeight); // (can be negative)
@@ -125,35 +126,29 @@ export default class Scrollify {
 	addEffect(name, options={}, scene) {
 		let element = this.element;
 
-    if (!scene && this.scenes.length) {
-      scene = this.scenes[this.scenes.length - 1];  // use the most recently added scene
-		}
+    if (!scene) {
+      if (this.scenes.length) {
+        scene = this.scenes[this.scenes.length - 1];  // use the most recently added scene
+      } else {
+        return this.addScene({                        // or if no scene (ie "addEffect" was called directly on Scrollify), set up a default one
+          'effects': [{ 'name': name, 'options': options }]
+        });
+      }
+    }
 
-		if (scene) {
-			let effect = (typeof name == 'function') ? name : effectList[name];
-			let curry = (fn, options) => {
-				return function() {       // NOTE: don't use => function here as we do NOT want to bind "this"
-					let context = {
-						'options': options,
-						'element': element
-					};
+		let effect = typeof name == 'function' ? name : effectList[name];
+		let curry = (fn, options) => {
+			return function() {       // NOTE: don't use => function here as we do NOT want to bind "this"
+				let context = {
+					'options': options,
+					'element': element
+				};
 
-					fn.call(context, this); // eslint-disable-line
-				}
-			}
+				fn.call(context, this); // eslint-disable-line
+			};
+		};
 
-			scene.effects.push(curry(effect, options));
-
-		} else {
-			// if no scene (ie "effect" was called directly on Scrollify), set up a default scene
-			return this.addScene({
-				'start': 0,
-				'duration': window.innerHeight + element.offsetHeight,
-				'effects': [{
-					'name': name, 'options': options
-				}]
-			});
-		}
+		scene.effects.push(curry(effect, options));
 
 		return this;
 	}
@@ -163,11 +158,11 @@ export default class Scrollify {
 	 * @return {void}
 	 */
 	onScroll() {
-		if (!this.ticking) {
+		// if (!this.ticking) {
 			this.ticking = true;
 			window.requestAnimationFrame(this.update.bind(this));
 			this.scroll = window.scrollY;
-		}
+		// }
 	}
 
 	/**
@@ -175,15 +170,7 @@ export default class Scrollify {
 	 * @return {void}
 	 */
 	onResize() {
-		// this.throttle(this.updateScene);
 		this.scenes.forEach((scene) => this.updateScene(scene));
-	}
-
-	/**
-	 * Limit frequency of DOM updates on resize
-	 */
-	throttle() {
-
 	}
 
 	/**
@@ -206,21 +193,30 @@ export default class Scrollify {
 		let scroll = this.scroll;
 		let progress;	//  = (scroll - start) / duration;
 
-		// dont do nuthin until this here thing is within range (ie. top edge peeks out from the bottom of the screen)
-		// if (progress < 0 || progress > 1) { return; }
-
-		// Use *actual* position data. An element may be onscreen while its reference (trigger) element is not.
-		if (this.element.getBoundingClientRect().top > window.innerHeight ||
-				this.element.getBoundingClientRect().bottom < 0
-		) {
-			return;
-		}
-
+		if (!scene.active) { return; }
 		if (scene.easing) {	// 						start, to, from, end
 			progress = ease[scene.easing](scroll - start, 1.0, 0.0, duration);
 		} else {
 			progress = (scroll - start) / duration;
 		}
+
+		scene.active = (progress > 0 && progress < 1);
+
+		// dont do nuthin until this here thing is within range (ie. top edge peeks out from the bottom of the screen)
+		// if (progress <= 0 || progress >= 1) {
+		// 	return;
+		// }
+
+		// Use *actual* position data. An element may be onscreen while its reference (trigger)
+		// element is not. Progress may be negative or > 1.0 in some instances.
+		// if (this.element.getBoundingClientRect().top > window.innerHeight ||
+		// 		this.element.getBoundingClientRect().bottom < 0
+		// ) {
+		// 	return;
+		// }
+    // progress = Math.min(1.0, Math.max(0, progress));
+
+
 
 		// cycle through any registered transformations
 		scene.effects.forEach((effect) => {
