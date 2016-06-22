@@ -72,13 +72,13 @@ export default class Scrollify {
 			'active': true,
 			'trigger': trigger,
 			'triggerPos': triggerPos,
+			'triggerPos': 1 - start,
 			'duration': duration,
 			'effects': []
 		};
 
 		effects.map((effect) => {
 			this.addEffect(effect.name, effect.options, scene);
-			if (effect.name == 'stick') scene.isSticky = true;
 		});
 
 		this.updateScene(scene);
@@ -95,7 +95,7 @@ export default class Scrollify {
 	updateScene(scene) {
 		let trigger = scene.trigger;
 		let BCR = trigger.getBoundingClientRect();
-		let where = 1 - scene.triggerPos;
+		let where = scene.triggerPos;
 		let top = 0;
 
 		do {
@@ -111,6 +111,7 @@ export default class Scrollify {
 			let d = scene.duration || 0;
 			let h = this.element.getBoundingClientRect().height;
 
+			this.element._stickyTop = where * window.innerHeight;
 			this.element.parentNode.style.paddingBottom = d + h + 'px';
 		}
 
@@ -191,9 +192,10 @@ export default class Scrollify {
 		let start = scene.start;
 		let duration = scene.duration;
 		let scroll = this.scroll;
-		let progress;	//  = (scroll - start) / duration;
+		let progress;
 
 		if (!scene.active) { return; }
+
 		if (scene.easing) {	// 						start, to, from, end
 			progress = ease[scene.easing](scroll - start, 1.0, 0.0, duration);
 		} else {
@@ -215,7 +217,6 @@ export default class Scrollify {
 		// 	return;
 		// }
     // progress = Math.min(1.0, Math.max(0, progress));
-
 
 
 		// cycle through any registered transformations

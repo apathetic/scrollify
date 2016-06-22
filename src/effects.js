@@ -14,16 +14,16 @@ import transform from './transform';
  * @return {void}
  */
 export function parallax(data) {
-	let offset = 0;
-	let opts = this.options;
+  let offset = 0;
+  let opts = this.options;
 
-	if (opts.speed !== undefined) {                 // check speed first
-		offset = data.absolute * opts.speed;
-	} else {                                        // fallback to range
-		offset = data.progress * (opts.range || 0);   // default is "0", no effect
-	}
+  if (opts.speed !== undefined) {                 // check speed first
+    offset = data.absolute * opts.speed;
+  } else {                                        // fallback to range
+    offset = data.progress * (opts.range || 0);   // default is "0", no effect
+  }
 
-	this.element.style[transform] = 'translate(0, '+ offset +'px)';
+  this.element.style[transform] = 'translate(0, '+ offset +'px)';
 }
 
 /**
@@ -33,19 +33,19 @@ export function parallax(data) {
  * @return {void}
  */
 export function toggle(data) {
-	let opts = this.options;
-	let element = this.element;
-	let times = Object.keys(opts);
-	let now = data.progress;
+  let opts = this.options;
+  let element = this.element;
+  let times = Object.keys(opts);
+  let now = data.progress;
 
-	times.forEach(function(time) {
-		let css = opts[time];
-		if (now > time) {
-			element.classList.add(css);
-		} else {
-			element.classList.remove(css);
-		}
-	});
+  times.forEach(function(time) {
+    let css = opts[time];
+    if (now > time) {
+      element.classList.add(css);
+    } else {
+      element.classList.remove(css);
+    }
+  });
 }
 
 /**
@@ -54,23 +54,23 @@ export function toggle(data) {
  * @return {[type]}      [description]
  */
 export function rotate(data) {
-	var degrees = this.options.deg * data.progress;
-	this.element.style.transform = 'rotate('+ degrees +'deg)';
+  var degrees = this.options.deg * data.progress;
+  this.element.style.transform = 'rotate('+ degrees +'deg)';
 };
 
 /**
  * Dummy effect for testing, at the moment
  */
 export function translateX(data) {
-	let offset = data.absolute;
-	let progress = data.progress;
-	let delay = window.innerHeight;	// start translating after one window-height of scrolling
-	let distance = 500;
+  let offset = data.absolute;
+  let progress = data.progress;
+  let delay = window.innerHeight; // start translating after one window-height of scrolling
+  let distance = 500;
 
-	offset = progress * distance;
-	offset -= delay;
+  offset = progress * distance;
+  offset -= delay;
 
-	this.el.style[transform] = 'translate3d(' + offset + 'px, 0, 0)';
+  this.el.style[transform] = 'translate3d(' + offset + 'px, 0, 0)';
 }
 
 /**
@@ -80,19 +80,20 @@ export function translateX(data) {
  */
 let currentState = '_';
 export function stick(data) {
-	let progress = data.progress;
-	let element = this.element;
+  let progress = data.progress;
+  let element = this.element;
 
-  // TODO. SANITY CHECK
-  progress = Math.min(1.0, Math.max(0, progress));
+  progress = Math.min(1.0, Math.max(0.0, progress));
 
-	if (progress <= 0) {
-		setState(element, 'normal');
-	} else if (progress >= 1) {
-		setState(element, 'bottom');
-	} else {
-		setState(element, 'sticky');
-	}
+  console.log('sticky', progress);
+
+  if (progress <= 0) {
+    setState(element, 'normal');
+  } else if (progress >= 1) {
+    setState(element, 'bottom');
+  } else {
+    setState(element, 'sticky');
+  }
 }
 
 function setState(element, state) {
@@ -111,10 +112,14 @@ function setState(element, state) {
   currentState = state;
 }
 
-function applyStyles(styles, on=true) {
+function applyStyles(styles, add=true) {
   for (let prop in styles) {
     if (prop == 'bottom' || prop == 'right') { continue; }
-    this.style[prop] = (on) ? styles[prop] + 'px' : '';
+    this.style[prop] = (add) ? styles[prop] + 'px' : '';
   }
-  this.style.position = (on) ? 'fixed' : '';  // OR, deal with this via CSS...?
+
+  if (this._stickyTop && add) {
+    this.style.top = this._stickyTop + 'px';
+  }
+  this.style.position = (add) ? 'fixed' : 'absolute';             // OR, deal with this via CSS...?
 }
