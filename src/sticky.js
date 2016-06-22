@@ -9,94 +9,70 @@
 
 /*global document requestAnimationFrame HTMLElement*/
 
-// boundsParams = ["top", "left", "bottom", "right", "margin", "marginLeft", "marginRight", "marginTop", "marginBottom"];
-// copyStyles = boundsParams.concat(["width", "height", "position", "boxSizing", "mozBoxSizing", "webkitBoxSizing"]);
-
-function copyStyles(element) {
-  let style = element.style;
-  const props = ['width', 'height', 'position', 'boxSizing', 'mozBoxSizing', 'webkitBoxSizing'];
-
-  element.originalStyles = {};
-  props.forEach((val) => {
-    element.originalStyles[val] = style[val] || '';
-  });
-}
-
-function applyStyles(styles, element) {
-  let addedProps = {};
-  for (let prop in styles) {
-    if (prop == 'bottom' || prop == 'right') { continue; }
-    element.style[prop] = styles[prop] + 'px';
-    addedProps[prop] = styles[prop];
-  }
-  // element.addedProps = addedProps;
-}
-
 /**
  * Sticky Element: sets up a sticky bar which attaches / detaches to top of viewport
- * @param {HTMLElement} sticky: The element to sticky-ify
+ * @param {HTMLElement} element: The element to sticky-ify
  * @param {Boolean} bounded: Whether to apply stickiness to the bottom of the parent container.
  * @return {void}
  */
-export default function Sticky(sticky, bounded=false) {
-  sticky = sticky instanceof HTMLElement ? sticky : document.querySelector(sticky);
-  if (!sticky) { return false; }
+export default class Sticky {
 
-  var parent = sticky.parentNode,
-    currentState = '_',
-    stateSwitcher,
-    determine = {
-      normal: function() {
-        let stickyPosition = sticky.getBoundingClientRect();
-        if (stickyPosition.top < 1) {
-          applyStyles(stickyPosition, sticky);
-          sticky.style.position = 'fixed';
-          return setState('sticky');
-        }
-      },
-      sticky: function() {
-        let parentPosition = parent.getBoundingClientRect();
-        if (parentPosition.top > 1) {
-          sticky.style = '';
-          return setState('normal');
-        }
-        if (bounded) {
-          let stickyPosition = sticky.getBoundingClientRect();
-          if (parentPosition.bottom < stickyPosition.bottom) {
-            sticky.style = '';
-            return setState('bottom');
-          }
-        }
-      },
-      bottom: function() {
-        let stickyPosition = sticky.getBoundingClientRect();
-        if (stickyPosition.top > 1) {
-          applyStyles(stickyPosition, sticky);
-          sticky.style.position = 'fixed';
-          return setState('sticky');
-        }
+  constructor(element, bounded=true) {
+    this.element = element instanceof HTMLElement ? element : document.querySelector(element);
+    if (!this.element) { return false; }
+
+    this.bounded = !!bounded;
+    this.parent = this.element.parentNode;
+    this.currentState = '_';
+    this.stateSwitcher;
+    this.determine = 'normal';
+
+    // determine initial state
+    if (this.element.getBoundingClientRect().top < 1) {
+      this.setState('sticky');
+      this.stateSwitcher();
+    } else {
+      this.setState('normal');
+    }
+
+    // window.addEventListener('scroll', this.stateSwitcher);    // stateSwitcher changes, so cannot pass (ie. bind directly) like this
+    window.addEventListener('scroll', () => { this.stateSwitcher(); });
+    window.addEventListener('resize', () => { this.stateSwitcher(); });
+  }
+
+  normal() {
+    let elementPosition = this.element.getBoundingClientRect();
+    if (elementPosition.top < 1) {
+      return this.setState('sticky');
+    }
+  }
+
+  sticky() {
+    let parentPosition = this.parent.getBoundingClientRect();
+    if (parentPosition.top > 1) {
+      return this.setState('normal');
+    }
+    if (this.bounded) {
+      let elementPosition = this.element.getBoundingClientRect();
+      if (parentPosition.bottom < elementPosition.bottom) {
+        return this.setState('bottom');
       }
-    };
-
-  function setState(state) {
-    if (currentState === state) { return; }
-    sticky.classList.remove(currentState);
-    sticky.classList.add(state);
-    currentState = state;
-    stateSwitcher = determine[state];
+    }
   }
 
-  //sticky initial position
-  if (sticky.getBoundingClientRect().top < 1) {
-    setState('sticky');
-    stateSwitcher();    // edge case: check if bottom of sticky collides w/ bounding container
-  } else {
-    setState('normal');
+  bottom() {
+    let elementPosition = this.element.getBoundingClientRect();
+    if (elementPosition.top > 1) {
+      return this.setState('sticky');
+    }
   }
 
-
-  // window.addEventListener('scroll', stateSwitcher);
-  window.addEventListener('scroll', function() { stateSwitcher(); });  // stateSwitcher changes, so cannot pass (ie. bind directly) here
-  window.addEventListener('resize', function() { stateSwitcher(); });
+  setState(state) {
+    if (this.currentState === state) { return; }
+    this.element.classList.remove(this.currentState);
+    this.element.classList.add(state);
+    this.currentState = state;
+    this.stateSwitcher = this[state];   // stateSwitcher will point at an internal fn
+  }
 }
 

@@ -73,14 +73,14 @@
 			<div class="container">
 				<h2>Demo</h2>
 
-				<p class="spacer">
+				<p class="spacer stick-spacer">
 					<span id="stick">
 						<strong>Sticks!</strong> I'll hang around for <strong>300 px</strong>.
 						Lorem ipsum dolor sit amet,	consectetur adipisicing elit, sed do eiusmod.
 					</span>
 				</p>
 
-				<div class="spacer">
+				<div class="spacer sequence-spacer">
 					<div id="sequence">
 						<img src="images/seq/horse_01.jpg" style="opacity:1" alt="">
 						<img src="images/seq/horse_02.jpg" alt="">
@@ -317,10 +317,11 @@
 					// 'easing': 'easeInCubic',
 					'duration': 300,
 					'effects': [
-						// { 'name': 'stick' },
+						{ 'name': 'stick' },
 						{ 'name': sequencer }
 					]
 				});
+			// new Sticky('#sequence');
 
 		});
 	</script>

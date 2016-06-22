@@ -32,10 +32,6 @@ export default class Scrollify {
 
 		window.addEventListener('scroll', (e) => this.onScroll(e));
 		window.addEventListener('resize', (e) => this.onResize(e));
-
-    // TODO: temporary workaround for chrome's scroll jitter bug
-    window.addEventListener("mousewheel", function() {});
-    window.wes = this;
 	}
 
   /**
@@ -71,8 +67,7 @@ export default class Scrollify {
 		let scene = {
 			'active': true,
 			'trigger': trigger,
-			'triggerPos': triggerPos,
-			'triggerPos': 1 - start,
+			'triggerPos': 1 - triggerPos,
 			'duration': duration,
 			'effects': []
 		};
@@ -95,7 +90,7 @@ export default class Scrollify {
 	updateScene(scene) {
 		let trigger = scene.trigger;
 		let BCR = trigger.getBoundingClientRect();
-		let where = scene.triggerPos;
+		let triggerPos = scene.triggerPos;
 		let top = 0;
 
 		do {
@@ -105,15 +100,7 @@ export default class Scrollify {
 		// VS. ?
 		// top = trigger.getBoundingClientRect().top + window.scrollY;
 
-		scene.start = top - (where * window.innerHeight); // (can be negative)
-
-		if (scene.isSticky) {
-			let d = scene.duration || 0;
-			let h = this.element.getBoundingClientRect().height;
-
-			this.element._stickyTop = where * window.innerHeight;
-			this.element.parentNode.style.paddingBottom = d + h + 'px';
-		}
+		scene.start = top - (triggerPos * window.innerHeight); // (can be negative)
 
 		this.calculate(scene);
 	}
@@ -149,9 +136,18 @@ export default class Scrollify {
 			};
 		};
 
+		// if (name == 'stick') { this.setupStick(); }
 		scene.effects.push(curry(effect, options));
 
 		return this;
+	}
+
+	stick() {
+		let d = scene.duration || 0;
+		let h = this.element.getBoundingClientRect().height;
+
+		this.element._stickyTop = triggerPos * window.innerHeight;
+		this.element.parentNode.style.paddingBottom = d + h + 'px';
 	}
 
 	/**
@@ -194,7 +190,7 @@ export default class Scrollify {
 		let scroll = this.scroll;
 		let progress;
 
-		if (!scene.active) { return; }
+		// if (!scene.active) { return; }
 
 		if (scene.easing) {	// 						start, to, from, end
 			progress = ease[scene.easing](scroll - start, 1.0, 0.0, duration);

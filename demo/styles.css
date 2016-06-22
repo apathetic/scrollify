@@ -23,11 +23,20 @@ main .normal {
 .spacer,
 p { margin-bottom:1em; clear:both; }
 
+.stick-spacer {
+	padding-bottom: 420px;
+	background-color: #fff;
+}
 #stick {
+	height: 120px;
 	padding: 1em;
 	border: 1px solid #333;
 }
 
+.sequence-spacer {
+	background-color: #fff;
+	padding-bottom: 720px;	/* images + padding = 420, leaving 300 for animation */
+}
 #sequence {
 	width: 320px;
 	height: 300px;
@@ -36,7 +45,7 @@ p { margin-bottom:1em; clear:both; }
 #sequence img {
 	opacity: 0;
 	position: absolute;
-	top: 0;
+	/*top: 0;*/
 	transition: opacity 0.2s;
 }
 

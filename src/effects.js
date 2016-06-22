@@ -78,14 +78,12 @@ export function translateX(data) {
  * @param  {[type]} data [description]
  * @return {[type]}      [description]
  */
-let currentState = '_';
 export function stick(data) {
   let progress = data.progress;
   let element = this.element;
+  let currentState = '_';
 
   progress = Math.min(1.0, Math.max(0.0, progress));
-
-  console.log('sticky', progress);
 
   if (progress <= 0) {
     setState(element, 'normal');
@@ -94,32 +92,41 @@ export function stick(data) {
   } else {
     setState(element, 'sticky');
   }
-}
 
-function setState(element, state) {
-  let BCR = element.getBoundingClientRect();
+  function setState(element, state) {
+    let BCR = element.getBoundingClientRect();
 
-  if (currentState === state) { return; }
-  if (state == 'sticky') {
-    applyStyles.call(element, BCR);
-  } else {
-    applyStyles.call(element, BCR, false);
+    if (currentState === state) { return; }
+    if (state == 'sticky') {
+      applyStyles.call(element, BCR);
+    } else {
+      applyStyles.call(element, BCR, false);
+    }
+
+    element.className = '';
+    // element.classList.remove(currentState);
+    element.classList.add(state);
+
+    currentState = state;
   }
 
-  // element.classList.remove(currentState);
-  element.className = '';
-  element.classList.add(state);
-  currentState = state;
-}
+  function applyStyles(styles, add=true) {
 
-function applyStyles(styles, add=true) {
-  for (let prop in styles) {
-    if (prop == 'bottom' || prop == 'right') { continue; }
-    this.style[prop] = (add) ? styles[prop] + 'px' : '';
+    // for (let prop in styles) {
+    //   if (prop == 'bottom' || prop == 'right') { continue; }
+    //   this.style[prop] = (add) ? styles[prop] + 'px' : '';
+    // }
+    this.style.top =   (add) ? styles.top+'px' : '';
+    this.style.left =  (add) ? styles.left+'px' : '';
+    this.style.width = (add) ? styles.width+'px' : '';
+    // this.style.height
+    // this.style.position = (add) ? 'fixed' : 'absolute';             // OR, deal with this via CSS...?
+
+    // if (this._stickyTop && add) {
+    //   this.style.top = this._stickyTop + 'px';
+    // }
   }
 
-  if (this._stickyTop && add) {
-    this.style.top = this._stickyTop + 'px';
-  }
-  this.style.position = (add) ? 'fixed' : 'absolute';             // OR, deal with this via CSS...?
+  // boundsParams = ["top", "left", "bottom", "right", "margin", "marginLeft", "marginRight", "marginTop", "marginBottom"];
+  // copyStyles = boundsParams.concat(["width", "height", "position", "boxSizing", "mozBoxSizing", "webkitBoxSizing"]);
 }
