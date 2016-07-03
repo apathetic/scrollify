@@ -7,65 +7,72 @@
  *
  */
 
-/*global document console requestAnimationFrame HTMLElement*/
+/*global document requestAnimationFrame HTMLElement*/
 
 /**
  * Sticky Element: sets up a sticky bar which attaches / detaches to top of viewport
  * @param {HTMLElement} element: The element to sticky-ify
- * @param {Boolean} bounded: Whether the element should be bounded by its parent.
+ * @param {Boolean} bounded: Whether to apply stickiness to the bottom of the parent container.
  * @return {void}
  */
-export default function Sticky(element, bounded = true) {
-  element = element instanceof HTMLElement ? element : document.querySelector(element);
+export default class Sticky {
 
-  if (!element) { return false; }
+  constructor(element, bounded=true) {
+    this.element = element instanceof HTMLElement ? element : document.querySelector(element);
+    if (!this.element) { return false; }
 
-  var parent = element.parentNode,
-    elementPosition,
-    parentPosition,
-    currentState = '_',
-    stateSwitcher,
-    determine = {
-      normal: function() {
-        elementPosition = element.getBoundingClientRect();
-        if (elementPosition.top < 1) { return setState('sticky'); }
-      },
-      sticky: function() {
-        parentPosition = parent.getBoundingClientRect();
-        if (parentPosition.top > 1) { return setState('normal'); }
-        if (!bounded) { return; }   // don't worry about bottom edge
-        elementPosition = element.getBoundingClientRect();
-        if (parentPosition.bottom < elementPosition.bottom) {
-          return setState('bottom');
-        }
-      },
-      bottom: function() {
-        elementPosition = element.getBoundingClientRect();
-        if (elementPosition.top > 1) { return setState('sticky'); }
+    this.bounded = !!bounded;
+    this.parent = this.element.parentNode;
+    this.currentState = '_';
+    this.stateSwitcher;
+    this.determine = 'normal';
+
+    // determine initial state
+    if (this.element.getBoundingClientRect().top < 1) {
+      this.setState('sticky');
+      this.stateSwitcher();
+    } else {
+      this.setState('normal');
+    }
+
+    // window.addEventListener('scroll', this.stateSwitcher);    // stateSwitcher changes, so cannot pass (ie. bind directly) like this
+    window.addEventListener('scroll', () => { this.stateSwitcher(); });
+    window.addEventListener('resize', () => { this.stateSwitcher(); });
+  }
+
+  normal() {
+    let elementPosition = this.element.getBoundingClientRect();
+    if (elementPosition.top < 1) {
+      return this.setState('sticky');
+    }
+  }
+
+  sticky() {
+    let parentPosition = this.parent.getBoundingClientRect();
+    if (parentPosition.top > 1) {
+      return this.setState('normal');
+    }
+    if (this.bounded) {
+      let elementPosition = this.element.getBoundingClientRect();
+      if (parentPosition.bottom < elementPosition.bottom) {
+        return this.setState('bottom');
       }
-    };
-
-  function setState(state) {
-    if (currentState === state) { return; }
-    element.classList.remove(currentState);
-    element.classList.add(state);
-    currentState = state;
-    stateSwitcher = determine[state];
+    }
   }
 
-  elementPosition = element.getBoundingClientRect();
-
-  //element initial position
-  if (elementPosition.top < 1) {
-    setState('sticky');
-    stateSwitcher();    // edge case: check if bottom of element collides w/ bounding container
-  } else {
-    setState('normal');
+  bottom() {
+    let elementPosition = this.element.getBoundingClientRect();
+    if (elementPosition.top > 1) {
+      return this.setState('sticky');
+    }
   }
 
-
-  // window.addEventListener('scroll', stateSwitcher);
-  window.addEventListener('scroll', function() { stateSwitcher(); });  // stateSwitcher changes, so cannot pass (ie. bind directly) here
-  window.addEventListener('resize', function() { stateSwitcher(); });
+  setState(state) {
+    if (this.currentState === state) { return; }
+    this.element.classList.remove(this.currentState);
+    this.element.classList.add(state);
+    this.currentState = state;
+    this.stateSwitcher = this[state];   // stateSwitcher will point at an internal fn
+  }
 }
 

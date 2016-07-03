@@ -15,12 +15,16 @@
 import transform from './transform';
 import createMatrix from './matrix';
 
+// import Sticky from './sticky';
+// import * as ease from './easings';
+// import * as effectList from './effects';
 
 /**
  * The Scrollify Class
  */
 export default class Scrollify {
 
+<<<<<<< HEAD
   /**
    * @constructor
    * @param {HTMLElement|String} element: The element to Scrollify.
@@ -121,6 +125,7 @@ export default class Scrollify {
     // top = trigger.getBoundingClientRect().top + window.scrollY;
 
     scene.start = Math.max(0, top - triggerPos * window.innerHeight); // (can be negative...?)
+		// scene.start = top - (triggerPos * window.innerHeight); // (can be negative)
 
     this.calculate(scene);
   }
@@ -172,6 +177,7 @@ export default class Scrollify {
     return this;
   }
 
+<<<<<<< HEAD
   /**
    * onScroll Handler
    * @return {void}
@@ -346,5 +352,14 @@ export default class Scrollify {
   disable() {
     this.active = false;
   }
+
+	// stick() {
+	// 	let d = scene.duration || 0;
+	// 	let h = this.element.getBoundingClientRect().height;
+
+	// 	this.element._stickyTop = triggerPos * window.innerHeight;
+	// 	this.element.parentNode.style.paddingBottom = d + h + 'px';
+	// }
+
 }
 

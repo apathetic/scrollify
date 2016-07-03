@@ -164,7 +164,6 @@ export function stick(progress) {
   }
 
   function applyStyles(styles, add = true) {
-
     // for (let prop in styles) {
     //   if (prop == 'bottom' || prop == 'right') { continue; }
     //   this.style[prop] = (add) ? styles[prop] + 'px' : '';

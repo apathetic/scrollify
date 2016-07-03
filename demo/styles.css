@@ -1,6 +1,54 @@
 main { overflow:hidden; }
 
+main span.sticky {
+	left: auto !important;
+	background: #ec008c;
+	color: #fff;
+}
+
+main .sticky {
+	position: fixed;
+}
+
+main .bottom {
+	position: absolute;
+	bottom: 0;
+}
+
+main .normal {
+	position: absolute;
+}
+
+
+.spacer,
 p { margin-bottom:1em; clear:both; }
+
+.stick-spacer {
+	padding-bottom: 420px;
+	background-color: #fff;
+}
+#stick {
+	height: 120px;
+	padding: 1em;
+	border: 1px solid #333;
+}
+
+.sequence-spacer {
+	background-color: #fff;
+	padding-bottom: 720px;	/* images + padding = 420, leaving 300 for animation */
+}
+#sequence {
+	width: 320px;
+	height: 300px;
+}
+
+#sequence img {
+	opacity: 0;
+	position: absolute;
+	/*top: 0;*/
+	transition: opacity 0.2s;
+}
+
 
 .item { position:absolute; z-index:-1; opacity:0.5; background:#ccc; width:40px; height:40px; line-height:40px; border-radius:20px; text-align: center;  }
 .item:nth-child(1) { top:0%; left:10% }
@@ -21,7 +69,7 @@ p.parallax { color: #ddd; z-index:-1 }
 
 .clip .parallax {
 	position: absolute;
-		background-image: url("images/pastoral.jpg");
+	background-image: url("images/pastoral.jpg");
 	background-position: 50% 50%;
 	background-size: cover;
 	top: -250px;
@@ -30,7 +78,7 @@ p.parallax { color: #ddd; z-index:-1 }
 }
 
 .clip .backwards.parallax {
-		background-image: url("images/pasture.jpg");
+	background-image: url("images/pasture.jpg");
 }
 
 

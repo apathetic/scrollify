@@ -3,11 +3,8 @@
  * @type {Boolean}
  */
 
-/*global document*/
-
 let transform = false;
-const transforms = ['transform', 'webkitTransform', 'MozTransform',
-                    'OTransform', 'msTransform'];
+const transforms = ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'];
 
 for (let i in transforms) {
   if (document.body.style[transforms[i]] !== undefined) {
