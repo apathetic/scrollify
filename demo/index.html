@@ -202,13 +202,13 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td>useEffect</td>
-							<td>effect(String), options(Object)</td>
+							<td>addScene</td>
+							<td>start, duration, effects</td>
 							<td>							</td>
 						</tr>
 						<tr>
 							<td>addEffect</td>
-							<td>name(String), effect(Function)</td>
+							<td>name(String|Function), options(Object)</td>
 							<td> 								</td>
 						</tr>
 					</tbody>
@@ -231,39 +231,50 @@
 		window.addEventListener('DOMContentLoaded', function() {
 			var elements = document.querySelectorAll('[data-scrollify]');
 
-			// use the built-in pin effect
-			// options: "where" : "duration" (ie. how many pixels)
-			// new Scrollify('#pin')
-			// 	.do('pin', {'40%': 300});
-			// 	.addEffect('spin', function(pos) { this.style.transform = 'rotate('+ (pos*2) +'deg)'; })	// or add your own
-			// 	.do('toggle', {'class':'red'});
+			var stick = Scrollify.fx.stick;
+			var toggle = Scrollify.fx.toggle;
+			// var parallax = Scrollify.fx.parallax;
 
-/* */
-			new Scrollify('#pin', 'pin')											// the element to target
-				.scene({																// start / stop, duration etc. of the effect
+			// example #1. Stick something
+			new Scrollify('#pin')											// the element to target
+				.addScene({															// start / stop, duration etc. of the effect
 					'start': 0.5,													//   'start': when at 50% of the viewport
-					'duration': 300												//   'duration': 300 pixels
-				})
-				.do('stick', {})
-				.do('toggle', { 0.2: 'red',							// the effect to apply, and when (within the progress of the scene)
-												0.5: 'blue',
-											  0.7: 'green'
-											});
+					'duration': 300,											//   'duration': 300 pixels
+			    'effects': [{
+						'name': stick												// the effect to apply, and when (within the progress of the scene)
+					}]
+				});
 
-/* */
+			// example #2: toggling various classes on scroll
+			new Scrollify('#transformer')
+				.addScene({
+			    'start': 0.5,
+			    'duration': 300,
+			    'effects': [{
+			      'name': toggle,
+			      'options': {
+			        0.2: 'red',
+							0.5: 'blue',
+						  0.7: 'green'
+			      }
+			    }]
+			  });
 
-			new Scrollify('#transformer', 'trans')
-				.do('toggle', { 0.2: 'red',
-												0.5: 'blue',
-											  0.7: 'green'
-											});
-
-			// Set various transformation in the data- prop of each element, and apply that
+			// example #3. various transformation from the data- prop of each element
 			Array.prototype.forEach.call(elements, function(el) {
 				var data = eval('(' + el.dataset.scrollify +')');
 				var effect = data[0];
 				var opts = data[1];
-				new Scrollify(el).do(effect, opts);
+
+				console.log(effect);
+
+				new Scrollify(el).
+					addScene({
+						'effects': [{
+							'name': Scrollify.fx[effect],
+							'options': opts
+						}]
+					});
 			});
 
 		});

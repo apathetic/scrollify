@@ -1,10 +1,11 @@
+/*global document requestAnimationFrame*/
 
 import {easeInOutCubic} from './easings';
 
 
 /**
  * Scroll the page to a particular page anchor
- * @param  {string} to: The id of the element to scroll to.
+ * @param  {String} to: The id of the element to scroll to.
  * @param  {Integer} offset: A scrolling offset.
  * @param  {Function} callback: Function to apply after scrolling
  * @return {void}
