@@ -24,7 +24,6 @@ import createMatrix from './matrix';
  */
 export default class Scrollify {
 
-<<<<<<< HEAD
   /**
    * @constructor
    * @param {HTMLElement|String} element: The element to Scrollify.
@@ -177,7 +176,6 @@ export default class Scrollify {
     return this;
   }
 
-<<<<<<< HEAD
   /**
    * onScroll Handler
    * @return {void}
