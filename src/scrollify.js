@@ -15,9 +15,6 @@
 import transform from './transform';
 import createMatrix from './matrix';
 
-// import Sticky from './sticky';
-// import * as ease from './easings';
-// import * as effectList from './effects';
 
 /**
  * The Scrollify Class
@@ -30,7 +27,7 @@ export default class Scrollify {
    */
   constructor(element) {
     if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
-    // if (!element || !transform) { this.active = false; return false; }
+    // if (!element || !transform) { return this.active = false; }
     if (!transform) { throw 'Scrollify [error]: transforms not supported'; }
     if (!element) { throw 'Scrollify [error]: could not find element'; }
 
@@ -46,8 +43,6 @@ export default class Scrollify {
       position: [0,0,0]
       // transformOrigin: [],
       // skew: [],
-      // rotationPost: [], //  ...remove?
-      // scalePost: []     // ...remove?
     };
 
     window.addEventListener('scroll', (e) => this.onScroll(e));
@@ -87,7 +82,7 @@ export default class Scrollify {
     let trigger = document.querySelector(opts.trigger) || this.element;
     let applyTransform = opts.applyTransform !== undefined ? opts.applyTransform : true;   // opt out rather than opt in
     let scene = {
-      'active': true,
+      'active': false,
       'trigger': trigger,
       'triggerPos': 1 - triggerPos,
       'duration': duration,
@@ -124,7 +119,7 @@ export default class Scrollify {
     // top = trigger.getBoundingClientRect().top + window.scrollY;
 
     scene.start = Math.max(0, top - triggerPos * window.innerHeight); // (can be negative...?)
-		// scene.start = top - (triggerPos * window.innerHeight); // (can be negative)
+    // scene.start = top - (triggerPos * window.innerHeight); // (can be negative)
 
     this.calculate(scene);
   }
@@ -164,13 +159,6 @@ export default class Scrollify {
       };
     };
 
-    // ??
-    // if rotate {
-    //   this.transforms.rotation = [0,0,0]
-    // if translateX || translateY
-    //   this.transforms.position = [0,0,0]
-    // ???
-
     scene.effects.push(curry(effect, options));
 
     return this;
@@ -181,11 +169,12 @@ export default class Scrollify {
    * @return {void}
    */
   onScroll() {
-    // if (!this.ticking) {
-    this.ticking = true;
-    window.requestAnimationFrame(this.update.bind(this));
+    // if (!this.active) { return; }
     this.scroll = window.scrollY;
-    // }
+    if (!this.ticking) {
+      window.requestAnimationFrame(this.update.bind(this));
+      this.ticking = true;
+    }
   }
 
   /**
@@ -260,10 +249,11 @@ export default class Scrollify {
     //   return;
     // }
 
-    // *** NOTE: with fixed-positioning, this won't work:
+    // *** NOTE: with fixed-positioning, this won't work. (Use bounding container as trigger?)
     // Determine if we should run calcuations for this Scene.
     // Use *actual* position data as an element may be onscreen while its reference (trigger)
     // element is not. Progress may be negative or > 1.0 in some instances.
+    //
     // if (this.element.getBoundingClientRect().top > window.innerHeight ||
     //    this.element.getBoundingClientRect().bottom < 0
     // ) {
@@ -350,14 +340,5 @@ export default class Scrollify {
   disable() {
     this.active = false;
   }
-
-	// stick() {
-	// 	let d = scene.duration || 0;
-	// 	let h = this.element.getBoundingClientRect().height;
-
-	// 	this.element._stickyTop = triggerPos * window.innerHeight;
-	// 	this.element.parentNode.style.paddingBottom = d + h + 'px';
-	// }
-
 }
 

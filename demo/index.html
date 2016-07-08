@@ -276,7 +276,6 @@
 			var stick = Scrollify.fx.stick;
 			new Scrollify('#stick')										// the element to target
 				.addScene({															// start / stop, duration etc. of the effect
-					// 'trigger': parent									// trigger is parent
 					'start': 0.5,													//   'start': when at 50% of the viewport
 					'duration': 300,											//   'duration': 300 pixels
 			    'effects': [{
@@ -284,25 +283,21 @@
 					}]
 				});
 
+
 			// example #2: toggling various classes on scroll
 			var toggle = Scrollify.fx.toggle;
-			// new Scrollify('#transformer')
-			// 	.addScene({
-			//     'start': 0.5,
-			//     'duration': 300,
-			//     'effects': [{
-			//       'name': toggle,
-			//       'options': {
-			//         0.2: 'red',
-			// 				0.5: 'blue',
-			// 			  0.7: 'green'
-			//       }
-			//     }]
-			//   });
 			new Scrollify('#transformer')
-				.addEffect(toggle, { 0.2: 'red',
-														 0.5: 'blue',
-														 0.7: 'green' });
+				.addScene({
+					'applyTransform': false,
+			    'effects': [{
+			      'name': toggle,
+			      'options': {
+			        0.2: 'red',
+							0.5: 'blue',
+						  0.7: 'green'
+			      }
+			    }]
+			  });
 
 
 			// example #3. various transformation from the data- prop of each element
@@ -313,16 +308,7 @@
 				var opts = data[1];
 				var fx = Scrollify.fx[effect];
 
-				// new Scrollify(el).
-				// 	addScene({
-				// 		'effects': [{
-				// 			'name': fx,
-				// 			'options': opts
-				// 		}]
-				// 	});
-
 				new Scrollify(el).addEffect(fx, opts);
-
 			});
 
 
@@ -340,10 +326,10 @@
 			new Scrollify('#sequence')
 				.addScene({
 					'start': 0.5,
-					// 'trigger': '',				// start when the #sequence-trigger element is at 0.5
 					'duration': 300,
+					// 'duration': function() { return window.innerHeight + 200 },
+					// 'duration': function() { return window.innerHeight * 1.2 },		// "speed" of 0.2
 					'effects': [
-						{ 'name': stick },
 						{ 'name': sequencer }
 					]
 				});

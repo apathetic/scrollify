@@ -24,7 +24,6 @@ export function translateX(progress) {
   let offset = (to - from) * progress + from;
 
   this.transforms.position[0] = offset;
-  // this.element.style[transform] = 'translate3d(' + offset + unit + ', 0, 0)';
 }
 
 /**
@@ -34,15 +33,10 @@ export function translateX(progress) {
  * @return {void}
  */
 export function translateY(progress) {
-  // let delay = this.options.delay || 0;
   let to = this.options.to || 0;
   let from = this.options.from || 0; // this.transforms.position[1];
-  // let unit = this.options.unit || 'px';
   let offset = (to - from) * progress + from;
 
-  // offset -= delay;
-
-  // this.element.style[transform] = 'translate3d(0, ' + offset + unit + ', 0)';
   this.transforms.position[1] = offset;
 }
 
@@ -100,7 +94,6 @@ export function parallax(progress) {
   let range = this.options.range || 0;
 
   offset = progress * range;
-  // this.element.style[transform] = 'translate(0, ' + offset + 'px)';
   this.transforms.position[1] = offset;   // just vertical for now
 }
 
@@ -136,7 +129,7 @@ export function stick(progress) {
   let element = this.element;
   let currentState = '_';
 
-  progress = Math.min(1.0, Math.max(0.0, progress));
+  // progress = Math.min(1.0, Math.max(0.0, progress));
 
   if (progress <= 0) {
     setState(element, 'normal');
@@ -151,9 +144,13 @@ export function stick(progress) {
 
     if (currentState === state) { return; }
     if (state == 'sticky') {
-      applyStyles(BCR);
+      element.style.top = BCR.top + 'px';
+      element.style.left = BCR.left + 'px';
+      element.style.width = BCR.width + 'px';
     } else {
-      applyStyles(BCR, false);
+      element.style.top = '';
+      element.style.left = '';
+      element.style.width = '';
     }
 
     element.className = '';
@@ -161,19 +158,6 @@ export function stick(progress) {
     element.classList.add(state);
 
     currentState = state;
-  }
-
-  function applyStyles(styles, add = true) {
-    // for (let prop in styles) {
-    //   if (prop == 'bottom' || prop == 'right') { continue; }
-    //   this.style[prop] = (add) ? styles[prop] + 'px' : '';
-    // }
-    element.style.top =   add ? styles.top + 'px' : '';
-    element.style.left =  add ? styles.left + 'px' : '';
-    element.style.width = add ? styles.width + 'px' : '';
-    // this.style.height
-    // this.style.position = (add) ? 'fixed' : 'absolute';             // OR, deal with this via CSS...?
-
   }
 
   // boundsParams = ["top", "left", "bottom", "right", "margin", "marginLeft", "marginRight", "marginTop", "marginBottom"];
