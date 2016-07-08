@@ -152,6 +152,14 @@
 				<div class="clip ref">
 					<div class="backwards parallax" data-scrollify="['parallax', { range:-200 }]"></div>
 				</div>
+
+				<p id="fader"><strong>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+				quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+				cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
 			</div>
 
 		</section>
@@ -314,7 +322,26 @@
 			});
 
 
-			// example #4. build an Image Sequence!
+			// example #4. Fade in and out a few times
+			var fade = Scrollify.fx.fade;
+			var easequad = Scrollify.easings.easeInOutQuad;
+			var oscillate = Scrollify.easings.oscillate;
+			new Scrollify('#fader')
+				.addScene({
+					'start': 0,
+					'applyTransform': false,
+					'easing': oscillate,
+			    'effects': [{
+			      'name': fade,
+			      'options': {
+			        'to': 0
+			      }
+			    }]
+			  });
+
+
+
+			// example #5. build an Image Sequence!
 			var images = document.querySelectorAll('#sequence img');
 			var length = images.length - 1;
 			var stick = Scrollify.fx.stick;

@@ -4,13 +4,11 @@
  */
 
 import scrollify from './scrollify.js';
-import Sticky from './sticky';
 import * as fx from './effects';
-import {easeOutQuad} from './easings';
+import * as easings from './easings';
 
 scrollify.fx = fx;
-// scrollify.easings = {};
+scrollify.easings = easings;
 
 window.Scrollify = scrollify;
-// window.Sticky = Sticky;
 

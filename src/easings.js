@@ -1,5 +1,14 @@
 /*eslint max-len: ["error", 120]*/
 
+export function oscillate(t, b, c, d) {
+  var i = 4;            // # of bounces
+  t /= d;               // percentage
+  t = Math.PI * i * t;  // go from 0 -> 2π
+  t = Math.sin(t) * c;  // now, oscillates between c, -c
+  t = Math.abs(t);			// "half wave rectifier"
+  return t + b;
+}
+
 export function easeInQuad(t, b, c, d) {
   return c * (t /= d) * t + b;
 }
