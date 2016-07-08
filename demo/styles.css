@@ -35,15 +35,11 @@ p { margin-bottom:1em; clear:both; }
 	transition: all 0.2s;
 }
 
-.sequence-spacer {
-	background-color: #fff;
-	padding-bottom: 720px;	/* images + padding = 420, leaving 300 for animation */
-	width: 320px;
-}
 #sequence {
 	width: 320px;
 	height: 303px;
 	border: 3px solid #000;
+	margin-bottom: 2em;
 }
 
 #sequence img {
@@ -83,6 +79,8 @@ p.parallax { color: #ddd; z-index:-1 }
 
 .clip .backwards.parallax {
 	background-image: url("images/pasture.jpg");
+	top: auto;
+	bottom: -250px;
 }
 
 

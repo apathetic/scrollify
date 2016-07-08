@@ -57,6 +57,10 @@
 						more slowly (or perhaps quickly) than the speed of the user-scroll.</li>
 					<li><strong>Toggle</strong>: turn a CSS class on or off if the element crosses a particular
 						threshold on the page.</li>
+					<li><strong>Translate</strong>: translate an element along the X- or Y- axis.</li>
+					<li><strong>Rotate</strong>: rotate an element via scroll.</li>
+					<li><strong>Scale</strong>: scale an element.</li>
+					<li><strong>Fade</strong>: change an element's opacity.</li>
 				</ul>
 			</div>
 		</section>
@@ -80,29 +84,27 @@
 					</span>
 				</p>
 
-				<div class="spacer sequence-spacer">
-					<div id="sequence">
-						<img src="images/seq/horse_01.jpg" style="opacity:1" alt="">
-						<img src="images/seq/horse_02.jpg" alt="">
-						<img src="images/seq/horse_03.jpg" alt="">
-						<img src="images/seq/horse_04.jpg" alt="">
-						<img src="images/seq/horse_05.jpg" alt="">
-						<img src="images/seq/horse_06.jpg" alt="">
-						<img src="images/seq/horse_07.jpg" alt="">
-						<img src="images/seq/horse_08.jpg" alt="">
-						<img src="images/seq/horse_09.jpg" alt="">
-						<img src="images/seq/horse_10.jpg" alt="">
-						<img src="images/seq/horse_11.jpg" alt="">
-						<img src="images/seq/horse_12.jpg" alt="">
-						<img src="images/seq/horse_13.jpg" alt="">
-						<img src="images/seq/horse_14.jpg" alt="">
-						<img src="images/seq/horse_15.jpg" alt="">
-						<img src="images/seq/horse_16.jpg" alt="">
-						<img src="images/seq/horse_17.jpg" alt="">
-						<img src="images/seq/horse_18.jpg" alt="">
-						<img src="images/seq/horse_19.jpg" alt="">
-						<img src="images/seq/horse_20.jpg" alt="">
-					</div>
+				<div id="sequence">
+					<img src="images/seq/horse_01.jpg" style="opacity:1" alt="">
+					<img src="images/seq/horse_02.jpg" alt="">
+					<img src="images/seq/horse_03.jpg" alt="">
+					<img src="images/seq/horse_04.jpg" alt="">
+					<img src="images/seq/horse_05.jpg" alt="">
+					<img src="images/seq/horse_06.jpg" alt="">
+					<img src="images/seq/horse_07.jpg" alt="">
+					<img src="images/seq/horse_08.jpg" alt="">
+					<img src="images/seq/horse_09.jpg" alt="">
+					<img src="images/seq/horse_10.jpg" alt="">
+					<img src="images/seq/horse_11.jpg" alt="">
+					<img src="images/seq/horse_12.jpg" alt="">
+					<img src="images/seq/horse_13.jpg" alt="">
+					<img src="images/seq/horse_14.jpg" alt="">
+					<img src="images/seq/horse_15.jpg" alt="">
+					<img src="images/seq/horse_16.jpg" alt="">
+					<img src="images/seq/horse_17.jpg" alt="">
+					<img src="images/seq/horse_18.jpg" alt="">
+					<img src="images/seq/horse_19.jpg" alt="">
+					<img src="images/seq/horse_20.jpg" alt="">
 				</div>
 
 				<p> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
@@ -148,7 +150,7 @@
 				</div>
 
 				<div class="clip ref">
-					<div class="backwards parallax" data-scrollify="['parallax', { speed:0.2 }]"></div>
+					<div class="backwards parallax" data-scrollify="['parallax', { range:-200 }]"></div>
 				</div>
 			</div>
 
@@ -325,8 +327,8 @@
 
 			new Scrollify('#sequence')
 				.addScene({
-					'start': 0.5,
-					'duration': 300,
+					'start': 0.3,
+					'duration': 600,
 					// 'duration': function() { return window.innerHeight + 200 },
 					// 'duration': function() { return window.innerHeight * 1.2 },		// "speed" of 0.2
 					'effects': [
