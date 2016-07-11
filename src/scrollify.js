@@ -82,13 +82,13 @@ export default class Scrollify {
     let trigger = document.querySelector(opts.trigger) || this.element;
     let applyTransform = opts.applyTransform !== undefined ? opts.applyTransform : true;   // opt out rather than opt in
     let scene = {
-      'active': false,
-      'trigger': trigger,
-      'triggerPos': 1 - triggerPos,
-      'duration': duration,
-      'easing': easing,
-      'applyTransform': applyTransform,
-      'effects': []
+      active: false,
+      trigger: trigger,
+      triggerPos: 1 - triggerPos,
+      duration: duration,
+      easing: easing,
+      applyTransform: applyTransform,
+      effects: []
     };
 
     effects.map((effect) => {
@@ -110,15 +110,16 @@ export default class Scrollify {
     let trigger = scene.trigger;
     let BCR = trigger.getBoundingClientRect();
     let triggerPos = scene.triggerPos;
-    let top = 0;
 
+    // let top = trigger.getBoundingClientRect().top + window.scrollY;
+
+    let top = 0;
     do {
       top += trigger.offsetTop || 0;
       trigger = trigger.offsetParent;
     } while(trigger);
-    // top = trigger.getBoundingClientRect().top + window.scrollY;
 
-    scene.start = Math.max(0, top - triggerPos * window.innerHeight); // (can be negative...?)
+    scene.start = Math.max(0, top - triggerPos * window.innerHeight);
     // scene.start = top - (triggerPos * window.innerHeight); // (can be negative)
 
     this.calculate(scene);
@@ -208,7 +209,6 @@ export default class Scrollify {
     let progress;
     let matrix;
 
-    // -------------------------
     if (scroll - start > duration) {
       if (scene.active) {    // do one final iteration
         scene.active = false;
@@ -225,44 +225,12 @@ export default class Scrollify {
       }
     } else {
       scene.active = true;
-
-
-      // -------------------------
       if (scene.easing) { //            start, from, to, end
         progress = scene.easing(scroll - start, 0, 1, duration);
       } else {
         progress = (scroll - start) / duration;
       }
-      // -------------------------
-
-
     }
-    // -------------------------
-
-
-    // *** NOTE: with quick scrolling, effects may not start or end cleanly
-    // if (scroll - start > duration || scroll - start < 0) { return; }
-
-    // *** NOTE: with easing, this wont work
-    // scene.active = progress > 0 && progress < 1;
-    // if (progress <= 0 || progress >= 1) {
-    //   return;
-    // }
-
-    // *** NOTE: with fixed-positioning, this won't work. (Use bounding container as trigger?)
-    // Determine if we should run calcuations for this Scene.
-    // Use *actual* position data as an element may be onscreen while its reference (trigger)
-    // element is not. Progress may be negative or > 1.0 in some instances.
-    //
-    // if (this.element.getBoundingClientRect().top > window.innerHeight ||
-    //    this.element.getBoundingClientRect().bottom < 0
-    // ) {
-    //   return;
-    // }
-
-    // *** NOTE: helpful, but may leave parallax'd elements suddenly stopped while still in viewport
-    // progress = Math.min(1.0, Math.max(0, progress));
-
 
     // cycle through any registered transformations
     scene.effects.forEach((effect) => {

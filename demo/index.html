@@ -48,8 +48,8 @@
 
 				<h3>What sorts of things?</h3>
 				<p>Well, whatever you want. Common effects such as parallax or toggling a class on/off are
-				  possible and bundled within. However, you may also easily create your own custom scroll
-				  function, and pass it in to Scrollify. The built-in effects include:<p>
+					possible and bundled within. However, you may also easily create your own custom scroll
+					function, and pass it in to Scrollify. The built-in effects include:<p>
 				<ul class="bullets">
 					<li><strong>Stick</strong>: sticks an element to a particular point and holds in there for a
 						pre-defined number of pixels.</li>
@@ -62,6 +62,21 @@
 					<li><strong>Scale</strong>: scale an element.</li>
 					<li><strong>Fade</strong>: change an element's opacity.</li>
 				</ul>
+
+				<h3>Notes</h3>
+				<p>Scrollify works by first calculating an element's position in the page so that it may be
+				manipulated on scroll. It is important to note that as the page loads, this position may jump
+				around as the DOM is constructed and images are loaded, etc.  Therefore, it is important that
+				Scrollify'd elements are not initialized until the page has finished loading all images and the
+				DOM is stable.</p>
+
+				<p>If you're trying to Scrollify an element whose position on the page is dependant on
+				assets loading above of it, you may wish to use
+				<code class="language-javascript">window.addEventListener('load', ...</code> rather than the more common
+				<code class="language-javascript">window.addEventListener('DOMContentLoaded', ...</code>, OR check
+				out the lovely <a href="https://github.com/desandro/imagesloaded">imagesloaded.js</a> plugin.
+
+
 			</div>
 		</section>
 
@@ -185,18 +200,56 @@
 			<div class="container">
 				<h2>Code</h2>
 
-				<p>All <strong>sticky</strong> elements are required to be wrapped in an empty "spacer" element. This wrapper
-				element serves as a reference point for changes in position to the targeted element.</p>
+				<pre><code class="language-javascript">
+	// Create a "scene" where the effect(s) will be active:
+	new Scrollify('#transformer')
+		.addScene({
+			'applyTransform': false,
+			'effects': [{
+				'name': toggle,
+				'options': {
+					0.2: 'red',
+					0.5: 'blue',
+					0.7: 'green'
+				}
+			}]
+		});
+				</code></pre>
 
-				<pre><code class="language-markup">
-	&lt;div class="ref">&lt;!-- the reference element -->
-		&lt;img class="scrollify" src="photo.jpg">&lt;!-- target element -->
-	&lt;/div>
+				<pre><code class="language-javascript">
+	// You can also chain multiple scenes together:
+	new Scrollify('#multiple')
+		.addScene({
+			'start': 0.5,
+			'applyTransform': false,
+			'easing': oscillate,
+			'effects': [{
+				'name': fade,
+				'options': {
+					'to': 0
+				}
+			}]
+		})
+		.addScene({
+			'start': 0.2,
+			'easing': easeIn,
+			'effects': [{
+				'name': translateY,
+				'options': {
+					'to': 0
+					'from': 400
+				}
+			}]
+		});
 				</code></pre>
 
 
 				<pre><code class="language-javascript">
-	// set up some options, including the element to Scrollify
+	// You can also just apply an effect directly, and Scrollify will
+	// set you up with some default scene (ie start / stop) options.
+
+	// Here's another way to get a reference to the element, and
+	// we'll also define some effect options:
 	var element = document.querySelector('.scrollify');
 	var options = {
 		speed: 0.2
@@ -208,13 +261,24 @@
 
 				<!-- OR: Scrollify.prototype.addEffect('rotate', function(data) { ...  }); -->
 				<pre><code class="language-javascript">
-	// Or, roll your own custom effect:
+	// You can also roll your own custom effect:
 	new Scrollify('#custom')
-		.addEffect(function(data) {
-			var degrees = 360 * data.progress;
-			data.el.style[transform] = 'rotate('+degrees+'deg)';
+		.addEffect(function(progress) {
+			var degrees = 360 * progress;
+			this.element.style.transform = 'rotate('+degrees+'deg)';
 		});
 				</code></pre>
+
+				<p>All <strong>sticky</strong> elements are required to be wrapped in an empty "spacer" element. This wrapper
+				element serves as a reference point for changes in position to the targeted element.</p>
+
+				<pre><code class="language-markup">
+	&lt;div class="ref">&lt;!-- the reference element -->
+		&lt;img class="scrollify" src="photo.jpg">&lt;!-- target element -->
+	&lt;/div>
+				</code></pre>
+
+
 			</div>
 		</section>
 
@@ -280,7 +344,9 @@
 
 	<script src="../dist/scrollify.js"></script>
 	<script>
-		window.addEventListener('DOMContentLoaded', function() {
+		// window.addEventListener('DOMContentLoaded', function() {
+		window.addEventListener('load', function(event) {
+			console.log('DOM ready; all assets loaded');
 
 			// example #1. Stick something
 			var stick = Scrollify.fx.stick;
@@ -288,7 +354,7 @@
 				.addScene({															// start / stop, duration etc. of the effect
 					'start': 0.5,													//   'start': when at 50% of the viewport
 					'duration': 300,											//   'duration': 300 pixels
-			    'effects': [{
+					'effects': [{
 						'name': stick												// the effect to apply, and when (within the progress of the scene)
 					}]
 				});
@@ -299,15 +365,15 @@
 			new Scrollify('#transformer')
 				.addScene({
 					'applyTransform': false,
-			    'effects': [{
-			      'name': toggle,
-			      'options': {
-			        0.2: 'red',
+					'effects': [{
+						'name': toggle,
+						'options': {
+							0.2: 'red',
 							0.5: 'blue',
-						  0.7: 'green'
-			      }
-			    }]
-			  });
+							0.7: 'green'
+						}
+					}]
+				});
 
 
 			// example #3. various transformation from the data- prop of each element
@@ -322,6 +388,20 @@
 			});
 
 
+			// sample "speed" based parallax (using % of window height)
+			// var test = document.querySelector('.xxx');
+			// new Scrollify(test)
+			// 	.addScene({
+			// 		'duration': window.innerHeight * 1.3 + 40,		// (40 is the element height)
+			// 		'effects': [{
+			// 			name: Scrollify.fx.parallax,
+			// 			options: {
+			// 				range: window.innerHeight * 0.3
+			// 			}
+			// 		}]
+			// 	});
+
+
 			// example #4. Fade in and out a few times
 			var fade = Scrollify.fx.fade;
 			var easequad = Scrollify.easings.easeInOutQuad;
@@ -331,20 +411,18 @@
 					'start': 0,
 					'applyTransform': false,
 					'easing': oscillate,
-			    'effects': [{
-			      'name': fade,
-			      'options': {
-			        'to': 0
-			      }
-			    }]
-			  });
-
+					'effects': [{
+						'name': fade,
+						'options': {
+							'to': 0
+						}
+					}]
+				});
 
 
 			// example #5. build an Image Sequence!
 			var images = document.querySelectorAll('#sequence img');
 			var length = images.length - 1;
-			var stick = Scrollify.fx.stick;
 			var sequencer = function(progress) {
 				var index = parseInt(progress * length);
 				index = Math.min(length, Math.max(index, 0));
