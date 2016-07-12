@@ -10,7 +10,7 @@
 	<link rel="stylesheet" href="styles.css">
 
 	<!-- demo stuffs -->
-	<link rel="stylesheet" href="https://rawgit.com/apathetic/showcase/harp/www/css/styles.css">
+	<link rel="stylesheet" href="https://rawgit.com/apathetic/showcase/master/www/css/styles.css">
 	<script src="prism.js"></script>
 	<script src="https://rawgit.com/apathetic/stickynav/master/dist/stickynav.min.js"></script>
 	<script>
@@ -70,6 +70,11 @@
 				Scrollify'd elements are not initialized until the page has finished loading all images and the
 				DOM is stable.</p>
 
+				<p>A note on implementation: Scrollify uses matrix transformations in its calculations -- in
+				this way multiple element transforms may be stacked and animated on a single element (it is
+				also a lot more efficient and speedy). <!-- If you write a custom transform function, you
+				should apply the results to an internal transforms object. --></p>
+
 				<p>If you're trying to Scrollify an element whose position on the page is dependant on
 				assets loading above of it, you may wish to use
 				<code class="language-javascript">window.addEventListener('load', ...</code> rather than the more common
@@ -98,29 +103,6 @@
 						Lorem ipsum dolor sit amet,	consectetur adipisicing elit, sed do eiusmod.
 					</span>
 				</p>
-
-				<div id="sequence">
-					<img src="images/seq/horse_01.jpg" style="opacity:1" alt="">
-					<img src="images/seq/horse_02.jpg" alt="">
-					<img src="images/seq/horse_03.jpg" alt="">
-					<img src="images/seq/horse_04.jpg" alt="">
-					<img src="images/seq/horse_05.jpg" alt="">
-					<img src="images/seq/horse_06.jpg" alt="">
-					<img src="images/seq/horse_07.jpg" alt="">
-					<img src="images/seq/horse_08.jpg" alt="">
-					<img src="images/seq/horse_09.jpg" alt="">
-					<img src="images/seq/horse_10.jpg" alt="">
-					<img src="images/seq/horse_11.jpg" alt="">
-					<img src="images/seq/horse_12.jpg" alt="">
-					<img src="images/seq/horse_13.jpg" alt="">
-					<img src="images/seq/horse_14.jpg" alt="">
-					<img src="images/seq/horse_15.jpg" alt="">
-					<img src="images/seq/horse_16.jpg" alt="">
-					<img src="images/seq/horse_17.jpg" alt="">
-					<img src="images/seq/horse_18.jpg" alt="">
-					<img src="images/seq/horse_19.jpg" alt="">
-					<img src="images/seq/horse_20.jpg" alt="">
-				</div>
 
 				<p> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
@@ -175,6 +157,30 @@
 				cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
 				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
+
+				<div id="sequence">
+					<img src="images/seq/horse_01.jpg" style="opacity:1" alt="">
+					<img src="images/seq/horse_02.jpg" alt="">
+					<img src="images/seq/horse_03.jpg" alt="">
+					<img src="images/seq/horse_04.jpg" alt="">
+					<img src="images/seq/horse_05.jpg" alt="">
+					<img src="images/seq/horse_06.jpg" alt="">
+					<img src="images/seq/horse_07.jpg" alt="">
+					<img src="images/seq/horse_08.jpg" alt="">
+					<img src="images/seq/horse_09.jpg" alt="">
+					<img src="images/seq/horse_10.jpg" alt="">
+					<img src="images/seq/horse_11.jpg" alt="">
+					<img src="images/seq/horse_12.jpg" alt="">
+					<img src="images/seq/horse_13.jpg" alt="">
+					<img src="images/seq/horse_14.jpg" alt="">
+					<img src="images/seq/horse_15.jpg" alt="">
+					<img src="images/seq/horse_16.jpg" alt="">
+					<img src="images/seq/horse_17.jpg" alt="">
+					<img src="images/seq/horse_18.jpg" alt="">
+					<img src="images/seq/horse_19.jpg" alt="">
+					<img src="images/seq/horse_20.jpg" alt="">
+				</div>
+
 			</div>
 
 		</section>
@@ -200,39 +206,46 @@
 			<div class="container">
 				<h2>Code</h2>
 
+	      <p>The easiest way to get started is to feed Scrollify an element, and
+	      create a "scene" where an effect(s) will apply:
 				<pre><code class="language-javascript">
-	// Create a "scene" where the effect(s) will be active:
 	new Scrollify('#transformer')
 		.addScene({
-			'applyTransform': false,
 			'effects': [{
-				'name': toggle,
+				'name': scale,
 				'options': {
-					0.2: 'red',
-					0.5: 'blue',
-					0.7: 'green'
+					to: 1.5,
+					from: 1.0
 				}
 			}]
 		});
 				</code></pre>
 
+				<p>You can also specify multiple effects within the same scene:</p>
 				<pre><code class="language-javascript">
-	// You can also chain multiple scenes together:
 	new Scrollify('#multiple')
 		.addScene({
-			'start': 0.5,
-			'applyTransform': false,
-			'easing': oscillate,
 			'effects': [{
-				'name': fade,
+				'name': scale,
 				'options': {
-					'to': 0
+					to: 1.5,
+					from: 1.0
+				}, {
+				'name': rotate,
+				'options': {
+					rad: Math.Pi / 2
 				}
+
 			}]
-		})
+		});
+				</code></pre>
+
+				<p>Or, you can also chain multiple scenes together:</p>
+				<pre><code class="language-javascript">
+	new Scrollify('#multiple')
 		.addScene({
-			'start': 0.2,
-			'easing': easeIn,
+			'start': 0.2, // start when the element reaches 20% of the viewport
+			'easing': easeIn, // specify an easing function
 			'effects': [{
 				'name': translateY,
 				'options': {
@@ -240,28 +253,36 @@
 					'from': 400
 				}
 			}]
+		})
+		.addScene({
+			'trigger': '#otherThing', // start trigger can be any element
+			'start': 0.5,
+			'applyTransform': false, // specifies that the effect is not a css transform
+			'easing': oscillate,
+			'effects': [{
+				'name': fade,
+				'options': {
+					'to': 0
+				}
+			}]
 		});
 				</code></pre>
 
-
+				<p>You can also just apply an effect directly, and Scrollify will set you up
+				with some default scene options (ie start, duration etc). Here, we're passing
+				in an HTML element directly:</p>
 				<pre><code class="language-javascript">
-	// You can also just apply an effect directly, and Scrollify will
-	// set you up with some default scene (ie start / stop) options.
-
-	// Here's another way to get a reference to the element, and
-	// we'll also define some effect options:
 	var element = document.querySelector('.scrollify');
 	var options = {
-		speed: 0.2
+		range: 300
 	};
 
-	// create a new Scrollify instance using a built-in effect, "parallax":
-	new Scrollify(element).addEffect('parallax', options);
+	new Scrollify(element).addEffect(parallax, options);
 				</code></pre>
 
-				<!-- OR: Scrollify.prototype.addEffect('rotate', function(data) { ...  }); -->
+				<p>You can also roll your own custom effect. Have a look in the effect.js
+				file to glean further insight.</p>
 				<pre><code class="language-javascript">
-	// You can also roll your own custom effect:
 	new Scrollify('#custom')
 		.addEffect(function(progress) {
 			var degrees = 360 * progress;
@@ -269,8 +290,11 @@
 		});
 				</code></pre>
 
-				<p>All <strong>sticky</strong> elements are required to be wrapped in an empty "spacer" element. This wrapper
-				element serves as a reference point for changes in position to the targeted element.</p>
+				<p>There is a <strong>sticky</strong> function as well; keep in mind that you'll need
+				to CSS a few things, though. It's probably easiest if you wrap your element in an empty
+				"spacer" element, which would serve as a reference point for changes in the display
+				property of the sticky element and prevent the page from collapsing when it's taken out
+				of the flow.</p>
 
 				<pre><code class="language-markup">
 	&lt;div class="ref">&lt;!-- the reference element -->
@@ -296,8 +320,8 @@
 					<tbody>
 						<tr>
 							<td>el</td>
-							<td>string</td>
-							<td>selector (or HTMLElement) of thing to scroll-ify</td>
+							<td>string | HTMLElement</td>
+							<td>Reference to the DOM node of thing to scroll-ify</td>
 						</tr>
 						</tr>
 					</tbody>

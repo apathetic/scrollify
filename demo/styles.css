@@ -33,6 +33,7 @@ p { margin-bottom:1em; clear:both; }
 	padding: 1em;
 	border: 1px solid #333;
 	transition: all 0.2s;
+	display: block;
 }
 
 #sequence {
