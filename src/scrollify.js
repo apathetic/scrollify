@@ -79,10 +79,11 @@ export default class Scrollify {
     let duration = opts.duration || window.innerHeight + this.element.offsetHeight;
     let easing = opts.easing || false;
     let effects = opts.effects || [];
-    let trigger = document.querySelector(opts.trigger) || this.element;
+    // let trigger = document.querySelector(opts.trigger) || this.element;
+    let trigger = opts.trigger ? opts.trigger instanceof HTMLElement ? opts.trigger : document.querySelector(opts.trigger) : this.element;
     let applyTransform = opts.applyTransform !== undefined ? opts.applyTransform : true;   // opt out rather than opt in
     let scene = {
-      active: false,
+      // active: false,
       trigger: trigger,
       triggerPos: 1 - triggerPos,
       duration: duration,
@@ -90,6 +91,8 @@ export default class Scrollify {
       applyTransform: applyTransform,
       effects: []
     };
+
+    scene.active = this.scroll > this.calculateStart(scene); // calculate any transformations if the scene has already passed.
 
     effects.map((effect) => {
       this.addEffect(effect.name, effect.options, scene);
@@ -107,21 +110,7 @@ export default class Scrollify {
    * @return {void}
    */
   updateScene(scene) {
-    let trigger = scene.trigger;
-    let BCR = trigger.getBoundingClientRect();
-    let triggerPos = scene.triggerPos;
-
-    // let top = trigger.getBoundingClientRect().top + window.scrollY;
-
-    let top = 0;
-    do {
-      top += trigger.offsetTop || 0;
-      trigger = trigger.offsetParent;
-    } while(trigger);
-
-    scene.start = Math.max(0, top - triggerPos * window.innerHeight);
-    // scene.start = top - (triggerPos * window.innerHeight); // (can be negative)
-
+    scene.start = this.calculateStart(scene);
     this.calculate(scene);
   }
 
@@ -166,12 +155,32 @@ export default class Scrollify {
   }
 
   /**
+   * Calculate the start point of each scene.
+   * @param  {[type]} scene A Scrollify Scene object.
+   * @return {Integer} The start position of the Scene, in pixels.
+   */
+  calculateStart(scene) {
+    let trigger = scene.trigger;
+    let triggerPos = scene.triggerPos;
+    let top = 0;
+
+    do {
+      top += trigger.offsetTop || 0;
+      trigger = trigger.offsetParent;
+    } while(trigger);
+    // top = trigger.getBoundingClientRect().top + window.scrollY;
+
+    return Math.max(0, top - triggerPos * window.innerHeight); // (can be negative...?)
+  }
+
+  /**
    * onScroll Handler
    * @return {void}
    */
   onScroll() {
-    // if (!this.active) { return; }
+    if (!this.active) { return; }
     this.scroll = window.scrollY;
+
     if (!this.ticking) {
       window.requestAnimationFrame(this.update.bind(this));
       this.ticking = true;
@@ -183,7 +192,7 @@ export default class Scrollify {
    * @return {void}
    */
   onResize() {
-    this.scenes.forEach((scene) => this.updateScene(scene));
+    this.scenes.forEach(this.updateScene, this);
   }
 
   /**
@@ -191,7 +200,7 @@ export default class Scrollify {
    * @return {void}
    */
   update() {
-    this.scenes.forEach((scene) => this.calculate(scene));
+    this.scenes.forEach(this.calculate, this);
     this.ticking = false;
   }
 

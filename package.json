@@ -1,5 +1,5 @@
 {
-  "name": "scrollify",
+  "name": "@apatheticwes/scrollify",
   "version": "0.1.0",
   "description": "A simple thing for triggering stupid scroll effects that everybody loves",
   "directories": {
@@ -10,11 +10,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/apathetic/parallax.git"
+    "url": "https://github.com/apathetic/scrollify.git"
   },
   "keywords": [
-    "parallax",
-	"scroll"
+    "matrix",
+    "scroll"
   ],
   "author": "wes hatch",
   "license": "MIT",
