@@ -27,14 +27,14 @@ export default class Scrollify {
    */
   constructor(element) {
     if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
-    // if (!element || !transform) { return this.active = false; }
-    if (!transform) { throw 'Scrollify [error]: transforms not supported'; }
-    if (!element) { throw 'Scrollify [error]: could not find element'; }
+    if (!element || !transform) { return this.active = false; }
+    // if (!transform) { throw 'Scrollify [error]: transforms not supported'; }
+    // if (!element) { throw 'Scrollify [error]: could not find element'; }
 
     this.element = element;
     this.ticking = false;
     this.scenes = [];
-    this.scroll = window.scrollY;
+    this.scroll = window.scrollY || window.pageYOffset;
     this.active = true;
     this.matrix = createMatrix();
     this.transforms = {
@@ -79,11 +79,9 @@ export default class Scrollify {
     let duration = opts.duration || window.innerHeight + this.element.offsetHeight;
     let easing = opts.easing || false;
     let effects = opts.effects || [];
-    // let trigger = document.querySelector(opts.trigger) || this.element;
     let trigger = opts.trigger ? opts.trigger instanceof HTMLElement ? opts.trigger : document.querySelector(opts.trigger) : this.element;
     let applyTransform = opts.applyTransform !== undefined ? opts.applyTransform : true;   // opt out rather than opt in
     let scene = {
-      // active: false,
       trigger: trigger,
       triggerPos: 1 - triggerPos,
       duration: duration,
@@ -92,7 +90,10 @@ export default class Scrollify {
       effects: []
     };
 
-    scene.active = this.scroll > this.calculateStart(scene); // calculate any transformations if the scene has already passed.
+    // scene.active = this.scroll > this.calculateStart(scene); // calculate any transformations if the scene has already passed.
+
+    this.calculateStart(scene);
+    scene.state = (this.scroll > this.start) ? (this.scroll > this.start+duration) ? 'after' : 'active' : 'before';
 
     effects.map((effect) => {
       this.addEffect(effect.name, effect.options, scene);
@@ -110,7 +111,7 @@ export default class Scrollify {
    * @return {void}
    */
   updateScene(scene) {
-    scene.start = this.calculateStart(scene);
+    this.calculateStart(scene);
     this.calculate(scene);
   }
 
@@ -168,9 +169,10 @@ export default class Scrollify {
       top += trigger.offsetTop || 0;
       trigger = trigger.offsetParent;
     } while(trigger);
-    // top = trigger.getBoundingClientRect().top + window.scrollY;
+    // top = trigger.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
 
-    return Math.max(0, top - triggerPos * window.innerHeight); // (can be negative...?)
+    // return Math.max(0, top - triggerPos * window.innerHeight); // (can be negative...?)
+    scene.start = Math.max(0, top - triggerPos * window.innerHeight);
   }
 
   /**
@@ -179,7 +181,7 @@ export default class Scrollify {
    */
   onScroll() {
     if (!this.active) { return; }
-    this.scroll = window.scrollY;
+    this.scroll = window.scrollY || window.pageYOffset;
 
     if (!this.ticking) {
       window.requestAnimationFrame(this.update.bind(this));
@@ -218,22 +220,27 @@ export default class Scrollify {
     let progress;
     let matrix;
 
+    // after end
     if (scroll - start > duration) {
-      if (scene.active) {    // do one final iteration
-        scene.active = false;
+      if (scene.state !== 'after') {    // do one final iteration
+        scene.state = 'after';
         progress = 1;
       } else {
         return;
       }
+
+    // before start
     } else if (scroll - start < 0) {
-      if (scene.active) {    // do one final iteration
-        scene.active = false;
+      if (scene.state !== 'before') {    // do one final iteration
+        scene.state = 'before';
         progress = 0;
       } else {
         return;
       }
+
+    // active
     } else {
-      scene.active = true;
+      scene.state = 'active';
       if (scene.easing) { //            start, from, to, end
         progress = scene.easing(scroll - start, 0, 1, duration);
       } else {

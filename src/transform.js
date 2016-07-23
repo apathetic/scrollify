@@ -3,14 +3,8 @@
  * @type {Boolean}
  */
 
-let transform = false;
-const transforms = ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'];
-
-for (let i in transforms) {
-  if (document.body.style[transforms[i]] !== undefined) {
-    transform = transforms[i];
-    break;
-  }
-}
+let transform = ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].find((t) => {
+  return (document.body.style[t] !== undefined);
+});
 
 export default transform;
