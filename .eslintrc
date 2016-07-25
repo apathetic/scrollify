@@ -1,0 +1,20 @@
+{
+  "parser": "babel-eslint",
+  "root": true,
+  "extends": "defaults/configurations/google",
+  "globals": {
+    "window": true,
+    "document": true,
+    "module": true
+  },
+
+  // add your custom rules here
+  "rules": {
+    "semi": ["error", "always"],
+    "space-before-function-paren": ["error", "never"],
+    "no-multiple-empty-lines": ["error", {"max": 3}],
+
+    // allow paren-less arrow functions
+    "arrow-parens": 0
+  }
+}
