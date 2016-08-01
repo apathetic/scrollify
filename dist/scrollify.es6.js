@@ -3,8 +3,10 @@
  * @type {Boolean}
  */
 
-let transform = ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].find(t => {
-  return document.body.style[t] !== undefined;
+const dummy = document.createElement('div');
+const transform = ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].find(t => {
+  // return (document.body.style[t] !== undefined);   // if DOM is not yet ready, let's do:
+  return dummy.style[t] !== undefined;
 });
 
 function assignedMatrixMultiplication(a, b, res) {
@@ -583,43 +585,3 @@ class Scrollify {
 
 export default Scrollify;
 //# sourceMappingURL=scrollify.es6.js.map
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import {easeInOutCubic} from './easings';
-export function scrollPage(to, offset = 0, callback) {
-  var root = document.body;
-  var duration = 500;
-  var startTime;
-  var startPos = root.scrollTop;
-  var endPos = ~~(to.getBoundingClientRect().top - offset);
-
-  var scroll = (timestamp) => {
-    var elapsed;
-
-    startTime = startTime || timestamp;
-    elapsed = timestamp - startTime;
-    root.scrollTop = easeInOutCubic(elapsed, startPos, endPos, duration);
-
-    if (elapsed < duration) {
-      requestAnimationFrame(scroll);
-    } else {
-      callback.call(to);
-    }
-  };
-
-  requestAnimationFrame(scroll);
-}

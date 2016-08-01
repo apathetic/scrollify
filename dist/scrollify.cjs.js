@@ -5,8 +5,10 @@
  * @type {Boolean}
  */
 
+var dummy = document.createElement('div');
 var transform = ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].find(function (t) {
-  return document.body.style[t] !== undefined;
+  // return (document.body.style[t] !== undefined);   // if DOM is not yet ready, let's do:
+  return dummy.style[t] !== undefined;
 });
 
 function assignedMatrixMultiplication(a, b, res) {
