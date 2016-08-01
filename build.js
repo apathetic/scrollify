@@ -20,12 +20,12 @@ const bundles = [
       'transform-es2015-function-name',
       'transform-es2015-parameters'
     ]
-  },
-  {
-    format: 'iife', ext: '.min.js', plugins: [uglify()],
-    babelPresets: ['es2015-rollup', 'stage-1'], babelPlugins: [],
-    moduleName: 'Scrollify', minify: true
   }
+  // {
+  //   format: 'iife', ext: '.min.js', plugins: [uglify()],
+  //   babelPresets: ['es2015-rollup', 'stage-1'], babelPlugins: [],
+  //   moduleName: 'Scrollify', minify: true
+  // }
 
   // {
   //   format: 'umd', ext: '.js', plugins: [],
