@@ -325,4 +325,3 @@ export default class Scrollify {
     this.active = false;
   }
 }
-

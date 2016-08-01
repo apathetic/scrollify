@@ -11,14 +11,14 @@ import {easeInOutCubic} from './easings';
  * @return {void}
  */
 export default function scrollPage(to, offset = 0, callback) {
-  var root = document.body;
-  var duration = 500;
-  var startTime;
-  var startPos = root.scrollTop;
-  var endPos = ~~(to.getBoundingClientRect().top - offset);
+  let startTime;
 
-  var scroll = (timestamp) => {
-    var elapsed;
+  const root = document.body;
+  const duration = 500;
+  const startPos = root.scrollTop;
+  const endPos = ~~(to.getBoundingClientRect().top - offset);
+  const scroll = (timestamp) => {
+    let elapsed;
 
     startTime = startTime || timestamp;
     elapsed = timestamp - startTime;
@@ -26,12 +26,10 @@ export default function scrollPage(to, offset = 0, callback) {
 
     if (elapsed < duration) {
       requestAnimationFrame(scroll);
-    } else {
+    } else if (callback) {
       callback.call(to);
     }
   };
 
   requestAnimationFrame(scroll);
 }
-
-

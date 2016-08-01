@@ -9,14 +9,6 @@ const uglify = require('rollup-plugin-uglify');
 // const pkg = require('../package.json');
 
 const bundles = [
-  // {
-  //   format: 'cjs', ext: '.cjs.js', plugins: [],
-  //   babelPresets: ['stage-1'], babelPlugins: [
-  //     'transform-es2015-destructuring',
-  //     'transform-es2015-function-name',
-  //     'transform-es2015-parameters'
-  //   ]
-  // },
   {
     format: 'cjs', ext: '.cjs.js', plugins: [],
     babelPresets: ['es2015-rollup', 'stage-1'], babelPlugins: []
