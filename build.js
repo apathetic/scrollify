@@ -24,7 +24,7 @@ const bundles = [
   {
     format: 'iife', ext: '.min.js', plugins: [uglify()],
     babelPresets: ['es2015-rollup', 'stage-1'], babelPlugins: [],
-    moduleName: 'scrollify', minify: true
+    moduleName: 'Scrollify', minify: true
   }
 
   // {
@@ -58,7 +58,8 @@ for (const config of bundles) {
       })
     ].concat(config.plugins),
   }).then(bundle => bundle.write({
-    dest: `dist/${config.moduleName || 'scrollify'}${config.ext}`,
+    // dest: `dist/${config.moduleName || 'scrollify'}${config.ext}`,
+    dest: `dist/scrollify${config.ext}`,
     format: config.format,
     sourceMap: !config.minify,
     moduleName: config.moduleName,
