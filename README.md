@@ -22,6 +22,13 @@ Well, whatever you want. Common effects such as parallax or toggling a class on/
 Scrollify works by first calculating an element's position in the page so that it may be manipulated on scroll. It is important to note that as the page loads, this position may jump around as the DOM is constructed and images are loaded, etc.  Therefore, it is important that Scrollify'd elements are not initialized until the page has finished loading all images and the DOM is stable.
 If you're trying to Scrollify an element whose position on the page is dependant on assets loading above of it, you may wish to use __window.addEventListener('load'__ rather than the more common __window.addEventListener('DOMContentLoaded'__, OR check out the lovely <a href="https://github.com/desandro/imagesloaded">imagesloaded.js</a> plugin.
 
+## API
+Coming soon. Please see the demo/index.html page for now.
+
+## Examples
+
+First, spin up a webserver via ```npm i && npm start```. Navigate to localhost:8080/demo to check out the demos. Code samples are therein.
+
 ## Getting Started
 Download it from [Github](https://github.com/apathetic/scrollify).
 
@@ -29,10 +36,6 @@ Download it from [Github](https://github.com/apathetic/scrollify).
 * IE9+
 * Safari / Chrome
 * Firefox
-
-## Examples
-
-Please see the _demo_ directory
 
 ## Release History
 
