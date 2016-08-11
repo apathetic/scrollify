@@ -1,6 +1,6 @@
 {
   "name": "@apatheticwes/scrollify",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A simple thing for triggering stupid scroll effects that everybody loves",
   "main": "./dist/scrollify.cjs.js",
   "broswer": "./dist/scrollify.min.js",
