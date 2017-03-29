@@ -12,17 +12,16 @@ import {easeInOutCubic} from './easings';
  */
 export default function scrollPage(to, offset = 0, callback) {
   let startTime;
-
-  const root = document.body;
   const duration = 500;
-  const startPos = root.scrollTop;
+  const startPos = window.pageYOffset;
   const endPos = ~~(to.getBoundingClientRect().top - offset);
   const scroll = (timestamp) => {
     let elapsed;
 
     startTime = startTime || timestamp;
     elapsed = timestamp - startTime;
-    root.scrollTop = easeInOutCubic(elapsed, startPos, endPos, duration);
+
+    document.body.scrollTop = document.documentElement.scrollTop = easeInOutCubic(elapsed, startPos, endPos, duration);
 
     if (elapsed < duration) {
       requestAnimationFrame(scroll);
