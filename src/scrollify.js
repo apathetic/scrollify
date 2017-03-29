@@ -10,8 +10,6 @@
 /*eslint max-len: ["error", 120]*/
 /*global document requestAnimationFrame console HTMLElement*/
 
-// TODO add weakmap support for public / private methods
-
 import transform from './transform';
 import createMatrix from './matrix';
 

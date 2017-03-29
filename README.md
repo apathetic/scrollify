@@ -38,6 +38,9 @@ Either:
 * Safari / Chrome
 * Firefox
 
+## Todo
+* add weakmap support for public / private methods
+
 ## Release History
 
 ### 0.2

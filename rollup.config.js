@@ -8,6 +8,6 @@ export default {
 
   targets: [
     { dest: 'dist/scrollify.cjs.js', format: 'cjs' },
-    { dest: 'dist/scrollify.es6.js', format: 'es6' }
+    { dest: 'dist/scrollify.es6.js', format: 'es' }
   ]
 };

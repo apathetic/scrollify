@@ -3,9 +3,8 @@
  * @type {Boolean}
  */
 
-const dummy = document.createElement('div');
+const dummy = document.createElement('div');        // we use this instead of document.body if the DOM is not yet ready
 const transform = ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].find((t) => {
-  // return (document.body.style[t] !== undefined);   // if DOM is not yet ready, let's do:
   return (dummy.style[t] !== undefined);
 });
 
