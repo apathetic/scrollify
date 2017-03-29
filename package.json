@@ -18,7 +18,6 @@
   "scripts": {
     "start": "http-server ./ -p 8080 -d",
     "clean": "rm -f dist/*.js*",
-    "#build": "npm run clean && node build.js",
     "build": "npm run clean && npm run lint && rollup -c && rollup -c rollup.shim.config.js",
     "lint": "eslint source/js/*.js",
     "test": "#tape -r babel-register test/*.js"
