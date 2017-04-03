@@ -26,6 +26,11 @@ main dd {
 	display: block;
 }
 
+.demo {
+    padding: 3em;
+    border: 1px solid #ddd;
+}
+
 .spacer,
 p { margin-bottom:1em; clear:both; }
 
