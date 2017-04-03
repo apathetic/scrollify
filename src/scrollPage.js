@@ -1,6 +1,6 @@
 /*global document requestAnimationFrame*/
 
-import {easeInOutCubic} from './easings';
+import { easeInOutCubic } from './easings';
 
 
 /**

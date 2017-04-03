@@ -6,9 +6,8 @@
    * @type {Boolean}
    */
 
-  var dummy = document.createElement('div');
+  var dummy = document.createElement('div');        // we use this instead of document.body if the DOM is not yet ready
   var transform = ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].find(function (t) {
-    // return (document.body.style[t] !== undefined);   // if DOM is not yet ready, let's do:
     return (dummy.style[t] !== undefined);
   });
 
@@ -272,9 +271,9 @@
     var this$1 = this;
 
     if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
-    if (!element || !transform) { return this.active = false; }
-    // if (!transform) { throw 'Scrollify [error]: transforms not supported'; }
-    // if (!element) { throw 'Scrollify [error]: could not find element'; }
+    // if (!element || !transform) { return this.active = false; }
+    if (!transform) { return new Error('Scrollify [error]: transforms not supported'); }
+    if (!element) { return new Error('Scrollify [error]: could not find element'); }
 
     this.element = element;
     this.ticking = false;
@@ -285,8 +284,8 @@
     this.transforms = {
       scale: [1,1],
       rotation: [0,0,0],
-      position: [0,0,0]
-      // transformOrigin: [],
+      position: [0,0,0],
+      transformOrigin: [100,0,0]
       // skew: [],
     };
 
@@ -327,7 +326,7 @@
     var easing = opts.easing || false;
     var effects = opts.effects || [];
     var trigger = opts.trigger ? opts.trigger instanceof HTMLElement ? opts.trigger : document.querySelector(opts.trigger) : this.element;
-    var applyTransform = opts.applyTransform !== undefined ? opts.applyTransform : true; // opt out rather than opt in
+    var applyTransform = opts.applyTransform !== undefined ? opts.applyTransform : true; // opt in rather than opt out
     var scene = {
       trigger: trigger,
       triggerPos: 1 - triggerPos,
@@ -410,8 +409,8 @@
    * @return {Integer} The start position of the Scene, in pixels.
    */
   Scrollify.prototype.calculateStart = function calculateStart (scene) {
-    var trigger = scene.trigger;
     var triggerPos = scene.triggerPos;
+    var trigger = scene.trigger;
     var top = 0;
 
     do {
@@ -420,7 +419,6 @@
     } while(trigger);
     // top = trigger.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
 
-    // return Math.max(0, top - triggerPos * window.innerHeight); // (can be negative...?)
     scene.start = Math.max(0, top - triggerPos * window.innerHeight);
   };
 
@@ -744,7 +742,7 @@
     t /= d;               // percentage
     t = Math.PI * i * t;  // go from 0 -> 2π
     t = Math.sin(t) * c;  // now, oscillates between c, -c
-    t = Math.abs(t);			// "half wave rectifier"
+    t = Math.abs(t);      // "half wave rectifier"
     return t + b;
   }
 

@@ -5,7 +5,7 @@ export function oscillate(t, b, c, d) {
   t /= d;               // percentage
   t = Math.PI * i * t;  // go from 0 -> 2π
   t = Math.sin(t) * c;  // now, oscillates between c, -c
-  t = Math.abs(t);			// "half wave rectifier"
+  t = Math.abs(t);      // "half wave rectifier"
   return t + b;
 }
 

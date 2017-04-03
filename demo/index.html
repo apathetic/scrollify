@@ -11,11 +11,11 @@
 
 	<!-- demo stuffs -->
 	<link rel="stylesheet" href="https://apathetic.github.io/showcase/assets/css/main.min.css">
-	<script src="https://rawgit.com/apathetic/stickynav/master/dist/stickyNav.js"></script>
+	<script src="https://rawgit.com/apathetic/stickynav/master/dist/stickynav.js"></script>
 	<script src="prism.js"></script>
 	<script>
 		window.addEventListener('DOMContentLoaded', function() {
-			new stickyNav({ nav: '#sticky' });
+			new StickyNav({ nav: '#sticky' });
 		});
 	</script>
 	<!-- end demo stuffs -->
@@ -72,117 +72,26 @@
 
 				<p>A note on implementation: Scrollify uses matrix transformations in its calculations -- in
 				this way multiple element transforms may be stacked and animated on a single element (it is
-				also a lot more efficient and speedy). <!-- If you write a custom transform function, you
-				should apply the results to an internal transforms object. --></p>
+				also a lot more efficient and speedy).</p>
 
 				<p>If you're trying to Scrollify an element whose position on the page is dependant on
 				assets loading above of it, you may wish to use
-				<code class="language-javascript">window.addEventListener('load', ...</code> rather than the more common
-				<code class="language-javascript">window.addEventListener('DOMContentLoaded', ...</code>, OR check
-				out the lovely <a href="https://github.com/desandro/imagesloaded">imagesloaded.js</a> plugin.
+				<code class="language-javascript">window.addEventListener('load', ...)</code> rather than the more common
+				<code class="language-javascript">window.addEventListener('DOMContentLoaded', ...)</code>.
 
-
+				<!-- There is also a simple <a href="https://github.com/desandro/imagesloaded">imagesloaded.js</a> plugin included. -->
 			</div>
 		</section>
 
-		<section data-nav="Download" id="download">
+		<section data-nav="Install" id="install">
 			<div class="container">
-				<h2>Download</h2>
+				<h2>Install</h2>
+				<h3>npm</h3>
+				<pre><code class="language-javascript">npm install apatheticwes/scrollify</code></pre>
+
 				<h3>Github</h3>
 				<p><a href="https://github.com/apathetic/scrollify">Get it from Github</a></p>
 			</div>
-		</section>
-
-		<section data-nav="Demo" id="demo">
-			<div class="container">
-				<h2>Demo</h2>
-
-				<p class="spacer stick-spacer">
-					<span id="stick">
-						<strong>Sticks!</strong> I'll hang around for <strong>300 px</strong>.
-						Lorem ipsum dolor sit amet,	consectetur adipisicing elit, sed do eiusmod.
-					</span>
-				</p>
-
-				<p> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-				quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-				cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-
-				<div class="ref">
-					<div class="parallax item" data-scrollify="['parallax', { range:400  }]"> 1 </div>
-					<div class="parallax item" data-scrollify="['parallax', { range:200  }]"> 2 </div>
-					<div class="parallax item" data-scrollify="['parallax', { range:0    }]"> 3 </div>
-					<div class="parallax item" data-scrollify="['parallax', { range:-200 }]"> 4 </div>
-					<div class="parallax item" data-scrollify="['parallax', { range:-400 }]"> 5 </div>
-				</div>
-
-				<p class="parallax" data-scrollify="['parallax', {range:-300}]">
-					<span>
-						Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-						tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-						quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-						consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-						cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-						proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-					</span>
-				</p>
-
-				<p class="scrollify" id="transformer"><strong>This element is toggling various classes on and off. At 20%, 50%, and 70%.</strong> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-				quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-				cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-
-				<p class="scrollify" data-scrollify="['rotate', {rad: Math.PI/4}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
-				<p class="scrollify" data-scrollify="['rotate', {rad: Math.PI/2}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
-				<p class="scrollify" data-scrollify="['rotate', {rad: Math.PI}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
-				<p class="scrollify" data-scrollify="['rotate', {rad: Math.PI*2}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
-
-				<div class="clip ref">
-					<div class="parallax" data-scrollify="['parallax', { range:200 }]"></div>
-				</div>
-
-				<div class="clip ref">
-					<div class="backwards parallax" data-scrollify="['parallax', { range:-200 }]"></div>
-				</div>
-
-				<p id="fader"><strong>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-				quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-				cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-
-
-				<div id="sequence">
-					<img src="images/seq/horse_01.jpg" style="opacity:1" alt="">
-					<img src="images/seq/horse_02.jpg" alt="">
-					<img src="images/seq/horse_03.jpg" alt="">
-					<img src="images/seq/horse_04.jpg" alt="">
-					<img src="images/seq/horse_05.jpg" alt="">
-					<img src="images/seq/horse_06.jpg" alt="">
-					<img src="images/seq/horse_07.jpg" alt="">
-					<img src="images/seq/horse_08.jpg" alt="">
-					<img src="images/seq/horse_09.jpg" alt="">
-					<img src="images/seq/horse_10.jpg" alt="">
-					<img src="images/seq/horse_11.jpg" alt="">
-					<img src="images/seq/horse_12.jpg" alt="">
-					<img src="images/seq/horse_13.jpg" alt="">
-					<img src="images/seq/horse_14.jpg" alt="">
-					<img src="images/seq/horse_15.jpg" alt="">
-					<img src="images/seq/horse_16.jpg" alt="">
-					<img src="images/seq/horse_17.jpg" alt="">
-					<img src="images/seq/horse_18.jpg" alt="">
-					<img src="images/seq/horse_19.jpg" alt="">
-					<img src="images/seq/horse_20.jpg" alt="">
-				</div>
-
-			</div>
-
 		</section>
 
 		<section data-nav="Requirements" id="requirements">
@@ -202,107 +111,366 @@
 			</div>
 		</section>
 
-		<section data-nav="Code" id="code">
+		<section data-nav="Demo" id="demo">
 			<div class="container">
-				<h2>Code</h2>
+				<h2>Demo</h2>
 
-	      <p>The easiest way to get started is to feed Scrollify an element, and
-	      create a "scene" where an effect(s) will apply:
-				<pre><code class="language-javascript">
-	new Scrollify('#transformer')
-		.addScene({
-			'effects': [{
-				'name': scale,
-				'options': {
-					to: 1.5,
-					from: 1.0
-				}
-			}]
-		});
-				</code></pre>
+				<dl>
+					<dt><h4>Add a Scene</h4></dt>
+					<dd>
+						<p>The easiest way to get started is to create a new Scrollify instance, with the
+							DOM element you'd like to manipulate. Next, create a "scene", and define which
+							effect to apply:
+						</p>
+						<pre><code class="language-javascript">
+              <!-- var scale = Scrollify.fx.scale; -->
+NOTE: Ideal API :
+              new Scrollify('#transformer') // the element to scrollify
+                .addScene({
+                  effects: [{
+                    scale: {     // what effect to apply
+                      to: 1.5,     // some options for the effect
+                      from: 1.0
+                    }
+                  }]
+                });
+						</code></pre>
 
-				<p>You can also specify multiple effects within the same scene:</p>
-				<pre><code class="language-javascript">
-	new Scrollify('#multiple')
-		.addScene({
-			'effects': [{
-				'name': scale,
-				'options': {
-					to: 1.5,
-					from: 1.0
-				}, {
-				'name': rotate,
-				'options': {
-					rad: Math.Pi / 2
-				}
+						<!-- demo here -->
+						<p id="transformer">This element will scale from 1 to 1.5x as it moves across the viewport.</p>
+						<script>
+							window.addEventListener('load', function(event) {
+								new Scrollify('#transformer')
+									.addScene({
+										effects: [{
+											name: Scrollify.fx.scale,
+											options: {
+												to: 1.5,
+												from: 1.0
+											}
+										}]
+									});
+							});
+						</script>
+					</dd>
 
-			}]
-		});
-				</code></pre>
+					<dt><h4>Define Start and Duration</h4></dt>
+					<dd>
+						<p>By default, the Scene will be active for the duration of the element's time in the viewport.
+							That is to say: the Scene starts as soon as the element enters the viewport, and ends when it
+							leaves. However, we can define custom start point and duration.
+						</p>
+							<pre><code class="language-javascript">
+								new Scrollify('#transformer-2')
+									.addScene({
+										'start': 0.2,			// start when the element reaches 20% of the viewport
+										'duration': 300,	// do something for 300 pixels
+										'effects': [{
+											'name': scale,
+											'options': {
+												to: 1.5,
+												from: 1.0
+											}
+										}]
+									});
+							</code></pre>
+						</p>
+						<!-- demo here -->
+						<p id="transformer-2">This element will scale from 1 to 1.5x as it moves across the viewport.</p>
+					</dd>
 
-				<p>Or, you can also chain multiple scenes together:</p>
-				<pre><code class="language-javascript">
-	new Scrollify('#multiple')
-		.addScene({
-			'start': 0.2, // start when the element reaches 20% of the viewport
-			'easing': easeIn, // specify an easing function
-			'effects': [{
-				'name': translateY,
-				'options': {
-					'to': 0
-					'from': 400
-				}
-			}]
-		})
-		.addScene({
-			'trigger': '#otherThing', // start trigger can be any element
-			'start': 0.5,
-			'applyTransform': false, // specifies that the effect is not a css transform
-			'easing': oscillate,
-			'effects': [{
-				'name': fade,
-				'options': {
-					'to': 0
-				}
-			}]
-		});
-				</code></pre>
+					<dt><h4>Add Multiple Effects</h4></dt>
+					<dd>
+						<p>You can also specify multiple effects within the same scene:</p>
+						<pre><code class="language-javascript">
+							new Scrollify('#multiple')
+								.addScene({
+									'effects': [{
+										'name': scale,
+										'options': {
+											to: 1.5,
+											from: 1.0
+										}, {
+										'name': rotate,
+										'options': {
+											rad: Math.Pi / 2
+										}
 
-				<p>You can also just apply an effect directly, and Scrollify will set you up
-				with some default scene options (ie start, duration etc). Here, we're passing
-				in an HTML element directly:</p>
-				<pre><code class="language-javascript">
-	var element = document.querySelector('.scrollify');
-	var options = {
-		range: 300
-	};
+									}]
+								});
+						</code></pre>
+						<!-- demo goes here -->
+					</dd>
 
-	new Scrollify(element).addEffect(parallax, options);
-				</code></pre>
+					<dt>Chain Scenes</dt>
+					<dd>
+						<p>Or, you can also chain multiple scenes together:</p>
+						<pre><code class="language-javascript">
+							new Scrollify('#multiple')
+								.addScene({
+									'start': 0.2, // start when the element reaches 20% of the viewport
+									'easing': easeIn, // specify an easing function
+									'effects': [{
+										'name': translateY,
+										'options': {
+											'to': 0
+											'from': 400
+										}
+									}]
+								})
+								.addScene({
+									'trigger': '#otherThing', // start trigger can be any element
+									'start': 0.5,
+									'applyTransform': false, // specifies that the effect is not a css transform
+									'easing': oscillate,
+									'effects': [{
+										'name': fade,
+										'options': {
+											'to': 0
+										}
+									}]
+								});
+							</code></pre>
 
-				<p>You can also roll your own custom effect. Have a look in the effect.js
-				file to glean further insight.</p>
-				<pre><code class="language-javascript">
-	new Scrollify('#custom')
-		.addEffect(function(progress) {
-			var degrees = 360 * progress;
-			this.element.style.transform = 'rotate('+degrees+'deg)';
-		});
-				</code></pre>
+						<!-- demo goes here -->
+					</dd>
 
-				<p>There is a <strong>sticky</strong> function as well; keep in mind that you'll need
-				to CSS a few things, though. It's probably easiest if you wrap your element in an empty
-				"spacer" element, which would serve as a reference point for changes in the display
-				property of the sticky element and prevent the page from collapsing when it's taken out
-				of the flow.</p>
+					<dt>Use an Implied Scene</dt>
+					<dd>
+						<p>You can also just apply an effect directly, and Scrollify will set you up
+							with some default scene options (ie start, duration etc). Here, we're passing
+							in an HTML element directly:</p>
+						<pre><code class="language-javascript">
+							var element = document.querySelector('.scrollify');
+							var options = {
+								range: 300
+							};
 
-				<pre><code class="language-markup">
-	&lt;div class="ref">&lt;!-- the reference element -->
-		&lt;img class="scrollify" src="photo.jpg">&lt;!-- target element -->
-	&lt;/div>
-				</code></pre>
+							new Scrollify(element).addEffect(parallax, options);
+						</code></pre>
 
+						<!-- demo goes here -->
+					</dd>
 
+					<dt>Custom Effects</dt>
+					<dd>
+						<p>You can also roll your own custom effect. Have a look in the effect.js
+							file to glean further insight.</p>
+						<pre><code class="language-javascript">
+							Scrollify.fx.rotate = ...
+
+							new Scrollify('#custom')
+								.addEffect(function(progress) {
+									var degrees = 360 * progress;
+									this.element.style.transform = 'rotate('+degrees+'deg)';
+								});
+						</code></pre>
+					</dd>
+
+					<dt>Stick</dt>
+					<dd>
+						<p>There is a <strong>sticky</strong> function as well; keep in mind that you'll need
+						to CSS a few things, though. It's probably easiest if you wrap your element in an empty
+						"spacer" element, which would serve as a reference point for changes in the display
+						property of the sticky element and prevent the page from collapsing when it's taken out
+						of the flow.</p>
+
+						<pre><code class="language-markup">
+							&lt;div class="ref">&lt;!-- the reference element -->
+								&lt;img class="scrollify" src="photo.jpg">&lt;!-- target element -->
+							&lt;/div>
+						</code></pre>
+
+						<p class="spacer stick-spacer">
+							<span id="stick">
+								<strong>Sticks!</strong> I'll hang around for <strong>300 px</strong>.
+								Lorem ipsum dolor sit amet,	consectetur adipisicing elit, sed do eiusmod.
+							</span>
+						</p>
+						<script>
+							window.addEventListener('load', function(event) {
+								var stick = Scrollify.fx.stick;
+								new Scrollify('#stick')										// the element to target
+									.addScene({															// start / stop, duration etc. of the effect
+										'start': 0.5,													//   'start': when at 50% of the viewport
+										'duration': 300,											//   'duration': 300 pixels
+										'effects': [{
+											'name': stick												// the effect to apply, and when (within the progress of the scene)
+										}]
+									});
+							});
+						</script>
+					</dd>
+
+					<dt>Toggle Class</dt>
+					<dd>
+						<p class="scrollify" id="transformer-3" class="transition"><strong>This element is toggling various classes on and off. At 20%, 50%, and 70%.</strong> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+						tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+						quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+						consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+						cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+						proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+						<script>
+							window.addEventListener('load', function() {
+								// example #2: toggling various classes on scroll
+								var toggle = Scrollify.fx.toggle;
+								new Scrollify('#transformer-3')
+									.addScene({
+										'applyTransform': false,
+										'effects': [{
+											'name': toggle,
+											'options': {
+												0.2: 'red',
+												0.5: 'blue',
+												0.7: 'green'
+											}
+										}]
+									});
+							});
+						</script>
+					</dd>
+
+					<dt>Data Object</dt>
+					<dd>
+						<div class="ref">
+							<div class="parallax item" data-scrollify="['parallax', { range:400  }]"> 1 </div>
+							<div class="parallax item" data-scrollify="['parallax', { range:200  }]"> 2 </div>
+							<div class="parallax item" data-scrollify="['parallax', { range:0    }]"> 3 </div>
+							<div class="parallax item" data-scrollify="['parallax', { range:-200 }]"> 4 </div>
+							<div class="parallax item" data-scrollify="['parallax', { range:-400 }]"> 5 </div>
+						</div>
+
+						<p> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+							tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+							quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+							consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+							cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+							proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+						</p>
+						<p class="parallax" data-scrollify="['parallax', {range:-300}]">
+							<span>
+								Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+								tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+								quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+								consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+								cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+								proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+							</span>
+						</p>
+
+						<p class="scrollify" data-scrollify="['rotate', {rad: Math.PI/4}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+						<p class="scrollify" data-scrollify="['rotate', {rad: Math.PI/2}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+						<p class="scrollify" data-scrollify="['rotate', {rad: Math.PI}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+						<p class="scrollify" data-scrollify="['rotate', {rad: Math.PI*2}]">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+
+						<div class="clip ref">
+							<div class="parallax" data-scrollify="['parallax', { range:200 }]"></div>
+						</div>
+
+						<div class="clip ref">
+							<div class="backwards parallax" data-scrollify="['parallax', { range:-200 }]"></div>
+						</div>
+
+						<script>
+							window.addEventListener('load', function() {
+								// example #3. various transformation from the data- prop of each element
+								var elements = document.querySelectorAll('[data-scrollify]');
+								Array.prototype.forEach.call(elements, function(el) {
+									var data = eval('(' + el.dataset.scrollify +')');
+									var effect = data[0];
+									var opts = data[1];
+									var fx = Scrollify.fx[effect];
+
+									new Scrollify(el).addEffect(fx, opts);
+								});
+							});
+						</script>
+					</dd>
+
+					<dt>Fade in / out</dt>
+					<dd>
+						<p id="fader"><strong>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+						tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+						quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+						consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+						cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+						proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</strong></p>
+
+						<script>
+							window.addEventListener('load', function() {
+								// example #4. Fade in and out a few times
+								var fade = Scrollify.fx.fade;
+								var easequad = Scrollify.easings.easeInOutQuad;
+								var oscillate = Scrollify.easings.oscillate;
+								new Scrollify('#fader')
+									.addScene({
+										'start': 0,
+										'applyTransform': false,
+										'easing': oscillate,
+										'effects': [{
+											'name': fade,
+											'options': {
+												'to': 0
+											}
+										}]
+									});
+							});
+						</script>
+					</dd>
+
+					<dt>Image animation</dt>
+					<dd>
+						<div id="sequence">
+							<img src="images/seq/horse_01.jpg" style="opacity:1" alt="">
+							<img src="images/seq/horse_02.jpg" alt="">
+							<img src="images/seq/horse_03.jpg" alt="">
+							<img src="images/seq/horse_04.jpg" alt="">
+							<img src="images/seq/horse_05.jpg" alt="">
+							<img src="images/seq/horse_06.jpg" alt="">
+							<img src="images/seq/horse_07.jpg" alt="">
+							<img src="images/seq/horse_08.jpg" alt="">
+							<img src="images/seq/horse_09.jpg" alt="">
+							<img src="images/seq/horse_10.jpg" alt="">
+							<img src="images/seq/horse_11.jpg" alt="">
+							<img src="images/seq/horse_12.jpg" alt="">
+							<img src="images/seq/horse_13.jpg" alt="">
+							<img src="images/seq/horse_14.jpg" alt="">
+							<img src="images/seq/horse_15.jpg" alt="">
+							<img src="images/seq/horse_16.jpg" alt="">
+							<img src="images/seq/horse_17.jpg" alt="">
+							<img src="images/seq/horse_18.jpg" alt="">
+							<img src="images/seq/horse_19.jpg" alt="">
+							<img src="images/seq/horse_20.jpg" alt="">
+						</div>
+
+						<script>
+							window.addEventListener('load', function() {
+								// example #5. build an Image Sequence!
+								var images = document.querySelectorAll('#sequence img');
+								var length = images.length - 1;
+								var sequencer = function(progress) {
+									var index = parseInt(progress * length);
+									index = Math.min(length, Math.max(index, 0));
+									Array.from(images, function(img) { img.style.opacity = 0; });
+									images[index].style.opacity = 1;
+								};
+
+								new Scrollify('#sequence')
+									.addScene({
+										'start': 0.3,
+										'duration': 600,
+										// 'duration': function() { return window.innerHeight + 200 },
+										// 'duration': function() { return window.innerHeight * 1.2 },		// "speed" of 0.2
+										'effects': [
+											{ 'name': sequencer }
+										]
+									});
+							});
+						</script>
+					</dd>
+
+				</dl>
 			</div>
 		</section>
 
@@ -373,43 +541,43 @@
 			console.log('DOM ready; all assets loaded');
 
 			// example #1. Stick something
-			var stick = Scrollify.fx.stick;
-			new Scrollify('#stick')										// the element to target
-				.addScene({															// start / stop, duration etc. of the effect
-					'start': 0.5,													//   'start': when at 50% of the viewport
-					'duration': 300,											//   'duration': 300 pixels
-					'effects': [{
-						'name': stick												// the effect to apply, and when (within the progress of the scene)
-					}]
-				});
+			// var stick = Scrollify.fx.stick;
+			// new Scrollify('#stick')										// the element to target
+			// 	.addScene({															// start / stop, duration etc. of the effect
+			// 		'start': 0.5,													//   'start': when at 50% of the viewport
+			// 		'duration': 300,											//   'duration': 300 pixels
+			// 		'effects': [{
+			// 			'name': stick												// the effect to apply, and when (within the progress of the scene)
+			// 		}]
+			// 	});
 
 
 			// example #2: toggling various classes on scroll
-			var toggle = Scrollify.fx.toggle;
-			new Scrollify('#transformer')
-				.addScene({
-					'applyTransform': false,
-					'effects': [{
-						'name': toggle,
-						'options': {
-							0.2: 'red',
-							0.5: 'blue',
-							0.7: 'green'
-						}
-					}]
-				});
+			// var toggle = Scrollify.fx.toggle;
+			// new Scrollify('#transformer')
+			// 	.addScene({
+			// 		'applyTransform': false,
+			// 		'effects': [{
+			// 			'name': toggle,
+			// 			'options': {
+			// 				0.2: 'red',
+			// 				0.5: 'blue',
+			// 				0.7: 'green'
+			// 			}
+			// 		}]
+			// 	});
 
 
 			// example #3. various transformation from the data- prop of each element
-			var elements = document.querySelectorAll('[data-scrollify]');
-			Array.prototype.forEach.call(elements, function(el) {
-				var data = eval('(' + el.dataset.scrollify +')');
-				var effect = data[0];
-				var opts = data[1];
-				var fx = Scrollify.fx[effect];
-
-				new Scrollify(el).addEffect(fx, opts);
-			});
+			// var elements = document.querySelectorAll('[data-scrollify]');
+			// Array.prototype.forEach.call(elements, function(el) {
+			// 	var data = eval('(' + el.dataset.scrollify +')');
+			// 	var effect = data[0];
+			// 	var opts = data[1];
+			// 	var fx = Scrollify.fx[effect];
+			//
+			// 	new Scrollify(el).addEffect(fx, opts);
+			// });
 
 
 			// sample "speed" based parallax (using % of window height)
@@ -426,44 +594,44 @@
 			// 	});
 
 
-			// example #4. Fade in and out a few times
-			var fade = Scrollify.fx.fade;
-			var easequad = Scrollify.easings.easeInOutQuad;
-			var oscillate = Scrollify.easings.oscillate;
-			new Scrollify('#fader')
-				.addScene({
-					'start': 0,
-					'applyTransform': false,
-					'easing': oscillate,
-					'effects': [{
-						'name': fade,
-						'options': {
-							'to': 0
-						}
-					}]
-				});
+			// // example #4. Fade in and out a few times
+			// var fade = Scrollify.fx.fade;
+			// var easequad = Scrollify.easings.easeInOutQuad;
+			// var oscillate = Scrollify.easings.oscillate;
+			// new Scrollify('#fader')
+			// 	.addScene({
+			// 		'start': 0,
+			// 		'applyTransform': false,
+			// 		'easing': oscillate,
+			// 		'effects': [{
+			// 			'name': fade,
+			// 			'options': {
+			// 				'to': 0
+			// 			}
+			// 		}]
+			// 	});
 
 
 			// example #5. build an Image Sequence!
-			var images = document.querySelectorAll('#sequence img');
-			var length = images.length - 1;
-			var sequencer = function(progress) {
-				var index = parseInt(progress * length);
-				index = Math.min(length, Math.max(index, 0));
-				Array.from(images, function(img) { img.style.opacity = 0; });
-				images[index].style.opacity = 1;
-			};
-
-			new Scrollify('#sequence')
-				.addScene({
-					'start': 0.3,
-					'duration': 600,
-					// 'duration': function() { return window.innerHeight + 200 },
-					// 'duration': function() { return window.innerHeight * 1.2 },		// "speed" of 0.2
-					'effects': [
-						{ 'name': sequencer }
-					]
-				});
+			// var images = document.querySelectorAll('#sequence img');
+			// var length = images.length - 1;
+			// var sequencer = function(progress) {
+			// 	var index = parseInt(progress * length);
+			// 	index = Math.min(length, Math.max(index, 0));
+			// 	Array.from(images, function(img) { img.style.opacity = 0; });
+			// 	images[index].style.opacity = 1;
+			// };
+			//
+			// new Scrollify('#sequence')
+			// 	.addScene({
+			// 		'start': 0.3,
+			// 		'duration': 600,
+			// 		// 'duration': function() { return window.innerHeight + 200 },
+			// 		// 'duration': function() { return window.innerHeight * 1.2 },		// "speed" of 0.2
+			// 		'effects': [
+			// 			{ 'name': sequencer }
+			// 		]
+			// 	});
 
 
 		});

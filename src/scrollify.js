@@ -25,9 +25,9 @@ export default class Scrollify {
    */
   constructor(element) {
     if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
-    if (!element || !transform) { return this.active = false; }
-    // if (!transform) { throw 'Scrollify [error]: transforms not supported'; }
-    // if (!element) { throw 'Scrollify [error]: could not find element'; }
+    // if (!element || !transform) { return this.active = false; }
+    if (!transform) { return new Error('Scrollify [error]: transforms not supported'); }
+    if (!element) { return new Error('Scrollify [error]: could not find element'); }
 
     this.element = element;
     this.ticking = false;
@@ -38,8 +38,8 @@ export default class Scrollify {
     this.transforms = {
       scale: [1,1],
       rotation: [0,0,0],
-      position: [0,0,0]
-      // transformOrigin: [],
+      position: [0,0,0],
+      transformOrigin: [100,0,0]
       // skew: [],
     };
 
@@ -73,12 +73,12 @@ export default class Scrollify {
    * @return {void}
    */
   addScene(opts) {
-    let triggerPos = opts.start || 0;
-    let duration = opts.duration || window.innerHeight + this.element.offsetHeight;
-    let easing = opts.easing || false;
-    let effects = opts.effects || [];
-    let trigger = opts.trigger ? opts.trigger instanceof HTMLElement ? opts.trigger : document.querySelector(opts.trigger) : this.element;
-    let applyTransform = opts.applyTransform !== undefined ? opts.applyTransform : true;   // opt out rather than opt in
+    const triggerPos = opts.start || 0;
+    const duration = opts.duration || window.innerHeight + this.element.offsetHeight;
+    const easing = opts.easing || false;
+    const effects = opts.effects || [];
+    const trigger = opts.trigger ? opts.trigger instanceof HTMLElement ? opts.trigger : document.querySelector(opts.trigger) : this.element;
+    const applyTransform = opts.applyTransform !== undefined ? opts.applyTransform : true;   // opt in rather than opt out
     let scene = {
       trigger: trigger,
       triggerPos: 1 - triggerPos,
@@ -121,8 +121,8 @@ export default class Scrollify {
    * @return {void}
    */
   addEffect(effect, options = {}, scene) {
-    let element = this.element;
-    let transforms = this.transforms;
+    const element = this.element;
+    const transforms = this.transforms;
 
     if (!scene) {
       if (this.scenes.length) {
@@ -136,7 +136,7 @@ export default class Scrollify {
       }
     }
 
-    let curry = (fn, options) => {
+    const curry = (fn, options) => {
       return function() {       // NOTE: don't use => function here as we do NOT want to bind "this"
         let context = {
           'options': options,
@@ -159,8 +159,8 @@ export default class Scrollify {
    * @return {Integer} The start position of the Scene, in pixels.
    */
   calculateStart(scene) {
+    const triggerPos = scene.triggerPos;
     let trigger = scene.trigger;
-    let triggerPos = scene.triggerPos;
     let top = 0;
 
     do {
@@ -169,7 +169,6 @@ export default class Scrollify {
     } while(trigger);
     // top = trigger.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
 
-    // return Math.max(0, top - triggerPos * window.innerHeight); // (can be negative...?)
     scene.start = Math.max(0, top - triggerPos * window.innerHeight);
   }
 
@@ -212,9 +211,9 @@ export default class Scrollify {
    * @return {void}
    */
   calculate(scene) {
-    let start = scene.start;
-    let duration = scene.duration;
-    let scroll = this.scroll;
+    const start = scene.start;
+    const duration = scene.duration;
+    const scroll = this.scroll;
     let progress;
     let matrix;
 

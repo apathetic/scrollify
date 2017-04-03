@@ -20,8 +20,18 @@ main .normal {
 }
 
 
+
+main dd {
+  margin-bottom: 2em;
+	display: block;
+}
+
 .spacer,
 p { margin-bottom:1em; clear:both; }
+
+
+/* STICKY
+---------------*/
 
 .stick-spacer {
 	padding-bottom: 420px;
@@ -35,6 +45,10 @@ p { margin-bottom:1em; clear:both; }
 	transition: all 0.2s;
 	display: block;
 }
+
+
+/* IMAGE SEQUENCE
+---------------*/
 
 #sequence {
 	width: 320px;
@@ -50,6 +64,9 @@ p { margin-bottom:1em; clear:both; }
 	transition: opacity 0.2s;
 }
 
+
+/* PARALLAX
+---------------*/
 
 .item { position:absolute; z-index:-1; opacity:0.5; background:#ccc; width:40px; height:40px; line-height:40px; border-radius:20px; text-align: center;  }
 .item:nth-child(1) { top:0%; left:10% }
@@ -84,8 +101,10 @@ p.parallax { color: #ddd; z-index:-1 }
 	bottom: -250px;
 }
 
+/* CSS TOGGLE
+---------------*/
 
-#transformer {
+.transition {
 	transition: all 0.2s;
 	padding: 1em;
 }
@@ -109,4 +128,3 @@ p.parallax { color: #ddd; z-index:-1 }
 .red.blue {
 	background: rgba(255, 0, 255, 0.3);
 }
-
