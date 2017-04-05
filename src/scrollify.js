@@ -12,7 +12,11 @@
 
 import transform from './transform';
 import createMatrix from './matrix';
+import * as fx from './effects';
+import * as easings from './easings';
 
+// effects that use matrix transformations:
+const transformFns = ['translateX', 'translateY', 'rotate', 'scale', 'fade', 'parallax'];
 
 /**
  * The Scrollify Class
@@ -39,7 +43,7 @@ export default class Scrollify {
       scale: [1,1],
       rotation: [0,0,0],
       position: [0,0,0],
-      transformOrigin: [100,0,0]
+      // transformOrigin: [0,0,0]
       // skew: [],
     };
 
@@ -88,13 +92,19 @@ export default class Scrollify {
       effects: []
     };
 
-    // scene.active = this.scroll > this.calculateStart(scene); // calculate any transformations if the scene has already passed.
-
     this.calculateStart(scene);
+
     scene.state = (this.scroll > this.start) ? (this.scroll > this.start+duration) ? 'after' : 'active' : 'before';
 
+    // scene.applyTransform = (effect in transformFns) ? true : false;
+
     effects.map((effect) => {
-      this.addEffect(effect.name, effect.options, scene);
+      this.addEffect(effect.fn, effect.options, scene);
+
+      // const name = Object.keys(effect);
+      // const fn = fx[name];
+      // const options = effect[name];
+      // this.addEffect(fn, options, scene);
     });
 
     this.updateScene(scene);
@@ -120,7 +130,7 @@ export default class Scrollify {
    * @param  {Object} scene: Object containing start and duration information.
    * @return {void}
    */
-  addEffect(effect, options = {}, scene) {
+  addEffect(fn, options = {}, scene) {
     const element = this.element;
     const transforms = this.transforms;
 
@@ -131,10 +141,18 @@ export default class Scrollify {
       } else {
         // or if no scene (ie "addEffect" was called directly on Scrollify), set up a default one
         return this.addScene({
-          'effects': [{'name': effect, 'options': options}]
+          'effects': [{'fn': fn, 'options': options}]
         });
+
+        // let xxx = {};
+        // xxx[effect] = options;
+        // return this.addScene({
+        //   'effects': [xxx]
+        // });
       }
     }
+
+if (!fn) { console.log(this.element); }
 
     const curry = (fn, options) => {
       return function() {       // NOTE: don't use => function here as we do NOT want to bind "this"
@@ -148,7 +166,7 @@ export default class Scrollify {
       };
     };
 
-    scene.effects.push(curry(effect, options));
+    scene.effects.push(curry(fn, options));
 
     return this;
   }
@@ -215,7 +233,6 @@ export default class Scrollify {
     const duration = scene.duration;
     const scroll = this.scroll;
     let progress;
-    let matrix;
 
     // after end
     if (scroll - start > duration) {
@@ -248,11 +265,16 @@ export default class Scrollify {
     // cycle through any registered transformations
     scene.effects.forEach((effect) => {
       effect.call(progress);
+
+      // if (EFFECT.applyTransform) {
+      //   let matrix = this.updateMatrix();
+      //   this.element.style[transform] = matrix.asCSS();
+      // }
     });
 
     if (scene.applyTransform) {
       // transmogrify all applied transformations into a single matrix, and apply
-      matrix = this.updateMatrix();
+      let matrix = this.updateMatrix();
       this.element.style[transform] = matrix.asCSS();
     }
   }

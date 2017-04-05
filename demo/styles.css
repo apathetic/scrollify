@@ -90,7 +90,7 @@ p.parallax { color: #ddd; z-index:-1 }
 	background-color: #ccc;
 }
 
-.clip .parallax {
+#parallax {
 	position: absolute;
 	background-image: url("images/pastoral.jpg");
 	background-position: 50% 50%;
@@ -100,10 +100,14 @@ p.parallax { color: #ddd; z-index:-1 }
 	height: calc(100% + 250px);
 }
 
-.clip .backwards.parallax {
+#parallax-2 {
+	position: absolute;
 	background-image: url("images/pasture.jpg");
-	top: auto;
+	background-position: 50% 50%;
+	background-size: cover;
 	bottom: -250px;
+	width: 100%;
+	height: calc(100% + 250px);
 }
 
 /* CSS TOGGLE

@@ -18,28 +18,25 @@ Well, whatever you want. Common effects such as parallax or toggling a class on/
 ### Notes
 Scrollify works by first calculating an element's position in the page so that it may be manipulated on scroll. It is important to note that as the page loads, this position may jump around as the DOM is constructed and images are loaded, etc.  Therefore, it is important that Scrollify'd elements are not initialized until the page has finished loading all images and the DOM is stable.
 
-If you're trying to _Scrollify_ an element whose position on the page is dependant on assets loading above of it, you may wish to use ```window.addEventListener('load'...``` rather than the more common ```'DOMContentLoaded'```; or, check out the lovely [imagesloaded.js](https://github.com/desandro/imagesloaded) plugin.
+If you're trying to _Scrollify_ an element whose position on the page is dependant on assets loading above of it, you may wish to use ```window.addEventListener('load'...``` rather than the more common ```'DOMContentLoaded'```.
 
 ## API
 Coming soon. Please see the demo/index.html page for now.
 
 ## Examples
 
-First, spin up a webserver via ```npm i && npm start```. Navigate to ```localhost:8080/demo``` to check out the demos. Code samples are therein.
+First, install dependencies and spin up a webserver via ```npm i && npm start```. Navigate to ```localhost:8080/demo``` to check out the demos. Code samples are therein.
 
 ## Getting Started
 
 Either:
-* ```npm install @hugeinc/scrollify```
-* Download it from [Github](https://github.com/apathetic/scrollify).
+* npm: ```npm i @hugeinc/scrollify```
+* github: download it from [Github](https://github.com/apathetic/scrollify).
 
 ## Support
 * IE9+
 * Safari / Chrome
 * Firefox
-
-## Todo
-* add weakmap support for public / private methods
 
 ## Release History
 

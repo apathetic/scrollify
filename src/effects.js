@@ -47,7 +47,7 @@ export function translateY(progress) {
  * @return {void}
  */
 export function rotate(progress) {
-  let radians = this.options.rad * progress;
+  const radians = this.options.rad * progress;
 
   this.transforms.rotation[2] = radians;
 };
@@ -59,9 +59,9 @@ export function rotate(progress) {
  * @return {void}
  */
 export function scale(progress) {
-  let to = this.options.to || 1;
-  let from = this.options.from || this.transforms.scale[0];
-  let scale = (to - from) * progress + from;
+  const to = this.options.to || 1;
+  const from = this.options.from || this.transforms.scale[0];
+  const scale = (to - from) * progress + from;
 
   this.transforms.scale[0] = scale;
   this.transforms.scale[1] = scale;
@@ -74,9 +74,9 @@ export function scale(progress) {
  * @return {void}
  */
 export function fade(progress) {
-  let to = this.options.to !== undefined ? this.options.to : 1;
-  let from = this.options.from !== undefined ? this.options.from : 1;
-  let opacity = (to - from) * progress + from;
+  const to = this.options.to !== undefined ? this.options.to : 1;
+  const from = this.options.from !== undefined ? this.options.from : 1;
+  const opacity = (to - from) * progress + from;
 
   this.element.style.opacity = opacity;
 };
@@ -90,10 +90,9 @@ export function fade(progress) {
  * "this" contains effect options and also a reference to the element.
  */
 export function parallax(progress) {
-  let offset = 0;
-  let range = this.options.range || 0;
+  const range = this.options.range || 0;
+  const offset = progress * range;
 
-  offset = progress * range;
   this.transforms.position[1] = offset;   // just vertical for now
 }
 
@@ -104,12 +103,12 @@ export function parallax(progress) {
  * @return {void}
  */
 export function toggle(progress) {
-  let opts = this.options;
-  let element = this.element;
-  let times = Object.keys(opts);
+  const opts = this.options;
+  const element = this.element;
+  const times = Object.keys(opts);
 
   times.forEach(function(time) {
-    let css = opts[time];
+    const css = opts[time];
 
     if (progress > time) {
       element.classList.add(css);
@@ -128,8 +127,6 @@ export function toggle(progress) {
 export function stick(progress) {
   let element = this.element;
   let currentState = '_';
-
-  // progress = Math.min(1.0, Math.max(0.0, progress));
 
   if (progress <= 0) {
     setState(element, 'normal');
@@ -159,6 +156,4 @@ export function stick(progress) {
 
     currentState = state;
   }
-
-  // boundsParams = ["top", "left", "bottom", "right", "margin", "marginLeft", "marginRight", "marginTop", "marginBottom"];
 }

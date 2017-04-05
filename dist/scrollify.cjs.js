@@ -284,7 +284,7 @@ var Scrollify = function Scrollify(element) {
     scale: [1,1],
     rotation: [0,0,0],
     position: [0,0,0],
-    transformOrigin: [100,0,0]
+    // transformOrigin: [0,0,0]
     // skew: [],
   };
 
@@ -335,13 +335,19 @@ Scrollify.prototype.addScene = function addScene (opts) {
     effects: []
   };
 
-  // scene.active = this.scroll > this.calculateStart(scene); // calculate any transformations if the scene has already passed.
-
   this.calculateStart(scene);
+
   scene.state = (this.scroll > this.start) ? (this.scroll > this.start+duration) ? 'after' : 'active' : 'before';
 
+  // scene.applyTransform = (effect in transformFns) ? true : false;
+
   effects.map(function (effect) {
-    this$1.addEffect(effect.name, effect.options, scene);
+    this$1.addEffect(effect.fn, effect.options, scene);
+
+    // const name = Object.keys(effect);
+    // const fn = fx[name];
+    // const options = effect[name];
+    // this.addEffect(fn, options, scene);
   });
 
   this.updateScene(scene);
@@ -367,7 +373,7 @@ Scrollify.prototype.updateScene = function updateScene (scene) {
  * @param{Object} scene: Object containing start and duration information.
  * @return {void}
  */
-Scrollify.prototype.addEffect = function addEffect (effect, options, scene) {
+Scrollify.prototype.addEffect = function addEffect (fn, options, scene) {
     if ( options === void 0 ) options = {};
 
   var element = this.element;
@@ -380,10 +386,18 @@ Scrollify.prototype.addEffect = function addEffect (effect, options, scene) {
     } else {
       // or if no scene (ie "addEffect" was called directly on Scrollify), set up a default one
       return this.addScene({
-        'effects': [{'name': effect, 'options': options}]
+        'effects': [{'fn': fn, 'options': options}]
       });
+
+      // let xxx = {};
+      // xxx[effect] = options;
+      // return this.addScene({
+      // 'effects': [xxx]
+      // });
     }
   }
+
+if (!fn) { console.log(this.element); }
 
   var curry = function (fn, options) {
     return function() {     // NOTE: don't use => function here as we do NOT want to bind "this"
@@ -397,7 +411,7 @@ Scrollify.prototype.addEffect = function addEffect (effect, options, scene) {
     };
   };
 
-  scene.effects.push(curry(effect, options));
+  scene.effects.push(curry(fn, options));
 
   return this;
 };
@@ -464,7 +478,6 @@ Scrollify.prototype.calculate = function calculate (scene) {
   var duration = scene.duration;
   var scroll = this.scroll;
   var progress;
-  var matrix;
 
   // after end
   if (scroll - start > duration) {
@@ -497,11 +510,16 @@ Scrollify.prototype.calculate = function calculate (scene) {
   // cycle through any registered transformations
   scene.effects.forEach(function (effect) {
     effect.call(progress);
+
+    // if (EFFECT.applyTransform) {
+    // let matrix = this.updateMatrix();
+    // this.element.style[transform] = matrix.asCSS();
+    // }
   });
 
   if (scene.applyTransform) {
     // transmogrify all applied transformations into a single matrix, and apply
-    matrix = this.updateMatrix();
+    var matrix = this.updateMatrix();
     this.element.style[transform] = matrix.asCSS();
   }
 };
