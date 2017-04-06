@@ -16,9 +16,7 @@ Well, whatever you want. Common effects such as parallax or toggling a class on/
 
 
 ### Notes
-Scrollify works by first calculating an element's position in the page so that it may be manipulated on scroll. It is important to note that as the page loads, this position may jump around as the DOM is constructed and images are loaded, etc.  Therefore, it is important that Scrollify'd elements are not initialized until the page has finished loading all images and the DOM is stable.
-
-If you're trying to _Scrollify_ an element whose position on the page is dependant on assets loading above of it, you may wish to use ```window.addEventListener('load'...``` rather than the more common ```'DOMContentLoaded'```.
+Scrollify works by first calculating an element's position in the page so that it may be manipulated on scroll. It is important to note that as the page loads, this position may jump around as the DOM is constructed and images are loaded, etc.  Therefore, it is recommended that Scrollify'd elements are not initialized until the page has finished loading all images and the DOM is stable. For example, if you're trying to _Scrollify_ an element whose position on the page is dependent on assets loading above of it, you may wish to use ```window.addEventListener('load'...``` rather than the more common ```'DOMContentLoaded'```.
 
 ## API
 Coming soon. Please see the demo/index.html page for now.
@@ -37,6 +35,13 @@ Either:
 * IE9+
 * Safari / Chrome
 * Firefox
+
+## TODO
+* clarify start / stop / duration times
+* implement any unit (ie. px, %) for this
+* relative units "+=", "-=", etc
+* getComputedStyle to avoid defining default vals
+* simplify API for effects definition
 
 ## Release History
 

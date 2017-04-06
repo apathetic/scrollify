@@ -74,8 +74,8 @@ export function scale(progress) {
  * @return {void}
  */
 export function fade(progress) {
-  const to = this.options.to !== undefined ? this.options.to : 1;
-  const from = this.options.from !== undefined ? this.options.from : 1;
+  const to = this.options.to || 0;
+  const from = this.options.from || 1;
   const opacity = (to - from) * progress + from;
 
   this.element.style.opacity = opacity;

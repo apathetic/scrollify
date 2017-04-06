@@ -261,6 +261,11 @@ function createMatrix() {
   };
 }
 
+function getUnit(val) {
+  var split = /([\+\-]?[0-9#\.]+)(%|px|pt|em|rem|in|cm|mm|ex|pc|vw|vh|deg|rad|turn)?/.exec(val);
+  if (split) return split[2];
+}
+
 /**
  * The Scrollify Class
  */
@@ -268,9 +273,9 @@ var Scrollify = function Scrollify(element) {
   var this$1 = this;
 
   if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
-  // if (!element || !transform) { return this.active = false; }
-  if (!transform) { return new Error('Scrollify [error]: transforms not supported'); }
-  if (!element) { return new Error('Scrollify [error]: could not find element'); }
+  if (!element || !transform) { return this.active = false; }
+  // if (!transform) { return new Error('Scrollify [error]: transforms not supported'); }
+  // if (!element) { return new Error('Scrollify [error]: could not find element'); }
 
   this.element = element;
   this.ticking = false;
@@ -295,49 +300,48 @@ var Scrollify = function Scrollify(element) {
  * to start applying an effect and for how long.
  * @param{Object} opts: Various options to apply to the new Scene:
  *
- * start: (required) When to start the effect. It is a 0 - 1 value
- *        representing the percentage of the viewport (eg. 0.5).
- *        Any effects in the Scene will begin when the trigger element
- *        crosses this threshold.
+ *   start: (required) When to start the effect. It is a 0 - 1 value
+ *          representing the percentage of the viewport (eg. 0.5).
+ *          Any effects in the Scene will begin when the trigger element
+ *          crosses this threshold.
  *
- * duration: The length of the effect, in pixels. Scrollify will
- *        interpolate that into value into a "progress" variable, bounded
- *        by 0 - 1. If not supplied, the default value is the height of the
- *        viewport + element height, meaning the effect will last for as
- *        long as the element is visible.
+ *duration: The length of the effect, in pixels. Scrollify will
+ *          interpolate that into value into a "progress" variable, bounded
+ *          by 0 - 1. If not supplied, the default value is the height of
+ *          the viewport + element height, meaning the effect will last for
+ *          as long as the element is visible.
  *
  * trigger: If supplied, Scrollify will use this element's position to
- *        start any Scene effects. If not supplied, the default is to use
- *        the element itself as a trigger.
+ *          start any Scene effects. If not supplied, the default is to use
+ *          the element itself as a trigger.
  *
- * easing: Ease in/out of an effect. Any value from Robert Penner's easing
- *        functions is valid.
+ *  easing: Ease in/out of any effects in the Scene.
  *
  * @return {void}
  */
 Scrollify.prototype.addScene = function addScene (opts) {
     var this$1 = this;
 
-  var triggerPos = opts.start || 0;
-  var duration = opts.duration || window.innerHeight + this.element.offsetHeight;
+  var trigger = opts.trigger ? opts.trigger instanceof HTMLElement ? opts.trigger : document.querySelector(opts.trigger) : this.element;
+  // const offset = opts.start || 0; // when to start the effect, relative to the bottom of the viewport. Float [0, 1]
+  // const duration = normalize(opts.duration) || false;
   var easing = opts.easing || false;
   var effects = opts.effects || [];
-  var trigger = opts.trigger ? opts.trigger instanceof HTMLElement ? opts.trigger : document.querySelector(opts.trigger) : this.element;
   var applyTransform = opts.applyTransform !== undefined ? opts.applyTransform : true; // opt in rather than opt out
   var scene = {
-    trigger: trigger,
-    triggerPos: 1 - triggerPos,
-    duration: duration,
+    _trigger: trigger,                                      // keep for internal calculations
+    _applyTransform: applyTransform,                        // internal-use only. Whether to use matrix transforms or not. Perhaps should be moved to *effect* level
+
+    _offset: opts.start || 0,                               // store original value for later calcs
+    _duration: opts.duration || 1,                          // store original value for later calculations
+
+    // offset: opts.start ? 1 - normalize(opt.start) : 0,       // value between 0 and 1
+    // start: 0,                                             // absolute value in px. Some percentage of the viewport
+    // duration: duration,                                   // absolute value in px. Some percentage of the viewport
+
     easing: easing,
-    applyTransform: applyTransform,
     effects: []
   };
-
-  this.calculateStart(scene);
-
-  scene.state = (this.scroll > this.start) ? (this.scroll > this.start+duration) ? 'after' : 'active' : 'before';
-
-  // scene.applyTransform = (effect in transformFns) ? true : false;
 
   effects.map(function (effect) {
     this$1.addEffect(effect.fn, effect.options, scene);
@@ -348,7 +352,15 @@ Scrollify.prototype.addScene = function addScene (opts) {
     // this.addEffect(fn, options, scene);
   });
 
-  this.updateScene(scene);
+  this.calculateStart(scene);
+  this.calculateDuration(scene);
+
+  scene.state = (this.scroll > this.start) ? (this.scroll > this.start+scene.duration) ? 'after' : 'active' : 'before';
+  // scene.applyTransform = (effect in validTransforms) ? true : false;
+
+  console.log(scene);
+
+  this.calculate(scene);
   this.scenes.push(scene);
 
   return this;
@@ -361,6 +373,7 @@ Scrollify.prototype.addScene = function addScene (opts) {
  */
 Scrollify.prototype.updateScene = function updateScene (scene) {
   this.calculateStart(scene);
+  this.calculateDuration(scene);
   this.calculate(scene);
 };
 
@@ -395,8 +408,6 @@ Scrollify.prototype.addEffect = function addEffect (fn, options, scene) {
     }
   }
 
-if (!fn) { console.log(this.element); }
-
   var curry = function (fn, options) {
     return function() {     // NOTE: don't use => function here as we do NOT want to bind "this"
       var context = {
@@ -416,21 +427,71 @@ if (!fn) { console.log(this.element); }
 
 /**
  * Calculate the start point of each scene.
- * @param{[type]} scene A Scrollify Scene object.
+ * @param{Scrollify.Scene} scene A Scrollify Scene object.
  * @return {Integer} The start position of the Scene, in pixels.
  */
 Scrollify.prototype.calculateStart = function calculateStart (scene) {
-  var triggerPos = scene.triggerPos;
-  var trigger = scene.trigger;
+  // const offset = this.mapTo(scene._offset, window.innerHeight) + window.innerHeight;
+  var trigger = scene._trigger;
   var top = 0;
 
   do {
     top += trigger.offsetTop || 0;
     trigger = trigger.offsetParent;
   } while(trigger);
-  // top = trigger.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
 
-  scene.start = Math.max(0, top - triggerPos * window.innerHeight);
+  // var test = trigger.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
+  // console.log('starts: ', top, test);
+
+
+
+  // var offset = 1 - scene._offset;
+  // scene.start = Math.max(0, top - offset * window.innerHeight);
+
+  var offset = window.innerHeight - this.mapTo(scene._offset, window.innerHeight);
+  scene.start = Math.max(0, top - offset);
+};
+
+Scrollify.prototype.mapTo = function mapTo (input, scale) {
+  var parsed = parseFloat(input);
+  var unit = getUnit(input);
+
+  // return (unit === 'px') ? parsed : (unit === '%') ? parsed / 100.0 * scale : parsed * scale;
+
+  switch (unit) {
+    case 'px':
+      return parsed;
+      // break;
+    case '%':
+      return parsed / 100.0 * scale;
+      // break;
+    default:
+      return parsed * scale;
+  }
+};
+
+/**
+ * [calculateDuration description]
+ * @param{[type]} scene [description]
+ * @return [type]       [description]
+ */
+Scrollify.prototype.calculateDuration = function calculateDuration (scene) {
+  // if (typeof scene._duration === 'function') { return scene._duration(); }
+  scene.duration = this.mapTo(scene._duration, window.innerHeight + this.element.offsetHeight);
+
+  // const parsed = parseFloat(scene._duration);
+  // const unit = getUnit(scene._duration);
+  //
+  // switch (unit) {
+  // case 'px':
+  //   scene.duration = parsed;
+  //   break;
+  // case '%':
+  //   scene.duration = parsed / 100.0 * window.innerHeight + this.element.offsetHeight;
+  //   break;
+  // default:
+  //   scene.duration = (parsed * window.innerHeight + this.element.offsetHeight) - scene.start;
+  // }
 };
 
 /**
@@ -509,13 +570,13 @@ Scrollify.prototype.calculate = function calculate (scene) {
   scene.effects.forEach(function (effect) {
     effect.call(progress);
 
-    // if (EFFECT.applyTransform) {
+    // if (EFFECT._applyTransform) {
     // let matrix = this.updateMatrix();
     // this.element.style[transform] = matrix.asCSS();
     // }
   });
 
-  if (scene.applyTransform) {
+  if (scene._applyTransform) {
     // transmogrify all applied transformations into a single matrix, and apply
     var matrix = this.updateMatrix();
     this.element.style[transform] = matrix.asCSS();
