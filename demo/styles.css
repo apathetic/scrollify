@@ -26,6 +26,11 @@ main dd {
 	display: block;
 }
 
+main dt {
+  margin-top: 5em;
+}
+
+
 .demo {
     padding: 3em;
     border: 1px solid #ddd;

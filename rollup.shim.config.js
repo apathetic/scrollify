@@ -1,4 +1,5 @@
 import buble from 'rollup-plugin-buble';
+import uglify from 'rollup-plugin-uglify';
 
 export default {
   entry: 'src/shim.js',
@@ -6,6 +7,9 @@ export default {
   format: 'iife',
   moduleName: 'Scrollify',
   plugins: [
-    buble()
+    buble(),
+    uglify({
+      mangle: true
+    })
   ]
 };

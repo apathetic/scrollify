@@ -37,13 +37,16 @@ Either:
 * Firefox
 
 ## TODO
-* clarify start / stop / duration times
-* implement any unit (ie. px, %) for this
+* sticky effect glitchy on resize
 * relative units "+=", "-=", etc
 * getComputedStyle to avoid defining default vals
-* simplify API for effects definition
+* simplify API for effects / options definition
 
 ## Release History
+
+### 0.3
+* start and duration can accept various parameter types: float, 'px', '%'
+* internalized applyTransform check
 
 ### 0.2
 * quick scrolling bug fixing

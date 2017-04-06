@@ -266,6 +266,11 @@ function getUnit(val) {
   if (split) return split[2];
 }
 
+// Effects that use matrix transformations. At present, only
+// built-in effects benefit from matrix transformations.
+var validTransforms = ['translateX', 'translateY', 'rotate', 'scale', 'parallax'];
+
+
 /**
  * The Scrollify Class
  */
@@ -323,42 +328,27 @@ Scrollify.prototype.addScene = function addScene (opts) {
     var this$1 = this;
 
   var trigger = opts.trigger ? opts.trigger instanceof HTMLElement ? opts.trigger : document.querySelector(opts.trigger) : this.element;
-  // const offset = opts.start || 0; // when to start the effect, relative to the bottom of the viewport. Float [0, 1]
-  // const duration = normalize(opts.duration) || false;
   var easing = opts.easing || false;
   var effects = opts.effects || [];
-  var applyTransform = opts.applyTransform !== undefined ? opts.applyTransform : true; // opt in rather than opt out
   var scene = {
-    _trigger: trigger,                                      // keep for internal calculations
-    _applyTransform: applyTransform,                        // internal-use only. Whether to use matrix transforms or not. Perhaps should be moved to *effect* level
-
-    _offset: opts.start || 0,                               // store original value for later calcs
-    _duration: opts.duration || 1,                          // store original value for later calculations
-
-    // offset: opts.start ? 1 - normalize(opt.start) : 0,       // value between 0 and 1
-    // start: 0,                                             // absolute value in px. Some percentage of the viewport
-    // duration: duration,                                   // absolute value in px. Some percentage of the viewport
-
+    _trigger: trigger,                // keep for internal calculations
+    _applyTransform: false,           // internal-use only. Whether to use matrix transforms or not. Perhaps should be moved to *effect* level
+    _offset: opts.start || 0,         // store original value for later calcs
+    _duration: opts.duration || 1,    // store original value for later calculations
+    // start: 0,                      // absolute value in px. Some percentage of the viewport
+    // duration: duration,            // absolute value in px. Some percentage of the viewport
     easing: easing,
     effects: []
   };
 
   effects.map(function (effect) {
     this$1.addEffect(effect.fn, effect.options, scene);
-
-    // const name = Object.keys(effect);
-    // const fn = fx[name];
-    // const options = effect[name];
-    // this.addEffect(fn, options, scene);
   });
 
   this.calculateStart(scene);
   this.calculateDuration(scene);
 
   scene.state = (this.scroll > this.start) ? (this.scroll > this.start+scene.duration) ? 'after' : 'active' : 'before';
-  // scene.applyTransform = (effect in validTransforms) ? true : false;
-
-  console.log(scene);
 
   this.calculate(scene);
   this.scenes.push(scene);
@@ -399,14 +389,11 @@ Scrollify.prototype.addEffect = function addEffect (fn, options, scene) {
       return this.addScene({
         'effects': [{'fn': fn, 'options': options}]
       });
-
-      // let xxx = {};
-      // xxx[effect] = options;
-      // return this.addScene({
-      // 'effects': [xxx]
-      // });
     }
   }
+
+  // if any effect uses a matrix tranformation, we use true for the entire scene
+  scene._applyTransform = scene._applyTransform || !!~validTransforms.indexOf(fn.name);
 
   var curry = function (fn, options) {
     return function() {     // NOTE: don't use => function here as we do NOT want to bind "this"
@@ -431,7 +418,7 @@ Scrollify.prototype.addEffect = function addEffect (fn, options, scene) {
  * @return {Integer} The start position of the Scene, in pixels.
  */
 Scrollify.prototype.calculateStart = function calculateStart (scene) {
-  // const offset = this.mapTo(scene._offset, window.innerHeight) + window.innerHeight;
+  var offset = window.innerHeight - this.mapTo(scene._offset, window.innerHeight);
   var trigger = scene._trigger;
   var top = 0;
 
@@ -439,16 +426,8 @@ Scrollify.prototype.calculateStart = function calculateStart (scene) {
     top += trigger.offsetTop || 0;
     trigger = trigger.offsetParent;
   } while(trigger);
-
   // var test = trigger.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
-  // console.log('starts: ', top, test);
 
-
-
-  // var offset = 1 - scene._offset;
-  // scene.start = Math.max(0, top - offset * window.innerHeight);
-
-  var offset = window.innerHeight - this.mapTo(scene._offset, window.innerHeight);
   scene.start = Math.max(0, top - offset);
 };
 
@@ -456,15 +435,11 @@ Scrollify.prototype.mapTo = function mapTo (input, scale) {
   var parsed = parseFloat(input);
   var unit = getUnit(input);
 
-  // return (unit === 'px') ? parsed : (unit === '%') ? parsed / 100.0 * scale : parsed * scale;
-
   switch (unit) {
     case 'px':
       return parsed;
-      // break;
     case '%':
       return parsed / 100.0 * scale;
-      // break;
     default:
       return parsed * scale;
   }
@@ -478,20 +453,6 @@ Scrollify.prototype.mapTo = function mapTo (input, scale) {
 Scrollify.prototype.calculateDuration = function calculateDuration (scene) {
   // if (typeof scene._duration === 'function') { return scene._duration(); }
   scene.duration = this.mapTo(scene._duration, window.innerHeight + this.element.offsetHeight);
-
-  // const parsed = parseFloat(scene._duration);
-  // const unit = getUnit(scene._duration);
-  //
-  // switch (unit) {
-  // case 'px':
-  //   scene.duration = parsed;
-  //   break;
-  // case '%':
-  //   scene.duration = parsed / 100.0 * window.innerHeight + this.element.offsetHeight;
-  //   break;
-  // default:
-  //   scene.duration = (parsed * window.innerHeight + this.element.offsetHeight) - scene.start;
-  // }
 };
 
 /**
@@ -569,11 +530,6 @@ Scrollify.prototype.calculate = function calculate (scene) {
   // cycle through any registered transformations
   scene.effects.forEach(function (effect) {
     effect.call(progress);
-
-    // if (EFFECT._applyTransform) {
-    // let matrix = this.updateMatrix();
-    // this.element.style[transform] = matrix.asCSS();
-    // }
   });
 
   if (scene._applyTransform) {

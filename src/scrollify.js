@@ -9,12 +9,12 @@
 
 import transform from './transform';
 import createMatrix from './matrix';
-// import * as normalize from './normalize';
-// import normalize from './normalize';
 import { getUnit } from './normalize';
 
-// effects that use matrix transformations:
+// Effects that use matrix transformations. At present, only
+// built-in effects benefit from matrix transformations.
 const validTransforms = ['translateX', 'translateY', 'rotate', 'scale', 'parallax'];
+
 
 /**
  * The Scrollify Class
@@ -75,40 +75,27 @@ export default class Scrollify {
    */
   addScene(opts) {
     const trigger = opts.trigger ? opts.trigger instanceof HTMLElement ? opts.trigger : document.querySelector(opts.trigger) : this.element;
-    // const offset = opts.start || 0;   // when to start the effect, relative to the bottom of the viewport. Float [0, 1]
-    // const duration = normalize(opts.duration) || false;
     const easing = opts.easing || false;
     const effects = opts.effects || [];
-    const applyTransform = opts.applyTransform !== undefined ? opts.applyTransform : true;   // opt in rather than opt out
     let scene = {
-      _trigger: trigger,                                        // keep for internal calculations
-      _applyTransform: applyTransform,                          // internal-use only. Whether to use matrix transforms or not. Perhaps should be moved to *effect* level
-
-      _offset: opts.start || 0,                                 // store original value for later calcs
-      _duration: opts.duration || 1,                            // store original value for later calculations
-
-      // offset: opts.start ? 1 - normalize(opt.start) : 0,         // value between 0 and 1
-      // start: 0,                                               // absolute value in px. Some percentage of the viewport
-      // duration: duration,                                     // absolute value in px. Some percentage of the viewport
-
+      _trigger: trigger,                  // keep for internal calculations
+      _applyTransform: false,             // internal-use only. Whether to use matrix transforms or not. Perhaps should be moved to *effect* level
+      _offset: opts.start || 0,           // store original value for later calcs
+      _duration: opts.duration || 1,      // store original value for later calculations
+      // start: 0,                        // absolute value in px. Some percentage of the viewport
+      // duration: duration,              // absolute value in px. Some percentage of the viewport
       easing: easing,
       effects: []
     };
 
     effects.map((effect) => {
       this.addEffect(effect.fn, effect.options, scene);
-
-      // const name = Object.keys(effect);
-      // const fn = fx[name];
-      // const options = effect[name];
-      // this.addEffect(fn, options, scene);
     });
 
     this.calculateStart(scene);
     this.calculateDuration(scene);
 
     scene.state = (this.scroll > this.start) ? (this.scroll > this.start+scene.duration) ? 'after' : 'active' : 'before';
-    // scene.applyTransform = (effect in validTransforms) ? true : false;
 
     this.calculate(scene);
     this.scenes.push(scene);
@@ -147,14 +134,11 @@ export default class Scrollify {
         return this.addScene({
           'effects': [{'fn': fn, 'options': options}]
         });
-
-        // let xxx = {};
-        // xxx[effect] = options;
-        // return this.addScene({
-        //   'effects': [xxx]
-        // });
       }
     }
+
+    // if any effect uses a matrix tranformation, we use true for the entire scene
+    scene._applyTransform = scene._applyTransform || !!~validTransforms.indexOf(fn.name);
 
     const curry = (fn, options) => {
       return function() {       // NOTE: don't use => function here as we do NOT want to bind "this"
@@ -187,9 +171,7 @@ export default class Scrollify {
       top += trigger.offsetTop || 0;
       trigger = trigger.offsetParent;
     } while(trigger);
-
     // var test = trigger.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
-    // console.log('starts: ', top, test);
 
     scene.start = Math.max(0, top - offset);
   }
@@ -198,15 +180,11 @@ export default class Scrollify {
     const parsed = parseFloat(input);
     const unit = getUnit(input);
 
-    // return (unit === 'px') ? parsed : (unit === '%') ? parsed / 100.0 * scale : parsed * scale;
-
     switch (unit) {
       case 'px':
         return parsed;
-        // break;
       case '%':
         return parsed / 100.0 * scale;
-        // break;
       default:
         return parsed * scale;
     }
@@ -297,11 +275,6 @@ export default class Scrollify {
     // cycle through any registered transformations
     scene.effects.forEach((effect) => {
       effect.call(progress);
-
-      // if (EFFECT._applyTransform) {
-      //   let matrix = this.updateMatrix();
-      //   this.element.style[transform] = matrix.asCSS();
-      // }
     });
 
     if (scene._applyTransform) {
