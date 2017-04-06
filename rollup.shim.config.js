@@ -8,8 +8,8 @@ export default {
   moduleName: 'Scrollify',
   plugins: [
     buble(),
-    uglify({
-      mangle: true
-    })
+    // uglify({
+      // mangle: true
+    // })
   ]
 };
