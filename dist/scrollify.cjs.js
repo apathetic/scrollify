@@ -1,5 +1,7 @@
 'use strict';
 
+Object.defineProperty(exports, '__esModule', { value: true });
+
 /**
  * Feature detection: CSS transforms
  * @type {Boolean}
@@ -606,4 +608,378 @@ Scrollify.prototype.disable = function disable () {
   this.active = false;
 };
 
-module.exports = Scrollify;
+/**
+ * Translate an element along the X-axis.
+ * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @this {Object}
+ * @return {void}
+ */
+function translateX(progress) {
+  var to = this.options.to || 0;
+  var from = this.options.from || 0;
+  var offset = (to - from) * progress + from;
+
+  this.transforms.position[0] = offset;
+}
+
+/**
+ * Translate an element vertically.
+ * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @this {Object}
+ * @return {void}
+ */
+function translateY(progress) {
+  var to = this.options.to || 0;
+  var from = this.options.from || 0; // this.transforms.position[1];
+  var offset = (to - from) * progress + from;
+
+  this.transforms.position[1] = offset;
+}
+
+/**
+ * Rotate an element, using radians. (note: rotates around Z-axis).
+ * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @this {Object}
+ * @return {void}
+ */
+function rotate(progress) {
+  var radians = this.options.rad * progress;
+
+  this.transforms.rotation[2] = radians;
+};
+
+/**
+ * Uniformly scale an element along both axis'.
+ * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @this {Object}
+ * @return {void}
+ */
+function scale(progress) {
+  var to = this.options.to || 1;
+  var from = this.options.from || this.transforms.scale[0];
+  var scale = (to - from) * progress + from;
+
+  this.transforms.scale[0] = scale;
+  this.transforms.scale[1] = scale;
+};
+
+/**
+ * Update an element's opacity.
+ * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @this {Object}
+ * @return {void}
+ */
+function fade(progress) {
+  var to = this.options.to || 0;
+  var from = this.options.from || 1;
+  var opacity = (to - from) * progress + from;
+
+  this.element.style.opacity = opacity;
+};
+
+/**
+ * Parallax an element.
+ * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @this {Object}
+ * @return {void}
+ *
+ * "this" contains effect options and also a reference to the element.
+ */
+function parallax(progress) {
+  var range = this.options.range || 0;
+  var offset = progress * range;
+
+  this.transforms.position[1] = offset;   // just vertical for now
+}
+
+/**
+ * Toggle a class on or off.
+ * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @this {Object}
+ * @return {void}
+ */
+function toggle(progress) {
+  var opts = this.options;
+  var element = this.element;
+  var times = Object.keys(opts);
+
+  times.forEach(function(time) {
+    var css = opts[time];
+
+    if (progress > time) {
+      element.classList.add(css);
+    } else {
+      element.classList.remove(css);
+    }
+  });
+}
+
+/**
+ * Sticky Element: sets up a sticky element which toggles position 'fixed' on / off.
+ * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @this {Object}
+ * @return {void}
+ */
+function stick(progress) {
+  var element = this.element;
+  var currentState = '_';
+
+  if (progress <= 0) {
+    setState(element, 'normal');
+  } else if (progress >= 1) {
+    setState(element, 'bottom');
+  } else {
+    setState(element, 'sticky');
+  }
+
+  function setState(element, state) {
+    var BCR = element.getBoundingClientRect();
+
+    if (currentState === state) { return; }
+    if (state == 'sticky') {
+      element.style.top = BCR.top + 'px';
+      element.style.left = BCR.left + 'px';
+      element.style.width = BCR.width + 'px';
+    } else {
+      element.style.top = '';
+      element.style.left = '';
+      element.style.width = '';
+    }
+
+    element.className = '';
+    // element.classList.remove(currentState);  // TODO: why is this not working?
+    element.classList.add(state);
+
+    currentState = state;
+  }
+}
+
+
+var fx = Object.freeze({
+  translateX: translateX,
+  translateY: translateY,
+  rotate: rotate,
+  scale: scale,
+  fade: fade,
+  parallax: parallax,
+  toggle: toggle,
+  stick: stick
+});
+
+/*eslint max-len: ["error", 120]*/
+
+function oscillate(t, b, c, d) {
+  var i = 4;            // # of bounces
+  t /= d;               // percentage
+  t = Math.PI * i * t;  // go from 0 -> 2π
+  t = Math.sin(t) * c;  // now, oscillates between c, -c
+  t = Math.abs(t);      // "half wave rectifier"
+  return t + b;
+}
+
+function easeInQuad(t, b, c, d) {
+  return c * (t /= d) * t + b;
+}
+
+function easeOutQuad(t, b, c, d) {
+  return -c * (t /= d) * (t - 2) + b;
+}
+
+function easeInOutQuad(t, b, c, d) {
+  if ((t  /=  d / 2) < 1) { return c / 2 * t * t + b; }
+  return -c / 2 * (--t * (t - 2) - 1) + b;
+}
+
+function easeInCubic(t, b, c, d) {
+  return c * (t /= d) * t * t + b;
+}
+
+function easeOutCubic(t, b, c, d) {
+  return c * ((t = t / d - 1) * t * t + 1) + b;
+}
+
+function easeInOutCubic(t, b, c, d) {
+  if ((t /= d / 2) < 1) { return c / 2 * t * t * t + b; }
+  return c / 2 * ((t -= 2) * t * t + 2) + b;
+}
+
+function easeInQuart(t, b, c, d) {
+  return c * (t /= d) * t * t * t + b;
+}
+
+function easeOutQuart(t, b, c, d) {
+  return -c * ((t = t / d - 1) * t * t * t - 1) + b;
+}
+
+function easeInOutQuart(t, b, c, d) {
+  if ((t /= d / 2) < 1) { return c / 2 * t * t * t * t + b; }
+  return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
+}
+
+function easeInQuint(t, b, c, d) {
+  return c * (t /= d) * t * t * t * t + b;
+}
+
+function easeOutQuint(t, b, c, d) {
+  return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
+}
+
+function easeInOutQuint(t, b, c, d) {
+  if ((t /= d / 2) < 1) { return c / 2 * t * t * t * t * t + b; }
+  return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
+}
+
+function easeInSine(t, b, c, d) {
+  return -c * Math.cos(t / d * (Math.PI / 2)) + c + b;
+}
+
+function easeOutSine(t, b, c, d) {
+  return c * Math.sin(t / d * (Math.PI / 2)) + b;
+}
+
+function easeInOutSine(t, b, c, d) {
+  return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b;
+}
+
+function easeInExpo(t, b, c, d) {
+  return t == 0 ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
+}
+
+function easeOutExpo(t, b, c, d) {
+  return t == d ? b + c : c * (-Math.pow(2, -10 * t / d) + 1) + b;
+}
+
+function easeInOutExpo(t, b, c, d) {
+  if (t == 0) { return b; }
+  if (t == d) { return b + c; }
+  if ((t /= d / 2) < 1) { return c / 2 * Math.pow(2, 10 * (t - 1)) + b; }
+  return c / 2 * (-Math.pow(2, -10 * --t) + 2) + b;
+}
+
+function easeInCirc(t, b, c, d) {
+  return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
+}
+
+function easeOutCirc(t, b, c, d) {
+  return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
+}
+
+function easeInOutCirc(t, b, c, d) {
+  if ((t /= d / 2) < 1) { return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b; }
+  return c / 2 * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
+}
+
+function easeInElastic(t, b, c, d) {
+  var s = 1.70158;
+  var p = 0;
+  var a = c;
+
+  if (t == 0) { return b; }
+  if ((t /= d) == 1) { return b + c; }
+  if (!p) { p = d * .3; }
+  if (a < Math.abs(c)) {
+    a = c; var s = p / 4;
+  } else {
+    var s = p / (2 * Math.PI) * Math.asin(c / a);
+  }
+  return -(a * Math.pow(2,10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
+}
+
+function easeOutElastic(t, b, c, d) {
+  var s = 1.70158;
+  var p = 0;
+  var a = c;
+
+  if (t == 0) { return b; }
+  if ((t /= d) == 1) { return b + c; }
+  if (!p) { p = d * .3; }
+  if (a < Math.abs(c)) {
+    a = c; var s = p / 4;
+  } else {
+    var s = p / (2 * Math.PI) * Math.asin(c / a);
+  }
+  return a * Math.pow(2,-10 * t) * Math.sin((t * d - s) * (2 * Math.PI) / p) + c + b;
+}
+
+function easeInOutElastic(t, b, c, d) {
+  var s = 1.70158;
+  var p = 0;
+  var a = c;
+
+  if (t == 0) { return b; }
+  if ((t /= d / 2) == 2) { return b + c; }
+  if (!p) { p = d * (.3 * 1.5); }
+  if (a < Math.abs(c)) {
+    a = c; var s = p / 4;
+  } else {
+    var s = p / (2 * Math.PI) * Math.asin(c / a);
+  }
+  if (t < 1) { return -.5 * (a * Math.pow(2,10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b; }
+  return a * Math.pow(2, -10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p) * .5 + c + b;
+}
+
+function easeInBack(t, b, c, d, s) {
+  if (s == undefined) { s = 1.70158; }
+  return c * (t /= d) * t * ((s + 1) * t - s) + b;
+}
+
+function easeOutBack(t, b, c, d, s) {
+  if (s == undefined) { s = 1.70158; }
+  return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
+}
+
+function easeInOutBack(t, b, c, d, s) {
+  if (s == undefined) { s = 1.70158; }
+  if ((t /= d / 2) < 1) { return c / 2 * (t * t * (((s *= 1.525) + 1) * t - s)) + b; }
+  return c / 2 * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;
+}
+
+function easeOutBounce(t, b, c, d) {
+  if (t /= d < 1 / 2.75) {
+    return c * (7.5625 * t * t) + b;
+  } else if (t < 2 / 2.75) {
+    return c * (7.5625 * (t -= 1.5 / 2.75) * t + .75) + b;
+  } else if (t < 2.5 / 2.75) {
+    return c * (7.5625 * (t -= 2.25 / 2.75) * t + .9375) + b;
+  } else {
+    return c * (7.5625 * (t -= 2.625 / 2.75) * t + .984375) + b;
+  }
+}
+
+
+var easings = Object.freeze({
+  oscillate: oscillate,
+  easeInQuad: easeInQuad,
+  easeOutQuad: easeOutQuad,
+  easeInOutQuad: easeInOutQuad,
+  easeInCubic: easeInCubic,
+  easeOutCubic: easeOutCubic,
+  easeInOutCubic: easeInOutCubic,
+  easeInQuart: easeInQuart,
+  easeOutQuart: easeOutQuart,
+  easeInOutQuart: easeInOutQuart,
+  easeInQuint: easeInQuint,
+  easeOutQuint: easeOutQuint,
+  easeInOutQuint: easeInOutQuint,
+  easeInSine: easeInSine,
+  easeOutSine: easeOutSine,
+  easeInOutSine: easeInOutSine,
+  easeInExpo: easeInExpo,
+  easeOutExpo: easeOutExpo,
+  easeInOutExpo: easeInOutExpo,
+  easeInCirc: easeInCirc,
+  easeOutCirc: easeOutCirc,
+  easeInOutCirc: easeInOutCirc,
+  easeInElastic: easeInElastic,
+  easeOutElastic: easeOutElastic,
+  easeInOutElastic: easeInOutElastic,
+  easeInBack: easeInBack,
+  easeOutBack: easeOutBack,
+  easeInOutBack: easeInOutBack,
+  easeOutBounce: easeOutBounce
+});
+
+exports['default'] = Scrollify;
+exports.Scrollify = Scrollify;
+exports.fx = fx;
+exports.easings = easings;

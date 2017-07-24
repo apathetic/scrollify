@@ -1,4 +1,4 @@
-(function () {
+(function (exports) {
   'use strict';
 
   /**
@@ -978,9 +978,9 @@
     easeOutBounce: easeOutBounce
   });
 
-  Scrollify.fx = fx;
-  Scrollify.easings = easings;
+  exports['default'] = Scrollify;
+  exports.Scrollify = Scrollify;
+  exports.fx = fx;
+  exports.easings = easings;
 
-  window.Scrollify = Scrollify;
-
-}());
+}((this.Scrollify = this.Scrollify || {})));

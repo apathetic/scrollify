@@ -7,6 +7,7 @@
   "main": "./dist/scrollify.cjs.js",
   "broswer": "./dist/scrollify.js",
   "jsnext:main": "./dist/scrollify.es6.js",
+  "module": "./dist/scrollify.es6.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/apathetic/scrollify.git"
@@ -18,7 +19,7 @@
   "scripts": {
     "start": "http-server ./ -p 8080 -d",
     "clean": "rm -f dist/*.js*",
-    "build": "npm run clean && npm run lint && rollup -c && rollup -c rollup.shim.config.js",
+    "build": "npm run clean && npm run lint && rollup -c",
     "lint": "eslint source/js/*.js",
     "test": "#tape -r babel-register test/*.js"
   },
