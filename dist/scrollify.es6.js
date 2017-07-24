@@ -8,6 +8,30 @@ var transform = ['transform', 'webkitTransform', 'MozTransform', 'OTransform', '
   return (dummy.style[t] !== undefined);
 });
 
+/*
+The MIT License (MIT)
+
+Copyright (c) 2015 Daniel Lundin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 function assignedMatrixMultiplication(a, b, res) {
   // Unrolled loop
   res[0] = a[0] * b[0] + a[1] * b[4] + a[2] * b[8] + a[3] * b[12];
@@ -266,6 +290,15 @@ function getUnit(val) {
   if (split) return split[2];
 }
 
+/*
+ * scrollify
+ * https://github.com/apathetic/scrollify
+ *
+ * Copyright (c) 2016, 2017 Wes Hatch
+ * Licensed under the MIT license.
+ *
+ */
+
 // Effects that use matrix transformations. At present, only
 // built-in effects benefit from matrix transformations.
 var validTransforms = ['translateX', 'translateY', 'rotate', 'scale', 'parallax'];
@@ -274,7 +307,7 @@ var validTransforms = ['translateX', 'translateY', 'rotate', 'scale', 'parallax'
 /**
  * The Scrollify Class
  */
-var Scrollify = function Scrollify(element) {
+var Scrollify$1 = function Scrollify(element) {
   var this$1 = this;
 
   if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
@@ -324,7 +357,7 @@ var Scrollify = function Scrollify(element) {
  *
  * @return {void}
  */
-Scrollify.prototype.addScene = function addScene (opts) {
+Scrollify$1.prototype.addScene = function addScene (opts) {
     var this$1 = this;
 
   var trigger = opts.trigger ? opts.trigger instanceof HTMLElement ? opts.trigger : document.querySelector(opts.trigger) : this.element;
@@ -361,7 +394,7 @@ Scrollify.prototype.addScene = function addScene (opts) {
  * @param{Object} scene: The scene to update.
  * @return {void}
  */
-Scrollify.prototype.updateScene = function updateScene (scene) {
+Scrollify$1.prototype.updateScene = function updateScene (scene) {
   this.calculateStart(scene);
   this.calculateDuration(scene);
   this.calculate(scene);
@@ -374,7 +407,7 @@ Scrollify.prototype.updateScene = function updateScene (scene) {
  * @param{Object} scene: Object containing start and duration information.
  * @return {void}
  */
-Scrollify.prototype.addEffect = function addEffect (fn, options, scene) {
+Scrollify$1.prototype.addEffect = function addEffect (fn, options, scene) {
     if ( options === void 0 ) options = {};
 
   var element = this.element;
@@ -417,7 +450,7 @@ Scrollify.prototype.addEffect = function addEffect (fn, options, scene) {
  * @param{Scrollify.Scene} scene A Scrollify Scene object.
  * @return {Integer} The start position of the Scene, in pixels.
  */
-Scrollify.prototype.calculateStart = function calculateStart (scene) {
+Scrollify$1.prototype.calculateStart = function calculateStart (scene) {
   var offset = window.innerHeight - this.mapTo(scene._offset, window.innerHeight);
   var trigger = scene._trigger;
   var top = 0;
@@ -431,7 +464,7 @@ Scrollify.prototype.calculateStart = function calculateStart (scene) {
   scene.start = Math.max(0, top - offset);
 };
 
-Scrollify.prototype.mapTo = function mapTo (input, scale) {
+Scrollify$1.prototype.mapTo = function mapTo (input, scale) {
   var parsed = parseFloat(input);
   var unit = getUnit(input);
 
@@ -450,7 +483,7 @@ Scrollify.prototype.mapTo = function mapTo (input, scale) {
  * @param{[type]} scene [description]
  * @return [type]       [description]
  */
-Scrollify.prototype.calculateDuration = function calculateDuration (scene) {
+Scrollify$1.prototype.calculateDuration = function calculateDuration (scene) {
   // if (typeof scene._duration === 'function') { return scene._duration(); }
   scene.duration = this.mapTo(scene._duration, window.innerHeight + this.element.offsetHeight);
 };
@@ -459,7 +492,7 @@ Scrollify.prototype.calculateDuration = function calculateDuration (scene) {
  * onScroll Handler
  * @return {void}
  */
-Scrollify.prototype.onScroll = function onScroll () {
+Scrollify$1.prototype.onScroll = function onScroll () {
   if (!this.active) { return; }
   this.scroll = window.scrollY || window.pageYOffset;
 
@@ -473,7 +506,7 @@ Scrollify.prototype.onScroll = function onScroll () {
  * onResize Handler
  * @return {void}
  */
-Scrollify.prototype.onResize = function onResize () {
+Scrollify$1.prototype.onResize = function onResize () {
   this.scenes.forEach(this.updateScene, this);
 };
 
@@ -481,7 +514,7 @@ Scrollify.prototype.onResize = function onResize () {
  * Update the transformations for every scene.
  * @return {void}
  */
-Scrollify.prototype.update = function update () {
+Scrollify$1.prototype.update = function update () {
   this.scenes.forEach(this.calculate, this);
   this.ticking = false;
 };
@@ -493,7 +526,7 @@ Scrollify.prototype.update = function update () {
  *                       transformations to apply.
  * @return {void}
  */
-Scrollify.prototype.calculate = function calculate (scene) {
+Scrollify$1.prototype.calculate = function calculate (scene) {
   var start = scene.start;
   var duration = scene.duration;
   var scroll = this.scroll;
@@ -543,7 +576,7 @@ Scrollify.prototype.calculate = function calculate (scene) {
  * Loop through all the element's transformation data and calculates a matrix representing it.
  * @return {Matrix} Ye olde Matrix
  */
-Scrollify.prototype.updateMatrix = function updateMatrix () {
+Scrollify$1.prototype.updateMatrix = function updateMatrix () {
   var t = this.transforms;
   var m = this.matrix;
 
@@ -600,9 +633,20 @@ Scrollify.prototype.updateMatrix = function updateMatrix () {
  * Disable Scrollify-ing. Perhaps for performance reasons / mobile devices.
  * @return {void}
  */
-Scrollify.prototype.disable = function disable () {
+Scrollify$1.prototype.disable = function disable () {
   this.active = false;
 };
+
+/**
+ * A list of some default "transformations" that may be applied
+ * Options are applied at initialize and are curried in via "this".
+ *
+ * NOTE: for all functions herein, "this" contains effect options, a
+ * transformation Object, and also a reference to the element.
+ */
+
+/*global console*/
+/*eslint no-invalid-this: "error"*/
 
 /**
  * Translate an element along the X-axis.
@@ -642,7 +686,7 @@ function rotate(progress) {
   var radians = this.options.rad * progress;
 
   this.transforms.rotation[2] = radians;
-};
+}
 
 /**
  * Uniformly scale an element along both axis'.
@@ -657,7 +701,7 @@ function scale(progress) {
 
   this.transforms.scale[0] = scale;
   this.transforms.scale[1] = scale;
-};
+}
 
 /**
  * Update an element's opacity.
@@ -671,7 +715,7 @@ function fade(progress) {
   var opacity = (to - from) * progress + from;
 
   this.element.style.opacity = opacity;
-};
+}
 
 /**
  * Parallax an element.
@@ -751,15 +795,15 @@ function stick(progress) {
 }
 
 
-var fx = Object.freeze({
-  translateX: translateX,
-  translateY: translateY,
-  rotate: rotate,
-  scale: scale,
-  fade: fade,
-  parallax: parallax,
-  toggle: toggle,
-  stick: stick
+var effects = Object.freeze({
+	translateX: translateX,
+	translateY: translateY,
+	rotate: rotate,
+	scale: scale,
+	fade: fade,
+	parallax: parallax,
+	toggle: toggle,
+	stick: stick
 });
 
 /*eslint max-len: ["error", 120]*/
@@ -944,35 +988,40 @@ function easeOutBounce(t, b, c, d) {
 
 
 var easings = Object.freeze({
-  oscillate: oscillate,
-  easeInQuad: easeInQuad,
-  easeOutQuad: easeOutQuad,
-  easeInOutQuad: easeInOutQuad,
-  easeInCubic: easeInCubic,
-  easeOutCubic: easeOutCubic,
-  easeInOutCubic: easeInOutCubic,
-  easeInQuart: easeInQuart,
-  easeOutQuart: easeOutQuart,
-  easeInOutQuart: easeInOutQuart,
-  easeInQuint: easeInQuint,
-  easeOutQuint: easeOutQuint,
-  easeInOutQuint: easeInOutQuint,
-  easeInSine: easeInSine,
-  easeOutSine: easeOutSine,
-  easeInOutSine: easeInOutSine,
-  easeInExpo: easeInExpo,
-  easeOutExpo: easeOutExpo,
-  easeInOutExpo: easeInOutExpo,
-  easeInCirc: easeInCirc,
-  easeOutCirc: easeOutCirc,
-  easeInOutCirc: easeInOutCirc,
-  easeInElastic: easeInElastic,
-  easeOutElastic: easeOutElastic,
-  easeInOutElastic: easeInOutElastic,
-  easeInBack: easeInBack,
-  easeOutBack: easeOutBack,
-  easeInOutBack: easeInOutBack,
-  easeOutBounce: easeOutBounce
+	oscillate: oscillate,
+	easeInQuad: easeInQuad,
+	easeOutQuad: easeOutQuad,
+	easeInOutQuad: easeInOutQuad,
+	easeInCubic: easeInCubic,
+	easeOutCubic: easeOutCubic,
+	easeInOutCubic: easeInOutCubic,
+	easeInQuart: easeInQuart,
+	easeOutQuart: easeOutQuart,
+	easeInOutQuart: easeInOutQuart,
+	easeInQuint: easeInQuint,
+	easeOutQuint: easeOutQuint,
+	easeInOutQuint: easeInOutQuint,
+	easeInSine: easeInSine,
+	easeOutSine: easeOutSine,
+	easeInOutSine: easeInOutSine,
+	easeInExpo: easeInExpo,
+	easeOutExpo: easeOutExpo,
+	easeInOutExpo: easeInOutExpo,
+	easeInCirc: easeInCirc,
+	easeOutCirc: easeOutCirc,
+	easeInOutCirc: easeInOutCirc,
+	easeInElastic: easeInElastic,
+	easeOutElastic: easeOutElastic,
+	easeInOutElastic: easeInOutElastic,
+	easeInBack: easeInBack,
+	easeOutBack: easeOutBack,
+	easeInOutBack: easeInOutBack,
+	easeOutBounce: easeOutBounce
 });
 
-export { Scrollify, fx, easings };export default Scrollify;
+/**
+ * Put Scrollify into the Global scope.
+ * Useful for existing demos or if you wish to include manually
+ */
+
+export { Scrollify$1 as Scrollify, effects as fx, easings };export default Scrollify$1;
