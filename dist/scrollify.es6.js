@@ -665,8 +665,8 @@ Scrollify$1.prototype.disable = function disable () {
  * @return {void}
  */
 function translateX(progress) {
-  var to = parseFloat(this.options.to) || 0;
-  var from = parseFloat(this.options.from) || 0;
+  var to = (this.options.to !== undefined) ? this.options.to : 0;
+  var from = (this.options.from !== undefined) ? this.options.from : 0;
   var offset = (to - from) * progress + from;
 
   this.transforms.position[0] = offset;
@@ -679,8 +679,8 @@ function translateX(progress) {
  * @return {void}
  */
 function translateY(progress) {
-  var to = parseFloat(this.options.to) || 0;
-  var from = parseFloat(this.options.from) || 0; // this.transforms.position[1];
+  var to = (this.options.to !== undefined) ? this.options.to : 0;
+  var from = (this.options.from !== undefined) ? this.options.from : 0;// this.transforms.position[1];
   var offset = (to - from) * progress + from;
 
   this.transforms.position[1] = offset;
@@ -705,8 +705,8 @@ function rotate(progress) {
  * @return {void}
  */
 function scale(progress) {
-  var to = parseFloat(this.options.to) || 1;
-  var from = parseFloat(this.options.from) || this.transforms.scale[0];
+  var to = (this.options.to !== undefined) ? this.options.to : 1;
+  var from = (this.options.from !== undefined) ? this.options.from : this.transforms.scale[0];
   var scale = (to - from) * progress + from;
 
   this.transforms.scale[0] = scale;
@@ -720,8 +720,8 @@ function scale(progress) {
  * @return {void}
  */
 function fade(progress) {
-  var to = parseFloat(this.options.to) || 0;
-  var from = parseFloat(this.options.from) || 1;
+  var to = (this.options.to !== undefined) ? this.options.to : 0;
+  var from = (this.options.from !== undefined) ? this.options.from : 1;
   var opacity = (to - from) * progress + from;
 
   this.element.style.opacity = opacity;
