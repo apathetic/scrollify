@@ -390,6 +390,10 @@ Scrollify$1.prototype.addScene = function addScene (opts) {
   this.calculate(scene);
   this.scenes.push(scene);
 
+  if (opts.debug) {
+    console.log('Scrollify scene: ', scene);
+  }
+
   return this;
 };
 

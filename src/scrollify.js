@@ -100,6 +100,10 @@ export default class Scrollify {
     this.calculate(scene);
     this.scenes.push(scene);
 
+    if (opts.debug) {
+      console.log('Scrollify scene: ', scene);
+    }
+
     return this;
   }
 
