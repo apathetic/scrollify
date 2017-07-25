@@ -19,8 +19,8 @@ import transform from './transform';
  * @return {void}
  */
 export function translateX(progress) {
-  let to = this.options.to || 0;
-  let from = this.options.from || 0;
+  let to = parseFloat(this.options.to) || 0;
+  let from = parseFloat(this.options.from) || 0;
   let offset = (to - from) * progress + from;
 
   this.transforms.position[0] = offset;
@@ -33,8 +33,8 @@ export function translateX(progress) {
  * @return {void}
  */
 export function translateY(progress) {
-  let to = this.options.to || 0;
-  let from = this.options.from || 0; // this.transforms.position[1];
+  let to = parseFloat(this.options.to) || 0;
+  let from = parseFloat(this.options.from) || 0; // this.transforms.position[1];
   let offset = (to - from) * progress + from;
 
   this.transforms.position[1] = offset;
@@ -59,8 +59,8 @@ export function rotate(progress) {
  * @return {void}
  */
 export function scale(progress) {
-  const to = this.options.to || 1;
-  const from = this.options.from || this.transforms.scale[0];
+  const to = parseFloat(this.options.to) || 1;
+  const from = parseFloat(this.options.from) || this.transforms.scale[0];
   const scale = (to - from) * progress + from;
 
   this.transforms.scale[0] = scale;
@@ -74,8 +74,8 @@ export function scale(progress) {
  * @return {void}
  */
 export function fade(progress) {
-  const to = this.options.to || 0;
-  const from = this.options.from || 1;
+  const to = parseFloat(this.options.to) || 0;
+  const from = parseFloat(this.options.from) || 1;
   const opacity = (to - from) * progress + from;
 
   this.element.style.opacity = opacity;

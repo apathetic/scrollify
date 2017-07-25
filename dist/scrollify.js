@@ -467,6 +467,12 @@ Scrollify.prototype.calculateStart = function calculateStart (scene) {
   scene.start = Math.max(0, top - offset);
 };
 
+/**
+ * [mapTo description]
+ * @param{[type]} input [description]
+ * @param{[type]} scale [description]
+ * @return {[type]}     [description]
+ */
 Scrollify.prototype.mapTo = function mapTo (input, scale) {
   var parsed = parseFloat(input);
   var unit = getUnit(input);
@@ -658,8 +664,8 @@ Scrollify.prototype.disable = function disable () {
  * @return {void}
  */
 function translateX(progress) {
-  var to = this.options.to || 0;
-  var from = this.options.from || 0;
+  var to = parseFloat(this.options.to) || 0;
+  var from = parseFloat(this.options.from) || 0;
   var offset = (to - from) * progress + from;
 
   this.transforms.position[0] = offset;
@@ -672,8 +678,8 @@ function translateX(progress) {
  * @return {void}
  */
 function translateY(progress) {
-  var to = this.options.to || 0;
-  var from = this.options.from || 0; // this.transforms.position[1];
+  var to = parseFloat(this.options.to) || 0;
+  var from = parseFloat(this.options.from) || 0; // this.transforms.position[1];
   var offset = (to - from) * progress + from;
 
   this.transforms.position[1] = offset;
@@ -698,8 +704,8 @@ function rotate(progress) {
  * @return {void}
  */
 function scale(progress) {
-  var to = this.options.to || 1;
-  var from = this.options.from || this.transforms.scale[0];
+  var to = parseFloat(this.options.to) || 1;
+  var from = parseFloat(this.options.from) || this.transforms.scale[0];
   var scale = (to - from) * progress + from;
 
   this.transforms.scale[0] = scale;
@@ -713,8 +719,8 @@ function scale(progress) {
  * @return {void}
  */
 function fade(progress) {
-  var to = this.options.to || 0;
-  var from = this.options.from || 1;
+  var to = parseFloat(this.options.to) || 0;
+  var from = parseFloat(this.options.from) || 1;
   var opacity = (to - from) * progress + from;
 
   this.element.style.opacity = opacity;

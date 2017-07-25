@@ -176,6 +176,12 @@ export default class Scrollify {
     scene.start = Math.max(0, top - offset);
   }
 
+  /**
+   * [mapTo description]
+   * @param  {[type]} input [description]
+   * @param  {[type]} scale [description]
+   * @return {[type]}       [description]
+   */
   mapTo(input, scale) {
     const parsed = parseFloat(input);
     const unit = getUnit(input);
