@@ -663,7 +663,7 @@ Scrollify.prototype.disable = function disable () {
 
 /**
  * Translate an element along the X-axis.
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @param {Float} progress  Current progress data of the scene, between 0 and 1.
  * @this {Object}
  * @return {void}
  */
@@ -677,7 +677,7 @@ function translateX(progress) {
 
 /**
  * Translate an element vertically.
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @param {Float} progress  Current progress data of the scene, between 0 and 1.
  * @this {Object}
  * @return {void}
  */
@@ -691,7 +691,7 @@ function translateY(progress) {
 
 /**
  * Rotate an element, using radians. (note: rotates around Z-axis).
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @param {Float} progress  Current progress data of the scene, between 0 and 1.
  * @this {Object}
  * @return {void}
  */
@@ -703,7 +703,7 @@ function rotate(progress) {
 
 /**
  * Uniformly scale an element along both axis'.
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @param {Float} progress  Current progress data of the scene, between 0 and 1.
  * @this {Object}
  * @return {void}
  */
@@ -718,7 +718,7 @@ function scale(progress) {
 
 /**
  * Update an element's opacity.
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @param {Float} progress  Current progress data of the scene, between 0 and 1.
  * @this {Object}
  * @return {void}
  */
@@ -731,16 +731,28 @@ function fade(progress) {
 }
 
 /**
- * Parallax an element.
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * Update an element's blur.
+ * @param {Float} progress  Current progress of the scene, between 0 and 1.
  * @this {Object}
  * @return {void}
- *
- * "this" contains effect options and also a reference to the element.
+ */
+function blur(progress) {
+  var to = (this.options.to !== undefined) ? this.options.to : 0;
+  var from = (this.options.from !== undefined) ? this.options.from : 0;
+  var amount = (to - from) * progress + from;
+
+  this.element.style.filter = 'blur(' + amount + 'px)';
+}
+
+/**
+ * Parallax an element.
+ * @param {Float} progress  Current progress data of the scene, between 0 and 1.
+ * @this {Object}
+ * @return {void}
  */
 function parallax(progress) {
   var range = this.options.range || 0;
-  var offset = progress * range;
+  var offset = progress * range;        // TODO add provision for speed as well
 
   this.transforms.position[1] = offset;   // just vertical for now
 }
@@ -814,6 +826,7 @@ var fx = Object.freeze({
 	rotate: rotate,
 	scale: scale,
 	fade: fade,
+	blur: blur,
 	parallax: parallax,
 	toggle: toggle,
 	stick: stick

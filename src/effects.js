@@ -14,7 +14,7 @@ import transform from './transform';
 
 /**
  * Translate an element along the X-axis.
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @param {Float} progress  Current progress data of the scene, between 0 and 1.
  * @this {Object}
  * @return {void}
  */
@@ -28,7 +28,7 @@ export function translateX(progress) {
 
 /**
  * Translate an element vertically.
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @param {Float} progress  Current progress data of the scene, between 0 and 1.
  * @this {Object}
  * @return {void}
  */
@@ -42,7 +42,7 @@ export function translateY(progress) {
 
 /**
  * Rotate an element, using radians. (note: rotates around Z-axis).
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @param {Float} progress  Current progress data of the scene, between 0 and 1.
  * @this {Object}
  * @return {void}
  */
@@ -54,7 +54,7 @@ export function rotate(progress) {
 
 /**
  * Uniformly scale an element along both axis'.
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @param {Float} progress  Current progress data of the scene, between 0 and 1.
  * @this {Object}
  * @return {void}
  */
@@ -69,7 +69,7 @@ export function scale(progress) {
 
 /**
  * Update an element's opacity.
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * @param {Float} progress  Current progress data of the scene, between 0 and 1.
  * @this {Object}
  * @return {void}
  */
@@ -82,16 +82,28 @@ export function fade(progress) {
 };
 
 /**
- * Parallax an element.
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
+ * Update an element's blur.
+ * @param {Float} progress  Current progress of the scene, between 0 and 1.
  * @this {Object}
  * @return {void}
- *
- * "this" contains effect options and also a reference to the element.
+ */
+export function blur(progress) {
+  const to = (this.options.to !== undefined) ? this.options.to : 0;
+  const from = (this.options.from !== undefined) ? this.options.from : 0;
+  const amount = (to - from) * progress + from;
+
+  this.element.style.filter = 'blur(' + amount + 'px)';
+};
+
+/**
+ * Parallax an element.
+ * @param {Float} progress  Current progress data of the scene, between 0 and 1.
+ * @this {Object}
+ * @return {void}
  */
 export function parallax(progress) {
   const range = this.options.range || 0;
-  const offset = progress * range;
+  const offset = progress * range;        // TODO add provision for speed as well
 
   this.transforms.position[1] = offset;   // just vertical for now
 }
