@@ -40,6 +40,17 @@ export function translateY(progress) {
   this.transforms.position[1] = offset;
 }
 
+// export function translate(progress) {
+//   const to = this.options.to;
+//   const from = this.options.from;
+//   const offsetX = (to[0] - from[0]) * progress + from[0];
+//   const offsetY = (to[1] - from[1]) * progress + from[1];
+//
+//   this.transforms.position[0] = offsetX;
+//   this.transforms.position[1] = offsetY;
+// }
+
+
 /**
  * Rotate an element, using radians. (note: rotates around Z-axis).
  * @param {Float} progress  Current progress data of the scene, between 0 and 1.

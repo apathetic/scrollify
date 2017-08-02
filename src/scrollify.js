@@ -27,7 +27,11 @@ export default class Scrollify {
    */
   constructor(element) {
     if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
-    if (!element || !transform) { return this.active = false; }
+    if (!element || !transform) {
+      console.log('Scrollify [error] ', arguments[0]);
+      return this.active = false;
+    }
+
     // if (!transform) { return new Error('Scrollify [error]: transforms not supported'); }
     // if (!element) { return new Error('Scrollify [error]: could not find element'); }
 

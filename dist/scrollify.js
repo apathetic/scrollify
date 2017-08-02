@@ -6,10 +6,14 @@
  * @type {Boolean}
  */
 
+var transform;
 var dummy = document.createElement('div');        // we use this instead of document.body if the DOM is not yet ready
-var transform = ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].find(function (t) {
-  return (dummy.style[t] !== undefined);
+
+['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].forEach(function (t) {
+  if (document.body.style[t] !== undefined) { transform = t; }
 });
+
+var transform$1 = transform;
 
 /*
 The MIT License (MIT)
@@ -314,7 +318,11 @@ var Scrollify = function Scrollify(element) {
   var this$1 = this;
 
   if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
-  if (!element || !transform) { return this.active = false; }
+  if (!element || !transform$1) {
+    console.log('Scrollify [error] ', arguments[0]);
+    return this.active = false;
+  }
+
   // if (!transform) { return new Error('Scrollify [error]: transforms not supported'); }
   // if (!element) { return new Error('Scrollify [error]: could not find element'); }
 
@@ -581,7 +589,7 @@ Scrollify.prototype.calculate = function calculate (scene) {
   if (scene._applyTransform) {
     // transmogrify all applied transformations into a single matrix, and apply
     var matrix = this.updateMatrix();
-    this.element.style[transform] = matrix.asCSS();
+    this.element.style[transform$1] = matrix.asCSS();
   }
 };
 
@@ -688,6 +696,17 @@ function translateY(progress) {
 
   this.transforms.position[1] = offset;
 }
+
+// export function translate(progress) {
+//   const to = this.options.to;
+//   const from = this.options.from;
+//   const offsetX = (to[0] - from[0]) * progress + from[0];
+//   const offsetY = (to[1] - from[1]) * progress + from[1];
+//
+//   this.transforms.position[0] = offsetX;
+//   this.transforms.position[1] = offsetY;
+// }
+
 
 /**
  * Rotate an element, using radians. (note: rotates around Z-axis).
