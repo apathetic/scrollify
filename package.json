@@ -2,7 +2,7 @@
   "name": "@apatheticwes/scrollify",
   "author": "wes hatch",
   "license": "MIT",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "A simple thing for triggering 'them scroll effects that everybody loves",
   "main": "./dist/scrollify.cjs.js",
   "broswer": "./dist/scrollify.js",
