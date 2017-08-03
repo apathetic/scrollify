@@ -7,7 +7,7 @@ var transform;
 var dummy = document.createElement('div');        // we use this instead of document.body if the DOM is not yet ready
 
 ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].forEach(function (t) {
-  if (document.body.style[t] !== undefined) { transform = t; }
+  if (dummy.style[t] !== undefined) { transform = t; }
 });
 
 var transform$1 = transform;
