@@ -11,10 +11,6 @@ import transform from './transform';
 import createMatrix from './matrix';
 import { getUnit } from './normalize';
 
-// Effects that use matrix transformations. At present, only
-// built-in effects benefit from matrix transformations.
-const validTransforms = ['translateX', 'translateY', 'rotate', 'scale', 'parallax'];
-
 
 /**
  * The Scrollify Class
@@ -146,7 +142,7 @@ export default class Scrollify {
     }
 
     // if any effect uses a matrix tranformation, we use true for the entire scene
-    scene._applyTransform = scene._applyTransform || !!~validTransforms.indexOf(fn.name);
+    scene._applyTransform = scene._applyTransform || fn._applyTransform;
 
     const curry = (fn, options) => {
       return function() {       // NOTE: don't use => function here as we do NOT want to bind "this"

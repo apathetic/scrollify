@@ -307,11 +307,6 @@ function getUnit(val) {
  *
  */
 
-// Effects that use matrix transformations. At present, only
-// built-in effects benefit from matrix transformations.
-var validTransforms = ['translateX', 'translateY', 'rotate', 'scale', 'parallax'];
-
-
 /**
  * The Scrollify Class
  */
@@ -442,7 +437,7 @@ Scrollify$1.prototype.addEffect = function addEffect (fn, options, scene) {
   }
 
   // if any effect uses a matrix tranformation, we use true for the entire scene
-  scene._applyTransform = scene._applyTransform || !!~validTransforms.indexOf(fn.name);
+  scene._applyTransform = scene._applyTransform || fn._applyTransform;
 
   var curry = function (fn, options) {
     return function() {     // NOTE: don't use => function here as we do NOT want to bind "this"
@@ -670,6 +665,13 @@ Scrollify$1.prototype.disable = function disable () {
 /*global console*/
 /*eslint no-invalid-this: "error"*/
 
+// Effects that use matrix transformations. At present, only
+// built-in effects benefit from matrix transformations.
+[translateX, translateY, rotate, scale, parallax].forEach(function (fn) {
+  fn._applyTransform = true;
+});
+
+
 /**
  * Translate an element along the X-axis.
  * @param {Float} progress  Current progress data of the scene, between 0 and 1.
@@ -707,7 +709,6 @@ function translateY(progress) {
 //   this.transforms.position[0] = offsetX;
 //   this.transforms.position[1] = offsetY;
 // }
-
 
 /**
  * Rotate an element, using radians. (note: rotates around Z-axis).

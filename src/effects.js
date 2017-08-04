@@ -12,6 +12,13 @@
 import transform from './transform';
 
 
+// Effects that use matrix transformations. At present, only
+// built-in effects benefit from matrix transformations.
+[translateX, translateY, rotate, scale, parallax].forEach((fn) => {
+  fn._applyTransform = true;
+});
+
+
 /**
  * Translate an element along the X-axis.
  * @param {Float} progress  Current progress data of the scene, between 0 and 1.
@@ -49,7 +56,6 @@ export function translateY(progress) {
 //   this.transforms.position[0] = offsetX;
 //   this.transforms.position[1] = offsetY;
 // }
-
 
 /**
  * Rotate an element, using radians. (note: rotates around Z-axis).
