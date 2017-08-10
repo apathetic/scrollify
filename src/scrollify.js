@@ -25,11 +25,8 @@ export default class Scrollify {
     if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
     if (!element || !transform) {
       console.log('Scrollify [error] ', arguments[0]);
-      return this.active = false;
+      return this.disable();
     }
-
-    // if (!transform) { return new Error('Scrollify [error]: transforms not supported'); }
-    // if (!element) { return new Error('Scrollify [error]: could not find element'); }
 
     this.element = element;
     this.ticking = false;
@@ -45,8 +42,8 @@ export default class Scrollify {
       // skew: [],
     };
 
-    window.addEventListener('scroll', (e) => this.onScroll(e));
-    window.addEventListener('resize', (e) => this.onResize(e));
+    window.addEventListener('scroll', () => this.onScroll(), { passive: true });
+    window.addEventListener('resize', () => this.onResize(), { passive: true });
   }
 
   /**
@@ -128,6 +125,7 @@ export default class Scrollify {
   addEffect(fn, options = {}, scene) {
     const element = this.element;
     const transforms = this.transforms;
+    const context = { options, element, transforms };
 
     if (!scene) {
       if (this.scenes.length) {
@@ -143,20 +141,7 @@ export default class Scrollify {
 
     // if any effect uses a matrix tranformation, we use true for the entire scene
     scene._applyTransform = scene._applyTransform || fn._applyTransform;
-
-    const curry = (fn, options) => {
-      return function() {       // NOTE: don't use => function here as we do NOT want to bind "this"
-        let context = {
-          'options': options,
-          'element': element,
-          'transforms': transforms
-        };
-
-        fn.call(context, this); // eslint-disable-line
-      };
-    };
-
-    scene.effects.push(curry(fn, options));
+    scene.effects.push(fn.bind(context));
 
     return this;
   }
@@ -284,7 +269,7 @@ export default class Scrollify {
 
     // cycle through any registered transformations
     scene.effects.forEach((effect) => {
-      effect.call(progress);
+      effect(progress);
     });
 
     if (scene._applyTransform) {
@@ -326,22 +311,6 @@ export default class Scrollify {
     if (t.position) {
       m.translate(t.position[0], t.position[1], t.position[2]);
     }
-
-    // -----------------------------------------------------
-    // IF we wished to perform rotation AFTER skew / position / etc, we could do it here.
-    // The ordering is important, and has an effect.
-
-    // if (t.rotationPost) {
-    //   m.rotateX(t.rotationPost[0]);
-    //   m.rotateY(t.rotationPost[1]);
-    //   m.rotateZ(t.rotationPost[2]);
-    // }
-
-    // if (t.scalePost) {
-    //   m.scale(t.scalePost[0], t.scalePost[1]);
-    // }
-    // -----------------------------------------------------
-
 
     // ... and here we put it back. (This duplication is not a mistake).
     if (t.transformOrigin) {

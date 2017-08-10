@@ -310,16 +310,11 @@ function getUnit(val) {
  * The Scrollify Class
  */
 var Scrollify = function Scrollify(element) {
-  var this$1 = this;
-
   if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
   if (!element || !transform$1) {
     console.log('Scrollify [error] ', arguments[0]);
-    return this.active = false;
+    return this.disable();
   }
-
-  // if (!transform) { return new Error('Scrollify [error]: transforms not supported'); }
-  // if (!element) { return new Error('Scrollify [error]: could not find element'); }
 
   this.element = element;
   this.ticking = false;
@@ -335,8 +330,10 @@ var Scrollify = function Scrollify(element) {
     // skew: [],
   };
 
-  window.addEventListener('scroll', function (e) { return this$1.onScroll(e); });
-  window.addEventListener('resize', function (e) { return this$1.onResize(e); });
+  // window.addEventListener('scroll', () => this.onScroll(), { passive: true });
+  // window.addEventListener('resize', () => this.onResize(), { passive: true });
+  window.addEventListener('scroll', this.onScroll.bind(this), { passive: true });
+  window.addEventListener('resize', this.onResize.bind(this), { passive: true });
 };
 
 /**
@@ -422,6 +419,7 @@ Scrollify.prototype.addEffect = function addEffect (fn, options, scene) {
 
   var element = this.element;
   var transforms = this.transforms;
+  var context = { options: options, element: element, transforms: transforms };
 
   if (!scene) {
     if (this.scenes.length) {
@@ -437,20 +435,7 @@ Scrollify.prototype.addEffect = function addEffect (fn, options, scene) {
 
   // if any effect uses a matrix tranformation, we use true for the entire scene
   scene._applyTransform = scene._applyTransform || fn._applyTransform;
-
-  var curry = function (fn, options) {
-    return function() {     // NOTE: don't use => function here as we do NOT want to bind "this"
-      var context = {
-        'options': options,
-        'element': element,
-        'transforms': transforms
-      };
-
-      fn.call(context, this); // eslint-disable-line
-    };
-  };
-
-  scene.effects.push(curry(fn, options));
+  scene.effects.push(fn.bind(context));
 
   return this;
 };
@@ -578,7 +563,7 @@ Scrollify.prototype.calculate = function calculate (scene) {
 
   // cycle through any registered transformations
   scene.effects.forEach(function (effect) {
-    effect.call(progress);
+    effect(progress);
   });
 
   if (scene._applyTransform) {
@@ -620,22 +605,6 @@ Scrollify.prototype.updateMatrix = function updateMatrix () {
   if (t.position) {
     m.translate(t.position[0], t.position[1], t.position[2]);
   }
-
-  // -----------------------------------------------------
-  // IF we wished to perform rotation AFTER skew / position / etc, we could do it here.
-  // The ordering is important, and has an effect.
-
-  // if (t.rotationPost) {
-  // m.rotateX(t.rotationPost[0]);
-  // m.rotateY(t.rotationPost[1]);
-  // m.rotateZ(t.rotationPost[2]);
-  // }
-
-  // if (t.scalePost) {
-  // m.scale(t.scalePost[0], t.scalePost[1]);
-  // }
-  // -----------------------------------------------------
-
 
   // ... and here we put it back. (This duplication is not a mistake).
   if (t.transformOrigin) {
