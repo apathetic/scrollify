@@ -511,14 +511,20 @@ new Scrollify('#parallax').addEffect(Scrollify.fx.parallax, options);</code></pr
           <dd>
             <p>There is a <strong>sticky</strong> function as well; keep in mind that you'll need
             to CSSify a few things, though. It's probably easiest if you wrap your element in an empty
-            "spacer" element, which would serve as a placeholder for changes in the display
+            <em>spacer</em> element, which would serve as a placeholder for changes in the display
             property of the sticky element -- preventing the page from collapsing or shifting when
-            it's taken out of the flow. You should have a "normal" class and a "bottom" class that will
-             get applied when stick is used. This identifies the top (start) and the bottom (finish)
-            position of the stuck element.</p>
+            it's taken out of the flow. You'll also need to provide the CSS for three classes that
+            are used:
+            <ul class="bullets">
+              <li>"normal": identifies the top (start)</li>
+              <li>"bottom": used at the bottom (finish)</li>
+              <li>"sticky": used when the element is fixed.</li>
+            </ul>
 
             <pre><code class="language-markup">&lt;div class="spacer">&lt;!-- the placeholder element -->
-  &lt;img class="scrollify" src="photo.jpg">&lt;!-- target element -->
+  &lt;p id="stick">&lt;!-- target element -->
+    &lt;strong>Sticks!&lt;/strong> I'll hang around for &lt;strong>300 px&lt;/strong>.
+  &lt;/p>
 &lt;/div></code></pre>
             <pre><code class="language-javascript">new Scrollify('#stick')  // the element to target
   .addScene({
@@ -541,19 +547,22 @@ new Scrollify('#parallax').addEffect(Scrollify.fx.parallax, options);</code></pr
                   });
               });
             </script>
-            <p class="spacer stick-spacer">
-              <span id="stick">
+            <div class="spacer stick-spacer">
+              <p id="stick" class="">
                 <strong>Sticks!</strong> I'll hang around for <strong>300 px</strong>.
-                Lorem ipsum dolor sit amet,  consectetur adipisicing elit, sed do eiusmod.
-              </span>
-            </p>
+                <br /><br />
+                <code class="normalCSS">.normal { position: absolute; }</code>
+                <code class="stickyCSS">.sticky { position: fixed; }</code>
+                <code class="bottomCSS">.bottom { position: absolute; bottom: 0; }</code>
+              </p>
+            </div>
           </dd>
 
           <dt><h4>Toggle Classes</h4></dt>
           <dd>
             <p>You can toggle a CSS class on / off at a pre-defined scroll point. The options for the
-              <em>toggle</em> function need to be bounded on the Scene timeline, between 0 and 1.</p>
-            <pre><code class="language-javascript">new Scrollify('#transformer-8')
+            <em>toggle</em> function need to be bounded on the Scene timeline, between 0 and 1.</p>
+  <pre><code class="language-javascript">new Scrollify('#transformer-8')
   .addScene({
     'effects': [{
       'fn': Scrollify.fx.toggle,
@@ -771,7 +780,7 @@ new Scrollify('#custom')
                 new Scrollify('#sequence')
                   .addScene({
                     start: 0.3,
-                    duration: 600px,
+                    duration: '600px',
                     // duration: function() { return window.innerHeight + 200 },
                     // duration: function() { return window.innerHeight * 1.2 },    // "speed" of 0.2
                     effects: [

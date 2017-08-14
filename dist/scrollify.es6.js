@@ -307,6 +307,8 @@ function getUnit(val) {
  * The Scrollify Class
  */
 var Scrollify$1 = function Scrollify(element) {
+  var this$1 = this;
+
   if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
   if (!element || !transform$1) {
     console.log('Scrollify [error] ', arguments[0]);
@@ -327,10 +329,8 @@ var Scrollify$1 = function Scrollify(element) {
     // skew: [],
   };
 
-  // window.addEventListener('scroll', () => this.onScroll(), { passive: true });
-  // window.addEventListener('resize', () => this.onResize(), { passive: true });
-  window.addEventListener('scroll', this.onScroll.bind(this), { passive: true });
-  window.addEventListener('resize', this.onResize.bind(this), { passive: true });
+  window.addEventListener('scroll', function () { return this$1.onScroll(); }, { passive: true });
+  window.addEventListener('resize', function () { return this$1.onResize(); }, { passive: true });
 };
 
 /**
@@ -773,7 +773,7 @@ function toggle(progress) {
  */
 function stick(progress) {
   var element = this.element;
-  var currentState = '_';
+  var currentState = element._currentState || null; // store prop on element
 
   if (progress <= 0) {
     setState(element, 'normal');
@@ -784,10 +784,10 @@ function stick(progress) {
   }
 
   function setState(element, state) {
-    var BCR = element.getBoundingClientRect();
-
     if (currentState === state) { return; }
     if (state == 'sticky') {
+      var BCR = element.getBoundingClientRect();
+
       element.style.top = BCR.top + 'px';
       element.style.left = BCR.left + 'px';
       element.style.width = BCR.width + 'px';
@@ -797,11 +797,9 @@ function stick(progress) {
       element.style.width = '';
     }
 
-    element.className = '';
-    // element.classList.remove(currentState);  // TODO: why is this not working?
+    element.classList.remove(currentState);
     element.classList.add(state);
-
-    currentState = state;
+    element._currentState = state;
   }
 }
 

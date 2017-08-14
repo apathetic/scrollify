@@ -1,39 +1,44 @@
 main { overflow:hidden; }
 
-main span.sticky {
-	left: auto !important;
+main #stick {
+	/*left: auto !important;*/
 	background: #ec008c;
 	color: #fff;
-}
-
-main .sticky {
-	position: fixed;
-}
-
-main .bottom {
+	margin: 0;
 	position: absolute;
-	bottom: 0;
+	left: 0;
+	right: 0;
+	transition: none;
 }
 
-main .normal {
-	position: absolute;
-}
+/* !important because it's a crappy demo and I cannot
+   be bothered to fix current specificity issues */
+main .sticky { position: fixed !important; }
+main .bottom { position: absolute !important; bottom: 0; }
+main .normal { position: absolute !important; }
+
+main #stick code { display: none; }
+.normal .normalCSS { display:block !important; }
+.sticky .stickyCSS { display:block !important; }
+.bottom .bottomCSS { display:block !important; }
+
+
 
 
 
 main dd {
-  margin-bottom: 2em;
+	margin-bottom: 2em;
 	display: block;
 }
 
 main dt {
-  margin-top: 5em;
+	margin-top: 5em;
 }
 
 
 .demo {
-    padding: 3em;
-    border: 1px solid #ddd;
+	padding: 3em;
+	border: 1px solid #ddd;
 }
 
 .spacer,

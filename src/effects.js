@@ -155,7 +155,7 @@ export function toggle(progress) {
  */
 export function stick(progress) {
   let element = this.element;
-  let currentState = '_';
+  let currentState = element._currentState || null; // store prop on element
 
   if (progress <= 0) {
     setState(element, 'normal');
@@ -166,10 +166,10 @@ export function stick(progress) {
   }
 
   function setState(element, state) {
-    let BCR = element.getBoundingClientRect();
-
     if (currentState === state) { return; }
     if (state == 'sticky') {
+      let BCR = element.getBoundingClientRect();
+
       element.style.top = BCR.top + 'px';
       element.style.left = BCR.left + 'px';
       element.style.width = BCR.width + 'px';
@@ -179,10 +179,8 @@ export function stick(progress) {
       element.style.width = '';
     }
 
-    element.className = '';
-    // element.classList.remove(currentState);  // TODO: why is this not working?
+    element.classList.remove(currentState);
     element.classList.add(state);
-
-    currentState = state;
+    element._currentState = state;
   }
 }
