@@ -140,9 +140,10 @@
 
             <!-- demo here -->
             <h5>Result:</h5>
-            <p id="transformer" class="demo">This element (#transformer) will scale from 1 to 1.2x as it moves across the viewport.</p>
+            <p id="transformer" class="demo">This element (#transformer) will scale from 1 to 1.2x as it moves across the viewport. &nbsp;(<em></em>)</p>
             <script>
               window.addEventListener('load', function() {
+                var debug1 = document.querySelector('#transformer em');
                 new Scrollify('#transformer')
                   .addScene({
                     effects: [{
@@ -151,6 +152,8 @@
                         from: 1.0,
                         to: 1.2
                       }
+                    }, {
+                      fn: function(p) { debug1.innerHTML = p.toFixed(3); }
                     }]
                   });
               });
@@ -182,10 +185,11 @@
             <!-- demo here -->
             <h5>Result:</h5>
             <p id="transformer-2" class="demo">This element (#transformer-2) will only start transforming at 20% of the way up from the
-               bottom, and stop after 300px.
+               bottom, and stop after 300px. &nbsp;(<em></em>)
             </p>
             <script>
               window.addEventListener('load', function(event) {
+                var debug2 = document.querySelector('#transformer-2 em');
                 new Scrollify('#transformer-2')
                   .addScene({
                     start: 0.2,         // start the Scene when the element reaches 20% of the viewport
@@ -196,6 +200,8 @@
                         from: 1.0,
                         to: 1.2
                       }
+                    }, {
+                      fn: function(p) { debug2.innerHTML = p.toFixed(3); }
                     }]
                   });
               });
@@ -263,6 +269,7 @@
             <!-- demo here -->
             <script>
               window.addEventListener('load', function() {
+                var debug3 = document.querySelector('#transformer-4 em');
                 new Scrollify('#transformer-4')
                   .addScene({
                     start: 0.3,
@@ -274,13 +281,15 @@
                         from: 1.0,
                         to: 1.5
                       }
+                    }, {
+                      fn: function(p) { debug3.innerHTML = p.toFixed(3); }
                     }]
                   });
               });
             </script>
             <h5>Result:</h5>
             <p id="transformer-4" class="demo">
-              This element (#transformer-4) uses an elastic easing function.
+              This element (#transformer-4) uses an elastic easing function. &nbsp;(<em></em>)
             </p>
           </dd>
 
@@ -315,9 +324,9 @@
             <!-- demo here -->
             <script>
               window.addEventListener('load', function() {
+                var debug5 = document.querySelector('#transformer-5 span');
                 new Scrollify('#transformer-5')
                   .addScene({
-                    debug: true,
                     start: 0.4,
                     effects: [
                       {
@@ -337,12 +346,14 @@
                           from: 0,
                           to: 400
                         }
+                      }, {
+                        fn: function(p) { debug5.innerHTML = p.toFixed(3); }
                       }
                     ]
                   });
               });
             </script>
-            <p id="transformer-5" class="demo">This element (#transformer-5) will scale, rotate <em>and</em> tranlate</p>
+            <p id="transformer-5" class="demo">This element (#transformer-5) will scale, rotate <em>and</em> translate. &nbsp;(<span></span>)</p>
           </dd>
 
           <dt><h4>Chain Scenes</h4></dt>
@@ -507,19 +518,21 @@ new Scrollify('#parallax').addEffect(Scrollify.fx.parallax, options);</code></pr
             </script>
           </dd>
 
-          <dt><h4>Stick</h4></dt>
+          <dt><h4>Stick <span style="color:orange">(experimental)</span> </h4></dt>
           <dd>
             <p>There is a <strong>sticky</strong> function as well; keep in mind that you'll need
             to CSSify a few things, though. It's probably easiest if you wrap your element in an empty
             <em>spacer</em> element, which would serve as a placeholder for changes in the display
             property of the sticky element -- preventing the page from collapsing or shifting when
             it's taken out of the flow. You'll also need to provide the CSS for three classes that
-            are used:
+            are used:</p>
             <ul class="bullets">
               <li>"normal": identifies the top (start)</li>
               <li>"bottom": used at the bottom (finish)</li>
               <li>"sticky": used when the element is fixed.</li>
             </ul>
+            <p>Also note: it's recommended <em>not</em> to use the "stickified" element as the trigger,
+            as resizing the viewport may cause unexpected results.</p>
 
             <pre><code class="language-markup">&lt;div class="spacer">&lt;!-- the placeholder element -->
   &lt;p id="stick">&lt;!-- target element -->
@@ -528,28 +541,33 @@ new Scrollify('#parallax').addEffect(Scrollify.fx.parallax, options);</code></pr
 &lt;/div></code></pre>
             <pre><code class="language-javascript">new Scrollify('#stick')  // the element to target
   .addScene({
-    'start': 0.5,         // 'start': when at 50% of the viewport
-    'duration': '300px',  // 'duration': 300 pixels
-    'effects': [{
-      'fn': Scrollify.fx.stick
+    trigger: '.spacer',
+    start: 0.5,         // 'start': when at 50% of the viewport
+    duration: '300px',  // 'duration': 300 pixels
+    effects: [{
+      fn: Scrollify.fx.stick
     }]
   });</code></pre>
             <script>
               window.addEventListener('load', function(event) {
                 var stick = Scrollify.fx.stick;
+                var debug6 = document.querySelector('#stick em');
                 new Scrollify('#stick')               // the element to target
                   .addScene({                         // start / stop, duration etc. of the effect
+                    trigger: '.stick-spacer',
                     start: 0.5,                       //   start: when at 50% of the viewport
                     duration: '300px',                //   'duration': 300 pixels
                     effects: [{
                       fn: stick                       // the effect to apply, and when (within the progress of the scene)
+                    }, {
+                      fn: function(p) { debug6.innerHTML = p.toFixed(3); }
                     }]
                   });
               });
             </script>
             <div class="spacer stick-spacer">
               <p id="stick" class="">
-                <strong>Sticks!</strong> I'll hang around for <strong>300 px</strong>.
+                <strong>Sticks!</strong> I'll hang around for <strong>300 px</strong>. &nbsp;(<em></em>)
                 <br /><br />
                 <code class="normalCSS">.normal { position: absolute; }</code>
                 <code class="stickyCSS">.sticky { position: fixed; }</code>
