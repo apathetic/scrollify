@@ -1,6 +1,6 @@
 # Scrollify
 
-Scrollify. Do things on scroll. 3KB minified and gzipped.
+Scrollify. Do things on scroll. 3KB minified and gzipped. There are no dependencies; you do not need jQuery; you do not need TweenMax.
 
 ## What sorts of things?
 
@@ -42,6 +42,9 @@ Either:
 * simplify API for effects / options definition
 
 ## Release History
+
+### 0.4
+* further bug fixing and optimizations
 
 ### 0.3
 * start and duration can accept various parameter types: float, 'px', '%'
