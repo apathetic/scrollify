@@ -798,9 +798,7 @@ new Scrollify('#custom')
                 new Scrollify('#sequence')
                   .addScene({
                     start: 0.3,
-                    duration: '600px',
-                    // duration: function() { return window.innerHeight + 200 },
-                    // duration: function() { return window.innerHeight * 1.2 },    // "speed" of 0.2
+                    duration: function(trigger) { return window.innerHeight * 0.8; },
                     effects: [
                       { fn: sequencer }
                     ]

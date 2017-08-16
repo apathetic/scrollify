@@ -43,6 +43,9 @@ Either:
 
 ## Release History
 
+### 0.5
+* duration may be a function, a string, or a float
+
 ### 0.4
 * further bug fixing and optimizations
 

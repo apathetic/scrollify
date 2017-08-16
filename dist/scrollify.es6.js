@@ -482,8 +482,9 @@ Scrollify$1.prototype.mapTo = function mapTo (input, scale) {
  * @return [type]       [description]
  */
 Scrollify$1.prototype.calculateDuration = function calculateDuration (scene) {
-  // if (typeof scene._duration === 'function') { return scene._duration(); }
-  scene.duration = this.mapTo(scene._duration, window.innerHeight + this.element.offsetHeight);
+  scene.duration = (typeof scene._duration === 'function') ?
+    scene._duration(scene._trigger) :
+    this.mapTo(scene._duration, window.innerHeight + this.element.offsetHeight);
 };
 
 /**
