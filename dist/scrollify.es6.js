@@ -10,7 +10,16 @@ var dummy = document.createElement('div');        // we use this instead of docu
   if (dummy.style[t] !== undefined) { transform = t; }
 });
 
-var transform$1 = transform;
+
+/**
+ * getUnit(), from anime.js
+ * @copyright ©2017 Julian Garnier
+ * Released under the MIT license
+ */
+function getUnit(val) {
+  var split = /([\+\-]?[0-9#\.]+)(%|px|pt|em|rem|in|cm|mm|ex|pc|vw|vh|deg|rad|turn)?/.exec(val);
+  if (split) return split[2];
+}
 
 /*
 The MIT License (MIT)
@@ -289,11 +298,6 @@ function createMatrix() {
   };
 }
 
-function getUnit(val) {
-  var split = /([\+\-]?[0-9#\.]+)(%|px|pt|em|rem|in|cm|mm|ex|pc|vw|vh|deg|rad|turn)?/.exec(val);
-  if (split) return split[2];
-}
-
 /*
  * scrollify
  * https://github.com/apathetic/scrollify
@@ -303,6 +307,9 @@ function getUnit(val) {
  *
  */
 
+// import { getUnit } from './normalize';
+
+
 /**
  * The Scrollify Class
  */
@@ -310,7 +317,7 @@ var Scrollify$1 = function Scrollify(element) {
   var this$1 = this;
 
   if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
-  if (!element || !transform$1) {
+  if (!element || !transform) {
     console.log('Scrollify [error] ', arguments[0]);
     return this.disable();
   }
@@ -381,7 +388,7 @@ Scrollify$1.prototype.addScene = function addScene (opts) {
   this.calculateStart(scene);
   this.calculateDuration(scene);
 
-  scene.state = (this.scroll > this.start) ? (this.scroll > this.start+scene.duration) ? 'after' : 'active' : 'before';
+  scene.state = (this.scroll > this.start) ? (this.scroll > this.start + scene.duration) ? 'after' : 'active' : 'before';
 
   this.calculate(scene);
   this.scenes.push(scene);
@@ -433,6 +440,7 @@ Scrollify$1.prototype.addEffect = function addEffect (fn, options, scene) {
   // if any effect uses a matrix tranformation, we use true for the entire scene
   scene._applyTransform = scene._applyTransform || fn._applyTransform;
   scene.effects.push(fn.bind(context));
+  // scene.effects.push(() => { fn.call(context); });
 
   return this;
 };
@@ -493,10 +501,14 @@ Scrollify$1.prototype.calculateDuration = function calculateDuration (scene) {
  */
 Scrollify$1.prototype.onScroll = function onScroll () {
   if (!this.active) { return; }
+
   this.scroll = window.scrollY || window.pageYOffset;
+  this.direction = (this.scroll > this.previousScroll) ? 'down' : 'up';
+  this.previousScroll = this.scroll;
 
   if (!this.ticking) {
     window.requestAnimationFrame(this.update.bind(this));
+    // window.requestAnimationFrame(() => { this.update(); });
     this.ticking = true;
   }
 };
@@ -567,7 +579,7 @@ Scrollify$1.prototype.calculate = function calculate (scene) {
   if (scene._applyTransform) {
     // transmogrify all applied transformations into a single matrix, and apply
     var matrix = this.updateMatrix();
-    this.element.style[transform$1] = matrix.asCSS();
+    this.element.style[transform] = matrix.asCSS();
   }
 };
 

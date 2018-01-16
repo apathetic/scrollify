@@ -9,7 +9,7 @@
 /*global console*/
 /*eslint no-invalid-this: "error"*/
 
-import transform from './transform';
+import { transform } from './utils';
 
 
 // Effects that use matrix transformations. At present, only
