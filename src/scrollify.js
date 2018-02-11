@@ -7,9 +7,8 @@
  *
  */
 
-import transform from './transform';
+import { transform, getUnit } from './utils';
 import createMatrix from './matrix';
-import { getUnit } from './normalize';
 
 
 /**
@@ -92,7 +91,7 @@ export default class Scrollify {
     this.calculateStart(scene);
     this.calculateDuration(scene);
 
-    scene.state = (this.scroll > this.start) ? (this.scroll > this.start+scene.duration) ? 'after' : 'active' : 'before';
+    scene.state = (this.scroll > this.start) ? (this.scroll > this.start + scene.duration) ? 'after' : 'active' : 'before';
 
     this.calculate(scene);
     this.scenes.push(scene);
@@ -142,6 +141,7 @@ export default class Scrollify {
     // if any effect uses a matrix tranformation, we use true for the entire scene
     scene._applyTransform = scene._applyTransform || fn._applyTransform;
     scene.effects.push(fn.bind(context));
+    // scene.effects.push(() => { fn.call(context); });
 
     return this;
   }
@@ -202,10 +202,14 @@ export default class Scrollify {
    */
   onScroll() {
     if (!this.active) { return; }
+
     this.scroll = window.scrollY || window.pageYOffset;
+    this.direction = (this.scroll > this.previousScroll) ? 'down' : 'up';
+    this.previousScroll = this.scroll;
 
     if (!this.ticking) {
       window.requestAnimationFrame(this.update.bind(this));
+      // window.requestAnimationFrame(() => { this.update(); });
       this.ticking = true;
     }
   }
