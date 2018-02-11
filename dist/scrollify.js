@@ -310,9 +310,6 @@ function createMatrix() {
  *
  */
 
-// import { getUnit } from './normalize';
-
-
 /**
  * The Scrollify Class
  */
