@@ -1,8 +1,9 @@
 
-// Borrowed / adapted from Anime https://github.com/juliangarnier/anime
-// * @author Julian Garnier
-// * @copyright ©2017 Julian Garnier
-// * Released under the MIT license
+/* Adapted from Anime https://github.com/juliangarnier/anime
+ * @author Julian Garnier
+ * @copyright ©2017 Julian Garnier
+ * Released under the MIT license
+ */
 
 const validTransforms = ['translateX', 'translateY', 'translateZ', 'rotate', 'rotateX', 'rotateY', 'rotateZ', 'scale', 'scaleX', 'scaleY', 'scaleZ', 'skewX', 'skewY'];
 
