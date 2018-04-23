@@ -5,14 +5,14 @@
  * Feature detection: CSS transforms
  * @type {Boolean}
  */
+var transform = false;
+if (typeof window !== 'undefined') {
+  var dummy = document.createElement('div');
 
-var transform;
-var dummy = document.createElement('div');        // we use this instead of document.body if the DOM is not yet ready
-
-['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].forEach(function (t) {
-  if (dummy.style[t] !== undefined) { transform = t; }
-});
-
+  ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].forEach(function (t) {
+    if (dummy.style[t] !== undefined) { transform = t; }
+  });
+}
 
 /**
  * getUnit(), from anime.js

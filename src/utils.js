@@ -2,14 +2,14 @@
  * Feature detection: CSS transforms
  * @type {Boolean}
  */
+export let transform = false;
+if (typeof window !== 'undefined') {
+  const dummy = document.createElement('div');
 
-export let transform;
-const dummy = document.createElement('div');        // we use this instead of document.body if the DOM is not yet ready
-
-['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].forEach((t) => {
-  if (dummy.style[t] !== undefined) { transform = t; }
-});
-
+  ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].forEach((t) => {
+    if (dummy.style[t] !== undefined) { transform = t; }
+  });
+}
 
 /**
  * getUnit(), from anime.js
