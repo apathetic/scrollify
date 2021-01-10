@@ -7,9 +7,10 @@
   <title>Scrollify</title>
   <meta name="viewport" content="width=device-width">
 
-  <link rel="stylesheet" href="styles.css">
-
   <!-- demo stuffs -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- end demo stuffs -->
+
   <link rel="stylesheet" href="https://apathetic.github.io/showcase/assets/css/main.min.css">
   <script src="https://rawgit.com/apathetic/stickynav/master/dist/stickynav.js"></script>
   <script src="prism.js"></script>
@@ -18,24 +19,24 @@
       new StickyNav({ nav: '#sticky' });
     });
   </script>
-  <!-- end demo stuffs -->
 
 </head>
 
 <body>
-  <header class="condensed align-center">
+  <header class="py-2 align-center">
     <h1>Scrollify.</h1>
   </header>
 
   <nav class="mini-nav">
-    <div id="sticky" class="normal">
-      <nav data-autogenerate="true">
-        <ul></ul>
-      </nav>
+    <div id="sticky">
+      <ul class="py-2" data-autogenerate="true">
+      </ul>
     </div>
+
   </nav>
 
-  <main class="component left-rail">
+
+  <main class="prose">
 
     <section data-nav="About" id="about">
       <div class="container">
@@ -86,7 +87,7 @@
       <div class="container">
         <h2>Install</h2>
         <h3>npm</h3>
-        <pre><code class="language-javascript">npm install apatheticwes/scrollify</code></pre>
+        <pre><code class="language-javascript">npm install @apatheticwes/scrollify</code></pre>
 
         <h3>Github</h3>
         <p><a href="https://github.com/apathetic/scrollify">Get it from Github</a></p>
@@ -115,9 +116,9 @@
             <p>The easiest way to get started is to create a new Scrollify instance, with the
               DOM element you'd like to manipulate. Next, create a Scene, and define which
               effect to apply.
-             </p>
+            </p>
             <!--
-             THIS IS THE IDEAL UPDATED API
+            THIS IS THE IDEAL API
              <pre><code class="language-javascript">new Scrollify('#transformer') // the element to scrollify
               .addScene({
                 effects: [{
@@ -127,12 +128,14 @@
                   }
                 }]
               });</code></pre> -->
-            <pre><code class="language-javascript">new Scrollify('#transformer')   // the element to scrollify
+            <pre><code class="language-javascript">import { scale } from './fx';
+
+new Scrollify('#transformer')   // the element to scrollify
   .addScene({
     effects: [{
-      fn: Scrollify.fx.scale,   // what effect to apply
-      options: {
-        from: 1.0, // some options for the effect
+      fn: scale,   // what effect to apply
+      options: {   // some options for the effect
+        from: 1.0,
         to: 1.2
       }
     }]
@@ -153,7 +156,9 @@
                         to: 1.2
                       }
                     }, {
-                      fn: function(p) { debug1.innerHTML = p.toFixed(3); }
+                      fn: ({ elements, options, transforms }) => {
+                        return (p) => { debug1.innerHTML = p.toFixed(3); }
+                      }
                     }]
                   });
               });
@@ -171,8 +176,8 @@
             </p>
               <pre><code class="language-javascript">new Scrollify('#transformer-2')
   .addScene({
-    start: 0.2,         // start when the element reaches 20% of the viewport (also possible: '20%', or '200px', e.g.)
-    duration: '300px',  // do something for 300 pixels (also possible: '30%', or 0.3, e.g.)
+    start: 0.2,         // start when the element is at 0.2 of the scene's progress (0 to 1)
+    duration: '300px',  // do something for 300 pixels
     effects: [{
       fn: Scrollify.fx.scale,
       options: {
@@ -201,7 +206,7 @@
                         to: 1.2
                       }
                     }, {
-                      fn: function(p) { debug2.innerHTML = p.toFixed(3); }
+                      fn: () => (p) => { debug2.innerHTML = p.toFixed(3); }
                     }]
                   });
               });
@@ -217,11 +222,11 @@
               <pre><code class="language-javascript">new Scrollify('#sticky')
   .addScene({
     trigger: '#trigger',    // this element will be used to start / stop the scene
-    start: 0.2,             // start when "#trigger" reaches 20% of the viewport
+    start: 0.2,             // start when "#trigger" reaches 0.2 on the timeline (i.e 20% of the viewport)
     duration: '300px',      // do something for 300 pixels
     effects: [{
       rotate: {
-        rad: Math.PI / 2
+        rad: Math.PI * 2
       }
     }]
   });</code></pre>
@@ -254,8 +259,8 @@
             </p>
               <pre><code class="language-javascript">new Scrollify('#transformer-4')
   .addScene({
-    start: 0.3,
-    duration: '300px',
+    start: 0.2,
+    duration: '400px',
     easing: Scrollify.easings.easeInElastic,  // use a built in easing function
     effects: [{
       fn: Scrollify.fx.scale,
@@ -272,8 +277,8 @@
                 var debug3 = document.querySelector('#transformer-4 em');
                 new Scrollify('#transformer-4')
                   .addScene({
-                    start: 0.3,
-                    duration: '500px',
+                    start: 0.2,
+                    duration: '400px',
                     easing: Scrollify.easings.easeInElastic,
                     effects: [{
                       fn: Scrollify.fx.scale,
@@ -282,7 +287,7 @@
                         to: 1.5
                       }
                     }, {
-                      fn: function(p) { debug3.innerHTML = p.toFixed(3); }
+                      fn: () => (p) => { debug3.innerHTML = p.toFixed(3); }
                     }]
                   });
               });
@@ -296,23 +301,24 @@
           <dt><h4>Add Multiple Effects</h4></dt>
           <dd>
             <p>You can also specify multiple effects within the same scene:</p>
-            <pre><code class="language-javascript">new Scrollify('#transformer-5')
+            <pre><code class="language-javascript">import { scale, rotate, translateX } from './fx';
+new Scrollify('#transformer-5')
   .addScene({
-    start: 0.4,
+    start: 0.3,
     effects: [
       {
-        fn: Scrollify.fx.scale,
+        fn: scale,
         options: {
           from: 1.0,
           to: 0.5
         }
       }, {
-        fn: Scrollify.fx.rotate,       // add other effects if you wish
+        fn: rotate,
         options: {
           rad: Math.PI
         }
       }, {
-        fn: Scrollify.fx.translateX,   // add other effects if you wish
+        fn: translateX,
         options: {
           from: 0,
           to: 400
@@ -327,7 +333,7 @@
                 var debug5 = document.querySelector('#transformer-5 span');
                 new Scrollify('#transformer-5')
                   .addScene({
-                    start: 0.4,
+                    start: 0.3,
                     effects: [
                       {
                         fn: Scrollify.fx.scale,
@@ -347,7 +353,7 @@
                           to: 400
                         }
                       }, {
-                        fn: function(p) { debug5.innerHTML = p.toFixed(3); }
+                        fn: () => (p) => { debug5.innerHTML = p.toFixed(3); }
                       }
                     ]
                   });
@@ -364,84 +370,54 @@
               also uses a trigger element to start / stop the Scene.
             </p>
 
-            <!-- <pre><code class="language-javascript">new Scrollify('#sticky')
-  .addScene({
-    trigger: '#multiple',
-    duration: '30%'
-    effects: [{
-      translateY: {
-        to: '+=300'
-      }
-    }]
-  })
-  .addScene({
-    trigger: '#multiple',
-    start: '30%',           // this Scene will start when "#multiple" is at 30%
-    duration: '40%',
-    effects: [{
-      fade: {
-        to: 0
-      }
-    }]
-  })
-  .addScene({
-    trigger: '#multiple',
-    start: 70%,
-    duration: '30%',
-    effects: [{
-      translateY: {
-        to: '-=300'
-      },
-      fade: {
-        to: 1
-      }
-    }]
-  });</code></pre> -->
+            <pre><code class="language-javascript">import { translateY, fade, rotate } from './fx';
+import { easeIn } from './easings';
 
-  <pre><code class="language-javascript">new Scrollify('#sticky')
+new Scrollify('#sticky')
   .addScene({
     trigger: '#multiple',
     duration: '30%'
-    effects: [{
-      fn: Scrollify.fx.translateY,
-      options: {
-        from: 0,
-        to: 300
+    easing: easeIn,
+    effects: [
+      {
+        fn: translateY,
+        options: {
+          from: 0,
+          to: 300
+        }
+      }, {
+        fn: fade,
+        options: {
+          from: 1,
+          to: 0.5
+        }
+      }, {
+        fn: rotate,
+        options: {
+          rad: Math.PI/8
+        }
       }
-    }]
-  })
-  .addScene({
-    trigger: '#multiple',
-    start: '30%',           // this Scene will start when "#multiple" is at 30%
-    duration: '40%',
-    effects: [{
-      fn: Scrollify.fx.fade,
-      options: {
-        from: 1,
-        to: 0
-      }
-    }]
+    ]
   })
   .addScene({
     trigger: '#multiple',
     start: 70%,
     duration: '30%',
     effects: [
-    {
-      fn: Scrollify.fx.translateY,
-      options: {
-        to: 300
+      {
+        fn: translateY,
+        options: {
+          to: 300
+        }
+      }, {
+        fn: fade,
+        options: {
+          from: 0,
+          to: 1
+        }
       }
-    }, {
-      fn: Scrollify.fx.fade,
-      options: {
-        from: 0,
-        to: 1
-      }
-    }]
+    ]
   });</code></pre>
-
-            <!-- demo goes here -->
             <script>
               window.addEventListener('load', function() {
                 new Scrollify('#sticky')
@@ -460,7 +436,7 @@
                         fn: Scrollify.fx.fade,
                         options: {
                           from: 1,
-                          to: .5
+                          to: 0.5
                         }
                       }, {
                         fn: Scrollify.fx.rotate,
@@ -492,6 +468,7 @@
                   });
               });
             </script>
+
             <p id="multiple" class="demo">
               <strong>&larr;</strong> This is another trigger element that will trigger various transforms on the navigation.
             </p>
@@ -520,6 +497,7 @@ new Scrollify('#parallax').addEffect(Scrollify.fx.parallax, options);</code></pr
 
           <dt><h4>Stick <span style="color:orange">(experimental)</span> </h4></dt>
           <dd>
+            <span style="font-size: 0.8rem;margin-bottom: 1em;display: inline-block;">Note: this is for demo purposes as to what is possible. You would probably be better using position:sticky in your CSS directly</span>
             <p>There is a <strong>sticky</strong> function as well; keep in mind that you'll need
             to CSSify a few things, though. It's probably easiest if you wrap your element in an empty
             <em>spacer</em> element, which would serve as a placeholder for changes in the display
@@ -560,7 +538,7 @@ new Scrollify('#parallax').addEffect(Scrollify.fx.parallax, options);</code></pr
                     effects: [{
                       fn: stick                       // the effect to apply, and when (within the progress of the scene)
                     }, {
-                      fn: function(p) { debug6.innerHTML = p.toFixed(3); }
+                      fn: () => (p) => { debug6.innerHTML = p.toFixed(3); }
                     }]
                   });
               });
@@ -620,15 +598,19 @@ new Scrollify('#parallax').addEffect(Scrollify.fx.parallax, options);</code></pr
             <p>Here, we're just showcasing a way to store animation preferences in a data-object, for quick
               and easy manipulation of many elements at once.</p>
 
-            <pre><code class="language-markup">&lt;div data-scrollify="['parallax', { range:400  }]"> 1 &lt;/div></code></pre>
-            <pre><code class="language-javascript">var elements = document.querySelectorAll('[data-scrollify]');
-Array.prototype.forEach.call(elements, function(el) {
-  var data = eval('(' + el.dataset.scrollify +')');
-  var effect = data[0];
-  var opts = data[1];
-  var fx = Scrollify.fx[effect];
+            <pre><code class="language-markup">&lt;div data-scrollify='["parallax", { "range":400  }]'> 1 &lt;/div>
+&lt;div data-scrollify='["parallax", { "range":200  }]'> 2 &lt;/div>
+&lt;div data-scrollify='["parallax", { "range":0    }]'> 3 &lt;/div>
+&lt;div data-scrollify='["parallax", { "range":-200 }]'> 4 &lt;/div>
+&lt;div data-scrollify='["parallax", { "range":-400 }]'> 5 &lt;/div>
+            </code></pre>
+            <pre><code class="language-javascript">import * as fx from './fx';
 
-  new Scrollify(el).addEffect(fx, opts);
+const elements = document.querySelectorAll('[data-scrollify]');
+
+elements.forEach((el) => {
+  const [ effect, opts ] = JSON.parse(el.dataset.scrollify);
+  new Scrollify(el).addEffect(fx[effect], opts);
 });</code></pre>
 
             <div class="ref">
@@ -691,9 +673,11 @@ Array.prototype.forEach.call(elements, function(el) {
             <p>You can also roll your own custom effect. Have a look in the effects.js
               file to glean further insight.</p>
             <pre><code class="language-javascript">// your custom effect here
-var skew = function(progress) {
-  var amount = 60 * progress;
-  this.element.style.transform = 'skew('+amount+'deg)';
+var skew = function({ element }) {
+  return (progress) => {
+    var amount = 60 * progress;
+    element.style.transform = 'skew('+amount+'deg)';
+  }
 }
 new Scrollify('#custom')
   .addScene({
@@ -712,9 +696,11 @@ new Scrollify('#custom')
             </p>
             <script>
               window.addEventListener('load', function() {
-                var skew = function(progress) {
-                  var amount = 45 * progress;
-                  this.element.style.transform = 'skew('+amount+'deg)';
+                var skew = function({ element }) {
+                  return (progress) => {
+                    var amount = 45 * progress;
+                    element.style.transform = 'skew('+amount+'deg)';
+                  }
                 };
                 new Scrollify('#custom')
                   .addScene({
@@ -787,18 +773,20 @@ new Scrollify('#custom')
               window.addEventListener('load', function() {
                 var images = document.querySelectorAll('#sequence img');
                 var length = images.length - 1;
-                var sequencer = function(progress) {
-                  var index = parseInt(progress * length);
+                var sequencer = function() {
+                  return (progress) => {
+                    var index = parseInt(progress * length);
 
-                  Array.prototype.forEach.call(images, function(img) { img.style.opacity = 0; });
-                  index = Math.min(length, Math.max(index, 0));
-                  images[index].style.opacity = 1;
+                    Array.prototype.forEach.call(images, function(img) { img.style.opacity = 0; });
+                    index = Math.min(length, Math.max(index, 0));
+                    images[index].style.opacity = 1;
+                  }
                 };
 
                 new Scrollify('#sequence')
                   .addScene({
                     start: 0.3,
-                    duration: function(trigger) { return window.innerHeight * 0.8; },
+                    duration: function(el) { return window.innerHeight * 0.8; },
                     effects: [
                       { fn: sequencer }
                     ]
@@ -894,6 +882,13 @@ new Scrollify('#custom')
 
 
   <script src="../dist/scrollify.js"></script>
+  <script>
+    var Scrollify = scrollify.Scrollify;
+    Scrollify.easings = scrollify.easings;
+    Scrollify.fx = scrollify.fx;
+
+    window.Scrollify = Scrollify;
+  </script>
 </body>
 
 </html>

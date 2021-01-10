@@ -17,10 +17,10 @@
     "scroll"
   ],
   "scripts": {
-    "start": "http-server ./ -p 8080 -d",
+    "start": "http-server ./ -p 8888 -d",
     "clean": "rimraf dist/*.js*",
     "build": "npm run clean && npm run lint && rollup -c",
-    "lint": "eslint source/js/*.js",
+    "lint": "eslint src/*.js",
     "test": "#tape -r babel-register test/*.js"
   },
   "devDependencies": {

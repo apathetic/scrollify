@@ -217,9 +217,9 @@ function createMatrix() {
         for (var i = 0; i < 15; ++i) {
           if (Math.abs(data[i]) < 0.0001) {
             css += '0,';
-           } else {
-             css += data[i].toFixed(10) + ',';
-           }
+          } else {
+            css += data[i].toFixed(10) + ',';
+          }
         }
         if (Math.abs(data[15]) < 0.0001) {
           css += '0)';

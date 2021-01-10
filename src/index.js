@@ -9,7 +9,7 @@ import * as easings from './easings';
 
 export default Scrollify;
 export {
-  Scrollify,        // exported here for commonJS modules
+  Scrollify,
   fx,
   easings
 };

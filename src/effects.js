@@ -1,171 +1,149 @@
 /**
  * A list of some default "transformations" that may be applied
- * Options are applied at initialize and are curried in via "this".
- *
- * NOTE: for all functions herein, "this" contains effect options, a
- * transformation Object, and also a reference to the element.
  */
-
-/*global console*/
-/*eslint no-invalid-this: "error"*/
-
-import { transform } from './utils';
-
-
-// Effects that use matrix transformations. At present, only
-// built-in effects benefit from matrix transformations.
-[translateX, translateY, rotate, scale, parallax].forEach((fn) => {
-  fn._applyTransform = true;
-});
 
 
 /**
  * Translate an element along the X-axis.
- * @param {Float} progress  Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {object} context.transforms An object of matrix transforms to manipulate.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-export function translateX(progress) {
-  const to = (this.options.to !== undefined) ? this.options.to : 0;
-  const from = (this.options.from !== undefined) ? this.options.from : 0;
-  const offset = (to - from) * progress + from;
+export const translateX = ({ options, transforms }) => {
+  const to = (options.to !== undefined) ? options.to : 0;
+  const from = (options.from !== undefined) ? options.from : 0;
 
-  this.transforms.position[0] = offset;
-}
+  return (progress) => {
+    transforms.position[0] = (to - from) * progress + from;
+  };
+};
 
 /**
  * Translate an element vertically.
- * @param {Float} progress  Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {object} context.transforms An object of matrix transforms to manipulate.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-export function translateY(progress) {
-  const to = (this.options.to !== undefined) ? this.options.to : 0;
-  const from = (this.options.from !== undefined) ? this.options.from : 0;// this.transforms.position[1];
-  const offset = (to - from) * progress + from;
+export const translateY = ({ options, transforms }) => {
+  const to = (options.to !== undefined) ? options.to : 0;
+  const from = (options.from !== undefined) ? options.from : 0;// this.transforms.position[1];
 
-  this.transforms.position[1] = offset;
-}
-
-// export function translate(progress) {
-//   const to = this.options.to;
-//   const from = this.options.from;
-//   const offsetX = (to[0] - from[0]) * progress + from[0];
-//   const offsetY = (to[1] - from[1]) * progress + from[1];
-//
-//   this.transforms.position[0] = offsetX;
-//   this.transforms.position[1] = offsetY;
-// }
+  return (progress) => {
+    transforms.position[1] = (to - from) * progress + from;
+  };
+};
 
 /**
  * Rotate an element, using radians. (note: rotates around Z-axis).
- * @param {Float} progress  Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {object} context.transforms An object of matrix transforms to manipulate.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-export function rotate(progress) {
-  const radians = this.options.rad * progress;
-
-  this.transforms.rotation[2] = radians;
+export const rotate = ({ options, transforms }) => {
+  return (progress) => {
+    transforms.rotation[2] = options.rad * progress;
+  };
 };
 
 /**
  * Uniformly scale an element along both axis'.
- * @param {Float} progress  Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {object} context.transforms An object of matrix transforms to manipulate.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-export function scale(progress) {
-  const to = (this.options.to !== undefined) ? this.options.to : 1;
-  const from = (this.options.from !== undefined) ? this.options.from : this.transforms.scale[0];
-  const scale = (to - from) * progress + from;
+export const scale = ({ options, transforms }) => {
+  const to = (options.to !== undefined) ? options.to : 1;
+  const from = (options.from !== undefined) ? options.from : transforms.scale[0];
 
-  this.transforms.scale[0] = scale;
-  this.transforms.scale[1] = scale;
+  return (progress) => {
+    const scale = (to - from) * progress + from;
+
+    transforms.scale[0] = scale;
+    transforms.scale[1] = scale;
+  };
 };
 
 /**
  * Update an element's opacity.
- * @param {Float} progress  Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {HTMLElement} context.element A reference to the element to Scrollify.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-export function fade(progress) {
-  const to = (this.options.to !== undefined) ? this.options.to : 0;
-  const from = (this.options.from !== undefined) ? this.options.from : 1;
-  const opacity = (to - from) * progress + from;
+export const fade = ({ options, element }) => {
+  const to = (options.to !== undefined) ? options.to : 0;
+  const from = (options.from !== undefined) ? options.from : 1;
 
-  this.element.style.opacity = opacity;
+  return (progress) => {
+    element.style.opacity = (to - from) * progress + from;
+  };
 };
 
 /**
  * Update an element's blur.
- * @param {Float} progress  Current progress of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {HTMLElement} context.element A reference to the element to Scrollify.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-export function blur(progress) {
-  const to = (this.options.to !== undefined) ? this.options.to : 0;
-  const from = (this.options.from !== undefined) ? this.options.from : 0;
-  const amount = (to - from) * progress + from;
+export const blur = ({ options, element }) => {
+  const to = (options.to !== undefined) ? options.to : 0;
+  const from = (options.from !== undefined) ? options.from : 0;
 
-  this.element.style.filter = 'blur(' + amount + 'px)';
+  return (progress) => {
+    const amount = (to - from) * progress + from;
+    element.style.filter = 'blur(' + amount + 'px)';
+  };
 };
 
 /**
  * Parallax an element.
- * @param {Float} progress  Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {object} context.transforms An object of matrix transforms to manipulate.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-export function parallax(progress) {
-  const range = this.options.range || 0;
-  const offset = progress * range;        // TODO add provision for speed as well
+export const parallax = ({ options, transforms }) => {
+  const range = options.range || 0;
 
-  this.transforms.position[1] = offset;   // just vertical for now
-}
+  return (progress) => {
+    transforms.position[1] = progress * range;
+  };
+};
 
 /**
  * Toggle a class on or off.
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {HTMLElement} context.element A reference to the element to Scrollify.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-export function toggle(progress) {
-  const opts = this.options;
-  const element = this.element;
-  const times = Object.keys(opts);
+export const toggle = ({ options, element }) => {
+  const times = Object.keys(options);
 
-  times.forEach(function(time) {
-    const css = opts[time];
-
-    if (progress > time) {
-      element.classList.add(css);
-    } else {
-      element.classList.remove(css);
-    }
-  });
-}
+  return (progress) => {
+    times.forEach((time) => {
+      const css = options[time];
+      element.classList.toggle(css, progress > +time);
+    });
+  };
+};
 
 /**
  * Sticky Element: sets up a sticky element which toggles position 'fixed' on / off.
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * NOTE: this is a POC, a little CSS is also required
+ * @param {object} context Setup options
+ * @param {HTMLElement} context.element A reference to the element to Scrollify.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-export function stick(progress) {
-  let element = this.element;
-  let currentState = element._currentState || null; // store prop on element
+export const stick = ({ element }) => {
+  function setState(state) {
+    let currentState = element.__currentState; // store state on element
 
-  if (progress <= 0) {
-    setState(element, 'normal');
-  } else if (progress >= 1) {
-    setState(element, 'bottom');
-  } else {
-    setState(element, 'sticky');
-  }
-
-  function setState(element, state) {
     if (currentState === state) { return; }
     if (state == 'sticky') {
       let BCR = element.getBoundingClientRect();
@@ -181,6 +159,23 @@ export function stick(progress) {
 
     element.classList.remove(currentState);
     element.classList.add(state);
-    element._currentState = state;
+    element.__currentState = state;
   }
-}
+
+  return (progress) => {
+    if (progress <= 0) {
+      setState('normal');
+    } else if (progress >= 1) {
+      setState('bottom');
+    } else {
+      setState('sticky');
+    }
+  };
+};
+
+
+// Effects that use matrix transformations. At present, only
+// built-in effects benefit from matrix transformations.
+[translateX, translateY, rotate, scale, parallax].forEach((fn) => {
+  Object.defineProperty(fn, '__applyTransform', { value: true });
+});
