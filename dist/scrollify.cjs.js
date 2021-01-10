@@ -3,26 +3,33 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 /**
- * Feature detection: CSS transforms
- * @type {Boolean}
- */
-var transform = false;
-if (typeof window !== 'undefined') {
-  var dummy = document.createElement('div');
-
-  ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].forEach(function (t) {
-    if (dummy.style[t] !== undefined) { transform = t; }
-  });
-}
-
-/**
  * getUnit(), from anime.js
  * @copyright ©2017 Julian Garnier
  * Released under the MIT license
  */
 function getUnit(val) {
   var split = /([\+\-]?[0-9#\.]+)(%|px|pt|em|rem|in|cm|mm|ex|pc|vw|vh|deg|rad|turn)?/.exec(val);
-  if (split) return split[2];
+  if (split) { return split[2]; }
+}
+
+/**
+  * [mapTo description]
+  * @param  {any} input [description]
+  * @param  {number} scale [description]
+  * @return {number}       [description]
+  */
+function mapTo(input, scale) {
+  var parsed = parseFloat(input);
+  var unit = getUnit(input);
+
+  switch (unit) {
+    case 'px':
+      return parsed;
+    case '%':
+      return parsed / 100.0 * scale;
+    default:
+      return parsed * scale;
+  }
 }
 
 /*
@@ -242,9 +249,9 @@ function createMatrix() {
         for (var i = 0; i < 15; ++i) {
           if (Math.abs(data[i]) < 0.0001) {
             css += '0,';
-           } else {
-             css += data[i].toFixed(10) + ',';
-           }
+          } else {
+            css += data[i].toFixed(10) + ',';
+          }
         }
         if (Math.abs(data[15]) < 0.0001) {
           css += '0)';
@@ -310,23 +317,56 @@ function createMatrix() {
  * Licensed under the MIT license.
  *
  */
+var transform = 'transform';
+
+
+/**
+ * Calculate the start point of each scene.
+ * @param  {HTMLElement} trigger ....
+ * @return {number} The start position of the Scene, in pixels.
+ */
+function calculateStart(trigger, offset) {
+  if ( offset === void 0 ) offset = 0;
+
+  var c = window.innerHeight - (offset * window.innerHeight);
+  var top = trigger ? trigger.getBoundingClientRect().top + window.pageYOffset : 0;
+
+  return Math.max(0, top - c);
+}
+
+/**
+ * [calculateDuration description]
+ * @param  {number|string|Function} d The duration, as a fixed px value, a % of the element, or a custom function
+ * @param  {HTMLElement} el The element to Scrollify
+ * @return [type]         [description]
+ */
+function calculateDuration(d, el) {
+  if ( d === void 0 ) d = 1;
+
+  return (typeof d === 'function') ?
+    d(el) :
+    mapTo(d, window.innerHeight + el.offsetHeight);
+}
+
+
 
 /**
  * The Scrollify Class
  */
-var Scrollify$1 = function Scrollify(element) {
+var Scrollify = function Scrollify(element) {
   var this$1 = this;
 
-  if (element instanceof HTMLElement == false) { element = document.querySelector(element); }
-  if (!element || !transform) {
-    console.log('Scrollify [error] ', arguments[0]);
-    return this.disable();
+  if (element instanceof HTMLElement === false) {
+    element = document.querySelector(element);
+  }
+
+  if (!element) {
+    throw new Error('Scrollify requires an `element`');
   }
 
   this.element = element;
   this.ticking = false;
   this.scenes = [];
-  this.scroll = window.scrollY || window.pageYOffset;
   this.active = true;
   this.matrix = createMatrix();
   this.transforms = {
@@ -336,6 +376,8 @@ var Scrollify$1 = function Scrollify(element) {
     // transformOrigin: [0,0,0]
     // skew: [],
   };
+
+  element.style.willChange = transform;
 
   window.addEventListener('scroll', function () { return this$1.onScroll(); }, { passive: true });
   window.addEventListener('resize', function () { return this$1.onResize(); }, { passive: true });
@@ -363,35 +405,55 @@ var Scrollify$1 = function Scrollify(element) {
  *
  *  easing: Ease in/out of any effects in the Scene.
  *
- * @return {void}
  */
-Scrollify$1.prototype.addScene = function addScene (opts) {
+Scrollify.prototype.addScene = function addScene (opts) {
     var this$1 = this;
 
-  var trigger = opts.trigger ? opts.trigger instanceof HTMLElement ? opts.trigger : document.querySelector(opts.trigger) : this.element;
-  var easing = opts.easing || false;
-  var effects = opts.effects || [];
+  var trigger = opts.trigger;
+    var easing = opts.easing;
+    var effects = opts.effects;
+    var start = opts.start;
+    var duration = opts.duration;
+  var ref = this;
+    var element = ref.element;
+    var transforms = ref.transforms;
+
+  effects = effects || [];
+  trigger = trigger ?
+    trigger instanceof HTMLElement ?
+      trigger :
+      document.querySelector(trigger) :
+    element;
+
   var scene = {
-    _trigger: trigger,                // keep for internal calculations
-    _applyTransform: false,           // internal-use only. Whether to use matrix transforms or not. Perhaps should be moved to *effect* level
-    _offset: opts.start || 0,         // store original value for later calcs
-    _duration: opts.duration || 1,    // store original value for later calculations
-    // start: 0,                      // absolute value in px. Some percentage of the viewport
-    // duration: duration,            // absolute value in px. Some percentage of the viewport
+    start: 0,
+    duration: 0,
+    state: '',
     easing: easing,
-    effects: []
+    effects: effects.map(function (ref) {
+        var fn = ref.fn;
+        var options = ref.options;
+
+        return fn({ options: options, element: element, transforms: transforms });
+    }),
+    reset: function () {
+      var scroll = window.scrollY;
+      scene.start = calculateStart(trigger, start);
+      scene.duration = calculateDuration(duration, element);
+      scene.state = (scroll > scene.start) ? (scroll > scene.start + scene.duration) ? 'after' : 'active' : 'before';
+      this$1.update(scene);
+    }
   };
 
-  effects.map(function (effect) {
-    this$1.addEffect(effect.fn, effect.options, scene);
-  });
+  // internal-use only. Whether to use matrix transforms or not.
+  // Perhaps should be moved to *effect* level
+  scene.__applyTransform = effects.some(function (ref) {
+      var fn = ref.fn;
 
-  this.calculateStart(scene);
-  this.calculateDuration(scene);
+      return fn.__applyTransform;
+    });
+  scene.reset();
 
-  scene.state = (this.scroll > this.start) ? (this.scroll > this.start + scene.duration) ? 'after' : 'active' : 'before';
-
-  this.calculate(scene);
   this.scenes.push(scene);
 
   if (opts.debug) {
@@ -402,146 +464,65 @@ Scrollify$1.prototype.addScene = function addScene (opts) {
 };
 
 /**
- * Update each scene.
- * @param{Object} scene: The scene to update.
- * @return {void}
+ * Convenience method to add an effect directly to a scrollify'd element.
+ * i.e. "addEffect" was called directly on Scrollify
+ * @param{Function} fn The transformation function to apply.
+ * @param{object} options Any transformation options.
+ * @param{object} scene Object containing scene data.
  */
-Scrollify$1.prototype.updateScene = function updateScene (scene) {
-  this.calculateStart(scene);
-  this.calculateDuration(scene);
-  this.calculate(scene);
-};
-
-/**
- * Add a particular transformation to a scene.
- * @param{Function} effect: The transformation function to apply.
- * @param{Object} options: Any transformation options.
- * @param{Object} scene: Object containing start and duration information.
- * @return {void}
- */
-Scrollify$1.prototype.addEffect = function addEffect (fn, options, scene) {
+Scrollify.prototype.addEffect = function addEffect (fn, options, scene) {
     if ( options === void 0 ) options = {};
 
-  var element = this.element;
-  var transforms = this.transforms;
-  var context = { options: options, element: element, transforms: transforms };
+  var ref = this;
+    var element = ref.element;
+    var transforms = ref.transforms;
 
   if (!scene) {
-    if (this.scenes.length) {
-      // use the most recently added scene
-      scene = this.scenes[this.scenes.length - 1];
-    } else {
-      // or if no scene (ie "addEffect" was called directly on Scrollify), set up a default one
-      return this.addScene({
-        'effects': [{'fn': fn, 'options': options}]
-      });
-    }
+    if (!this.scenes.length) { this.addScene({}); }
+    scene = this.scenes[this.scenes.length - 1];
   }
 
-  // if any effect uses a matrix tranformation, we use true for the entire scene
-  scene._applyTransform = scene._applyTransform || fn._applyTransform;
-  scene.effects.push(fn.bind(context));
-  // scene.effects.push(() => { fn.call(context); });
-
-  return this;
-};
-
-/**
- * Calculate the start point of each scene.
- * @param{Scrollify.Scene} scene A Scrollify Scene object.
- * @return {Integer} The start position of the Scene, in pixels.
- */
-Scrollify$1.prototype.calculateStart = function calculateStart (scene) {
-  var offset = window.innerHeight - this.mapTo(scene._offset, window.innerHeight);
-  var trigger = scene._trigger;
-  var top = 0;
-
-  do {
-    top += trigger.offsetTop || 0;
-    trigger = trigger.offsetParent;
-  } while(trigger);
-  // var test = trigger.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
-
-  scene.start = Math.max(0, top - offset);
-};
-
-/**
- * [mapTo description]
- * @param{[type]} input [description]
- * @param{[type]} scale [description]
- * @return {[type]}     [description]
- */
-Scrollify$1.prototype.mapTo = function mapTo (input, scale) {
-  var parsed = parseFloat(input);
-  var unit = getUnit(input);
-
-  switch (unit) {
-    case 'px':
-      return parsed;
-    case '%':
-      return parsed / 100.0 * scale;
-    default:
-      return parsed * scale;
-  }
-};
-
-/**
- * [calculateDuration description]
- * @param{[type]} scene [description]
- * @return [type]       [description]
- */
-Scrollify$1.prototype.calculateDuration = function calculateDuration (scene) {
-  scene.duration = (typeof scene._duration === 'function') ?
-    scene._duration(scene._trigger) :
-    this.mapTo(scene._duration, window.innerHeight + this.element.offsetHeight);
+  scene.effects.push( fn({ options: options, element: element, transforms: transforms }) );
+  scene.__applyTransform = scene.__applyTransform || fn.__applyTransform;
 };
 
 /**
  * onScroll Handler
- * @return {void}
+ * TODO: debounce?
  */
-Scrollify$1.prototype.onScroll = function onScroll () {
+Scrollify.prototype.onScroll = function onScroll () {
+    var this$1 = this;
+
   if (!this.active) { return; }
 
-  this.scroll = window.scrollY || window.pageYOffset;
-  this.direction = (this.scroll > this.previousScroll) ? 'down' : 'up';
-  this.previousScroll = this.scroll;
-
-  if (!this.ticking) {
-    window.requestAnimationFrame(this.update.bind(this));
-    // window.requestAnimationFrame(() => { this.update(); });
-    this.ticking = true;
-  }
+  window.requestAnimationFrame(function () {
+    this$1.scenes.forEach(function (s) { return this$1.update(s); }, this$1);
+  });
 };
 
 /**
- * onResize Handler
+ * onResize handler
  * @return {void}
  */
-Scrollify$1.prototype.onResize = function onResize () {
-  this.scenes.forEach(this.updateScene, this);
+Scrollify.prototype.onResize = function onResize () {
+  this.scenes.forEach(function (s) { return s.reset(); });
 };
 
 /**
- * Update the transformations for every scene.
- * @return {void}
+ * Update the transformation effects for each scene.
+ * @param{object} scene The `scene` object.
+ * @param{number} scene.start When the `scene` is active and effects calculated.
+ * @param{number} scene.duration How long the scene is "active" for, in px.
+ * @param{array} scene.effects An array of effects to apply to the `element`.
+ * @param{string} scene.state A label for the scene's running state.
+ * @param{function} scene.easing Custom easing for the progress value.
  */
-Scrollify$1.prototype.update = function update () {
-  this.scenes.forEach(this.calculate, this);
-  this.ticking = false;
-};
-
-/**
- * Calculate the transformations for each scene.
- * @param{Object} scene: An Object containing start and duration
- *                       information as well as an Array of
- *                       transformations to apply.
- * @return {void}
- */
-Scrollify$1.prototype.calculate = function calculate (scene) {
+Scrollify.prototype.update = function update (scene) {
   var start = scene.start;
-  var duration = scene.duration;
-  var scroll = this.scroll;
+    var duration = scene.duration;
+    var easing = scene.easing;
+    var effects = scene.effects;
+  var scroll = window.scrollY;
   var progress;
 
   // after end
@@ -565,239 +546,244 @@ Scrollify$1.prototype.calculate = function calculate (scene) {
   // active
   } else {
     scene.state = 'active';
-    if (scene.easing) { //          start, from, to, end
-      progress = scene.easing(scroll - start, 0, 1, duration);
+    if (easing) { //          start, from, to, end
+      progress = easing(scroll - start, 0, 1, duration);
     } else {
       progress = (scroll - start) / duration;
     }
   }
 
   // cycle through any registered transformations
-  scene.effects.forEach(function (effect) {
-    effect(progress);
-  });
+  effects.forEach(function (effect) { return effect(progress); });
 
-  if (scene._applyTransform) {
+  if (scene.__applyTransform) {
     // transmogrify all applied transformations into a single matrix, and apply
-    var matrix = this.updateMatrix();
-    this.element.style[transform] = matrix.asCSS();
+    this.element.style[transform] = this.updateMatrix().asCSS();
   }
 };
 
 /**
  * Loop through all the element's transformation data and calculates a matrix representing it.
- * @return {Matrix} Ye olde Matrix
+ * @return {object} Ye olde Matrix
  */
-Scrollify$1.prototype.updateMatrix = function updateMatrix () {
-  var t = this.transforms;
-  var m = this.matrix;
+Scrollify.prototype.updateMatrix = function updateMatrix () {
+  var ref = this;
+    var matrix = ref.matrix;
+    var t = ref.transforms;
 
-  m.clear();
+  matrix.clear();
 
   // here we adjust the transformOrigin ...
   if (t.transformOrigin) {
-    m.translate(-t.transformOrigin[0], -t.transformOrigin[1], -t.transformOrigin[2]);
+    matrix.translate(-t.transformOrigin[0], -t.transformOrigin[1], -t.transformOrigin[2]);
   }
 
   if (t.scale) {
-    m.scale(t.scale[0], t.scale[1]);
+    matrix.scale(t.scale[0], t.scale[1]);
   }
 
   if (t.skew) {
-    m.skew(t.skew[0], t.skew[1]);
+    matrix.skew(t.skew[0], t.skew[1]);
   }
 
   if (t.rotation) {
-    m.rotateX(t.rotation[0]);
-    m.rotateY(t.rotation[1]);
-    m.rotateZ(t.rotation[2]);
+    matrix.rotateX(t.rotation[0]);
+    matrix.rotateY(t.rotation[1]);
+    matrix.rotateZ(t.rotation[2]);
   }
 
   if (t.position) {
-    m.translate(t.position[0], t.position[1], t.position[2]);
+    matrix.translate(t.position[0], t.position[1], t.position[2]);
   }
 
   // ... and here we put it back. (This duplication is not a mistake).
   if (t.transformOrigin) {
-    m.translate(t.transformOrigin[0], t.transformOrigin[1], t.transformOrigin[2]);
+    matrix.translate(t.transformOrigin[0], t.transformOrigin[1], t.transformOrigin[2]);
   }
 
-  return m;
+  return matrix;
 };
 
 /**
  * Disable Scrollify-ing. Perhaps for performance reasons / mobile devices.
  * @return {void}
  */
-Scrollify$1.prototype.disable = function disable () {
+Scrollify.prototype.disable = function disable () {
   this.active = false;
 };
 
 /**
  * A list of some default "transformations" that may be applied
- * Options are applied at initialize and are curried in via "this".
- *
- * NOTE: for all functions herein, "this" contains effect options, a
- * transformation Object, and also a reference to the element.
  */
-
-/*global console*/
-/*eslint no-invalid-this: "error"*/
-
-// Effects that use matrix transformations. At present, only
-// built-in effects benefit from matrix transformations.
-[translateX, translateY, rotate, scale, parallax].forEach(function (fn) {
-  fn._applyTransform = true;
-});
 
 
 /**
  * Translate an element along the X-axis.
- * @param {Float} progress  Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {object} context.transforms An object of matrix transforms to manipulate.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-function translateX(progress) {
-  var to = (this.options.to !== undefined) ? this.options.to : 0;
-  var from = (this.options.from !== undefined) ? this.options.from : 0;
-  var offset = (to - from) * progress + from;
+var translateX = function (ref) {
+  var options = ref.options;
+  var transforms = ref.transforms;
 
-  this.transforms.position[0] = offset;
-}
+  var to = (options.to !== undefined) ? options.to : 0;
+  var from = (options.from !== undefined) ? options.from : 0;
+
+  return function (progress) {
+    transforms.position[0] = (to - from) * progress + from;
+  };
+};
 
 /**
  * Translate an element vertically.
- * @param {Float} progress  Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {object} context.transforms An object of matrix transforms to manipulate.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-function translateY(progress) {
-  var to = (this.options.to !== undefined) ? this.options.to : 0;
-  var from = (this.options.from !== undefined) ? this.options.from : 0;// this.transforms.position[1];
-  var offset = (to - from) * progress + from;
+var translateY = function (ref) {
+  var options = ref.options;
+  var transforms = ref.transforms;
 
-  this.transforms.position[1] = offset;
-}
+  var to = (options.to !== undefined) ? options.to : 0;
+  var from = (options.from !== undefined) ? options.from : 0;// this.transforms.position[1];
 
-// export function translate(progress) {
-//   const to = this.options.to;
-//   const from = this.options.from;
-//   const offsetX = (to[0] - from[0]) * progress + from[0];
-//   const offsetY = (to[1] - from[1]) * progress + from[1];
-//
-//   this.transforms.position[0] = offsetX;
-//   this.transforms.position[1] = offsetY;
-// }
+  return function (progress) {
+    transforms.position[1] = (to - from) * progress + from;
+  };
+};
 
 /**
  * Rotate an element, using radians. (note: rotates around Z-axis).
- * @param {Float} progress  Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {object} context.transforms An object of matrix transforms to manipulate.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-function rotate(progress) {
-  var radians = this.options.rad * progress;
+var rotate = function (ref) {
+  var options = ref.options;
+  var transforms = ref.transforms;
 
-  this.transforms.rotation[2] = radians;
-}
+  return function (progress) {
+    transforms.rotation[2] = options.rad * progress;
+  };
+};
 
 /**
  * Uniformly scale an element along both axis'.
- * @param {Float} progress  Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {object} context.transforms An object of matrix transforms to manipulate.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-function scale(progress) {
-  var to = (this.options.to !== undefined) ? this.options.to : 1;
-  var from = (this.options.from !== undefined) ? this.options.from : this.transforms.scale[0];
-  var scale = (to - from) * progress + from;
+var scale = function (ref) {
+  var options = ref.options;
+  var transforms = ref.transforms;
 
-  this.transforms.scale[0] = scale;
-  this.transforms.scale[1] = scale;
-}
+  var to = (options.to !== undefined) ? options.to : 1;
+  var from = (options.from !== undefined) ? options.from : transforms.scale[0];
+
+  return function (progress) {
+    var scale = (to - from) * progress + from;
+
+    transforms.scale[0] = scale;
+    transforms.scale[1] = scale;
+  };
+};
 
 /**
  * Update an element's opacity.
- * @param {Float} progress  Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {HTMLElement} context.element A reference to the element to Scrollify.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-function fade(progress) {
-  var to = (this.options.to !== undefined) ? this.options.to : 0;
-  var from = (this.options.from !== undefined) ? this.options.from : 1;
-  var opacity = (to - from) * progress + from;
+var fade = function (ref) {
+  var options = ref.options;
+  var element = ref.element;
 
-  this.element.style.opacity = opacity;
-}
+  var to = (options.to !== undefined) ? options.to : 0;
+  var from = (options.from !== undefined) ? options.from : 1;
+
+  return function (progress) {
+    element.style.opacity = (to - from) * progress + from;
+  };
+};
 
 /**
  * Update an element's blur.
- * @param {Float} progress  Current progress of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {HTMLElement} context.element A reference to the element to Scrollify.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-function blur(progress) {
-  var to = (this.options.to !== undefined) ? this.options.to : 0;
-  var from = (this.options.from !== undefined) ? this.options.from : 0;
-  var amount = (to - from) * progress + from;
+var blur = function (ref) {
+  var options = ref.options;
+  var element = ref.element;
 
-  this.element.style.filter = 'blur(' + amount + 'px)';
-}
+  var to = (options.to !== undefined) ? options.to : 0;
+  var from = (options.from !== undefined) ? options.from : 0;
+
+  return function (progress) {
+    var amount = (to - from) * progress + from;
+    element.style.filter = 'blur(' + amount + 'px)';
+  };
+};
 
 /**
  * Parallax an element.
- * @param {Float} progress  Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {object} context.transforms An object of matrix transforms to manipulate.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-function parallax(progress) {
-  var range = this.options.range || 0;
-  var offset = progress * range;        // TODO add provision for speed as well
+var parallax = function (ref) {
+  var options = ref.options;
+  var transforms = ref.transforms;
 
-  this.transforms.position[1] = offset;   // just vertical for now
-}
+  var range = options.range || 0;
+
+  return function (progress) {
+    transforms.position[1] = progress * range;
+  };
+};
 
 /**
  * Toggle a class on or off.
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * @param {object} context Setup options
+ * @param {object} context.options Options for the scale effect
+ * @param {HTMLElement} context.element A reference to the element to Scrollify.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-function toggle(progress) {
-  var opts = this.options;
-  var element = this.element;
-  var times = Object.keys(opts);
+var toggle = function (ref) {
+  var options = ref.options;
+  var element = ref.element;
 
-  times.forEach(function(time) {
-    var css = opts[time];
+  var times = Object.keys(options);
 
-    if (progress > time) {
-      element.classList.add(css);
-    } else {
-      element.classList.remove(css);
-    }
-  });
-}
+  return function (progress) {
+    times.forEach(function (time) {
+      var css = options[time];
+      element.classList.toggle(css, progress > +time);
+    });
+  };
+};
 
 /**
  * Sticky Element: sets up a sticky element which toggles position 'fixed' on / off.
- * @param {Float} progress: Current progress data of the scene, between 0 and 1.
- * @this {Object}
- * @return {void}
+ * NOTE: this is a POC, a little CSS is also required
+ * @param {object} context Setup options
+ * @param {HTMLElement} context.element A reference to the element to Scrollify.
+ * @returns {Function} A function that receives a normalized progress value.
  */
-function stick(progress) {
-  var element = this.element;
-  var currentState = element._currentState || null; // store prop on element
+var stick = function (ref) {
+  var element = ref.element;
 
-  if (progress <= 0) {
-    setState(element, 'normal');
-  } else if (progress >= 1) {
-    setState(element, 'bottom');
-  } else {
-    setState(element, 'sticky');
-  }
+  function setState(state) {
+    var currentState = element.__currentState; // store state on element
 
-  function setState(element, state) {
     if (currentState === state) { return; }
     if (state == 'sticky') {
       var BCR = element.getBoundingClientRect();
@@ -813,21 +799,38 @@ function stick(progress) {
 
     element.classList.remove(currentState);
     element.classList.add(state);
-    element._currentState = state;
+    element.__currentState = state;
   }
-}
+
+  return function (progress) {
+    if (progress <= 0) {
+      setState('normal');
+    } else if (progress >= 1) {
+      setState('bottom');
+    } else {
+      setState('sticky');
+    }
+  };
+};
 
 
-var effects = Object.freeze({
-	translateX: translateX,
-	translateY: translateY,
-	rotate: rotate,
-	scale: scale,
-	fade: fade,
-	blur: blur,
-	parallax: parallax,
-	toggle: toggle,
-	stick: stick
+// Effects that use matrix transformations. At present, only
+// built-in effects benefit from matrix transformations.
+[translateX, translateY, rotate, scale, parallax].forEach(function (fn) {
+  Object.defineProperty(fn, '__applyTransform', { value: true });
+});
+
+var effects = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  translateX: translateX,
+  translateY: translateY,
+  rotate: rotate,
+  scale: scale,
+  fade: fade,
+  blur: blur,
+  parallax: parallax,
+  toggle: toggle,
+  stick: stick
 });
 
 /*eslint max-len: ["error", 120]*/
@@ -1010,37 +1013,37 @@ function easeOutBounce(t, b, c, d) {
   }
 }
 
-
-var easings = Object.freeze({
-	oscillate: oscillate,
-	easeInQuad: easeInQuad,
-	easeOutQuad: easeOutQuad,
-	easeInOutQuad: easeInOutQuad,
-	easeInCubic: easeInCubic,
-	easeOutCubic: easeOutCubic,
-	easeInOutCubic: easeInOutCubic,
-	easeInQuart: easeInQuart,
-	easeOutQuart: easeOutQuart,
-	easeInOutQuart: easeInOutQuart,
-	easeInQuint: easeInQuint,
-	easeOutQuint: easeOutQuint,
-	easeInOutQuint: easeInOutQuint,
-	easeInSine: easeInSine,
-	easeOutSine: easeOutSine,
-	easeInOutSine: easeInOutSine,
-	easeInExpo: easeInExpo,
-	easeOutExpo: easeOutExpo,
-	easeInOutExpo: easeInOutExpo,
-	easeInCirc: easeInCirc,
-	easeOutCirc: easeOutCirc,
-	easeInOutCirc: easeInOutCirc,
-	easeInElastic: easeInElastic,
-	easeOutElastic: easeOutElastic,
-	easeInOutElastic: easeInOutElastic,
-	easeInBack: easeInBack,
-	easeOutBack: easeOutBack,
-	easeInOutBack: easeInOutBack,
-	easeOutBounce: easeOutBounce
+var easings = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  oscillate: oscillate,
+  easeInQuad: easeInQuad,
+  easeOutQuad: easeOutQuad,
+  easeInOutQuad: easeInOutQuad,
+  easeInCubic: easeInCubic,
+  easeOutCubic: easeOutCubic,
+  easeInOutCubic: easeInOutCubic,
+  easeInQuart: easeInQuart,
+  easeOutQuart: easeOutQuart,
+  easeInOutQuart: easeInOutQuart,
+  easeInQuint: easeInQuint,
+  easeOutQuint: easeOutQuint,
+  easeInOutQuint: easeInOutQuint,
+  easeInSine: easeInSine,
+  easeOutSine: easeOutSine,
+  easeInOutSine: easeInOutSine,
+  easeInExpo: easeInExpo,
+  easeOutExpo: easeOutExpo,
+  easeInOutExpo: easeInOutExpo,
+  easeInCirc: easeInCirc,
+  easeOutCirc: easeOutCirc,
+  easeInOutCirc: easeInOutCirc,
+  easeInElastic: easeInElastic,
+  easeOutElastic: easeOutElastic,
+  easeInOutElastic: easeInOutElastic,
+  easeInBack: easeInBack,
+  easeOutBack: easeOutBack,
+  easeInOutBack: easeInOutBack,
+  easeOutBounce: easeOutBounce
 });
 
 /**
@@ -1048,7 +1051,7 @@ var easings = Object.freeze({
  * Useful for existing demos or if you wish to include manually
  */
 
-exports['default'] = Scrollify$1;
-exports.Scrollify = Scrollify$1;
-exports.fx = effects;
+exports.Scrollify = Scrollify;
+exports.default = Scrollify;
 exports.easings = easings;
+exports.fx = effects;
