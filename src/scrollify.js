@@ -7,33 +7,63 @@
  *
  */
 
-import { mapTo } from './utils';
+import { getRef, getPosition, isFunc, isArray } from './utils';
+import * as Effects from './effects';
+import * as Easings from './easings';
 import createMatrix from './matrix';
+
 const transform = 'transform';
+const scrollifys = [];
+let initialized = false;
+
+
+
+const calculateRefs = (refs) => refs.map(getRef).map(getPosition);
 
 
 /**
- * Calculate the start point of each scene.
- * @param  {HTMLElement} trigger ....
- * @return {number} The start position of the Scene, in pixels.
+ * Converts a `value` string into its pixel-equivalent using data from the
+ * `refs` array and a mix of custom CSS and JS syntax.
+ * @param {string} value The string to dynamically interpret.
+ * @param {DOMRect[]} refs An array of BCRs from the `refs` option.
+ * @param {...} el A reference to the Scrollify'd element
+ *
+ * CSS units such as `vh` and `vw` are converted, while the following functions
+ * are also supported:
+ *
+ *  max(): returns the maximum value from a list of inputs
+ *  css(): fetches the current CSS property value of an element
+ *
+ * @example "refs[3].bottom"
+ * @example "refs[4].top - 100vh"
+ * @example "refs[3].bottom - css(padding-top, refs[0]) - css(top, refs[0])",
+ * @example "max((100vh / refs[2].height), (100vw / refs[2].width)) + 0.02"
  */
-function calculateStart(trigger, offset = 0) {
-  const c = window.innerHeight - (offset * window.innerHeight);
-  const top = trigger ? trigger.getBoundingClientRect().top + window.pageYOffset : 0;
+function parseValue(val, refs = [], el) {
+  if (typeof val === 'number') {
+    return val;
+  }
 
-  return Math.max(0, top - c);
-}
+  // /** var(--top-spacing) **/
+  // function var(str) {
+  //   // ... returns a CSS var ie --top-padding
+  // }
 
-/**
- * [calculateDuration description]
- * @param  {number|string|Function} d The duration, as a fixed px value, a % of the element, or a custom function
- * @param  {HTMLElement} el The element to Scrollify
- * @return [type]         [description]
- */
-function calculateDuration(d = 1, el) {
-  return (typeof d === 'function') ?
-    d(el) :
-    mapTo(d, window.innerHeight + el.offsetHeight);
+  // helper parsing functions
+  const css = (prop, el) => parseFloat(window.getComputedStyle(el)[prop]) || 0;
+  const max = (...args) => Math.max(...args);
+  const min = (...args) => Math.min(...args);
+
+  const pageHeight = document.body.scrollHeight;
+  const pageWidth = document.body.scrollWidth;
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  return new Function('refs', 'el', `'use strict';return (${val
+    .replace(/(\d*)vw/g, (match, v) => .01 * v * screenWidth)
+    .replace(/(\d*)vh/g, (match, v) => .01 * v * screenHeight)
+    .replace(/px/g, '')
+  });`)(refs, el);
 }
 
 
@@ -48,31 +78,53 @@ export default class Scrollify {
    * @param {HTMLElement} element: The element to Scrollify.
    */
   constructor(element) {
-    if (element instanceof HTMLElement === false) {
-      element = document.querySelector(element);
-    }
+    element = getRef(element);
 
     if (!element) {
-      throw new Error('Scrollify requires an `element`');
+      // throw new Error('Scrollify requires an `element`');
+      document.querySelectorAll('[data-scrollify]').forEach((el) => new Scrollify(el));
+      return;
     }
+
+    if (element.dataset.scrollify) {
+      // ... parseDataAttribute(element)
+      // .. addScene()
+    }
+
+
+    this.scenes = []; // scenes = [];
 
     this.element = element;
     this.ticking = false;
-    this.scenes = [];
     this.active = true;
     this.matrix = createMatrix();
     this.transforms = {
-      scale: [1,1],
-      rotation: [0,0,0],
-      position: [0,0,0],
-      // transformOrigin: [0,0,0]
+      scale: [1, 1],
+      rotation: [0, 0, 0],
+      position: [0, 0, 0],
       // skew: [],
+      // transformOrigin: [0,0,0]
     };
 
     element.style.willChange = transform;
 
+    // scrollifys.push(this);
+    if (!initialized) {
+      initialized = true;
+    }
+    // else {
     window.addEventListener('scroll', () => this.onScroll(), { passive: true });
     window.addEventListener('resize', () => this.onResize(), { passive: true });
+    // }
+
+
+
+  }
+
+  parseDataAttribute(el) {
+    const parser = (str) => Function(`'use strict';return (${str})`)();
+
+    return parser(el.dataset.scrollify);
   }
 
   /**
@@ -98,68 +150,103 @@ export default class Scrollify {
    *    easing: Ease in/out of any effects in the Scene.
    *
    */
-  addScene(opts) {
-    let { trigger, easing, effects, start, duration } = opts;
+  addScene(data) {
     let { element, transforms } = this;
+    let {
+      start = 'el.top - 100vh',
+      end = 'el.bottom',
+      easing,
+      refs = [],
+      effects = {}
+    } = data;
 
-    effects = effects || [];
-    trigger = trigger ?
-      trigger instanceof HTMLElement ?
-        trigger :
-        document.querySelector(trigger) :
-      element;
+    // const calculateEffects = (r, el) => Object.keys(effects).reduce(this.addEffect, []);
+    const calculateEffects = (r, el) => Object.keys(effects).reduce((fx, name) => {
+      let value = effects[name];
+      let fn;
+      let options;
+
+      if (isFunc(value)) {
+        fn = value;
+      } else {
+        fn = Effects[name];
+        options = isArray(value) ? value.map((v) => parseValue(v, r, el)) : value;
+      }
+
+      fx.push(fn({ element, transforms, options }));
+
+      return fx;
+    }, []);
 
     let scene = {
       start: 0,
       duration: 0,
       state: '',
-      easing: easing,
-      effects: effects.map(({ fn, options }) => fn({ options, element, transforms })),
+      easing: isFunc(easing) ? easing : Easings[easing],
+      effects: [],
       reset: () => {
         const scroll = window.scrollY;
-        scene.start = calculateStart(trigger, start);
-        scene.duration = calculateDuration(duration, element);
-        scene.state = (scroll > scene.start) ? (scroll > scene.start + scene.duration) ? 'after' : 'active' : 'before';
+        const el = getPosition(element);
+        const r = calculateRefs(refs);
+        const s = parseValue(start, r, el);
+        const e = parseValue(end, r, el);
+        const fx = calculateEffects(r, el);
+
+        scene.effects = fx;
+        scene.start = s;
+        scene.duration = e - s;
+        scene.state = (scroll > s) ? (scroll > e) ? 'after' : 'active' : 'before';
+
         this.update(scene);
       }
     };
 
-    // internal-use only. Whether to use matrix transforms or not.
-    // Perhaps should be moved to *effect* level
-    scene.__applyTransform = effects.some(({ fn }) => fn.__applyTransform);
+    if (data.skipMatrix) {
+      // scene.skipMatrix = scene.effects.every((fn) => fn.skipMatrix);
+      // internal-use only. Whether to use matrix transforms or not.
+      scene.skipMatrix = true;
+    }
+
     scene.reset();
 
-    this.scenes.push(scene);
-
-    if (opts.debug) {
+    if (data.debug) {
       console.log('Scrollify scene: ', scene);
     }
+
+    this.scenes.push(scene);
 
     return this;
   }
 
-  /**
-   * Convenience method to add an effect directly to a scrollify'd element.
-   * i.e. "addEffect" was called directly on Scrollify
-   * @param  {Function} fn The transformation function to apply.
-   * @param  {object} options Any transformation options.
-   * @param  {object} scene Object containing scene data.
-   */
-  addEffect(fn, options = {}, scene) {
-    const { element, transforms } = this;
 
-    if (!scene) {
-      if (!this.scenes.length) this.addScene({});
-      scene = this.scenes[this.scenes.length - 1];
+  /**
+   * Adds an effect to a scene.
+   * @param  {array} fx A reference to the `effects` array
+   * @param  {string} name The name of the effect to add
+   * @param  {number} i ignore for now
+   * @param  {object} effects A reference to ... .
+   * /
+  addEffect(fx, name, i, effects) {
+    let value = effects[name];
+    let options;
+    let fn;
+
+    if (typeof value == 'function') {
+      fn = value;
+    } else {
+      fn = Effects[name];
+      // if (!fn) { throw Error(`${name} not recognized`); }
+      options = value.map((val) => parseValue(val, r, el));
     }
 
-    scene.effects.push( fn({ options, element, transforms }) );
-    scene.__applyTransform = scene.__applyTransform || fn.__applyTransform;
+    fx.push(fn({ element, transforms, options }));
+
+    return fx;
   }
+
 
   /**
    * onScroll Handler
-   * TODO: debounce?
    */
   onScroll() {
     if (!this.active) { return; }
@@ -169,13 +256,16 @@ export default class Scrollify {
     });
   }
 
+
   /**
    * onResize handler
+   * TODO: debounce?
    * @return {void}
    */
   onResize() {
     this.scenes.forEach((s) => s.reset());
   }
+
 
   /**
    * Update the transformation effects for each scene.
@@ -222,11 +312,12 @@ export default class Scrollify {
     // cycle through any registered transformations
     effects.forEach((effect) => effect(progress));
 
-    if (scene.__applyTransform) {
-      // transmogrify all applied transformations into a single matrix, and apply
-      this.element.style[transform] = this.updateMatrix().asCSS();
-    }
+    if (scene.skipMatrix) { return; }
+
+    // transmogrify all applied transformations into a single matrix, and apply
+    this.element.style[transform] = this.updateMatrix().asCSS();
   }
+
 
   /**
    * Loop through all the element's transformation data and calculates a matrix representing it.
@@ -260,13 +351,14 @@ export default class Scrollify {
       matrix.translate(t.position[0], t.position[1], t.position[2]);
     }
 
-    // ... and here we put it back. (This duplication is not a mistake).
+    // ...and here we put it back.
     if (t.transformOrigin) {
       matrix.translate(t.transformOrigin[0], t.transformOrigin[1], t.transformOrigin[2]);
     }
 
     return matrix;
   }
+
 
   /**
    * Disable Scrollify-ing. Perhaps for performance reasons / mobile devices.

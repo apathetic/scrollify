@@ -2,8 +2,9 @@
   "name": "@apatheticwes/scrollify",
   "author": "wes hatch",
   "license": "MIT",
-  "version": "0.5.1",
+  "version": "1.0.0",
   "description": "A simple thing for triggering 'them scroll effects that everybody loves",
+  "homepage": "https://github.com/apathetic/scrollify",
   "main": "./dist/scrollify.cjs.js",
   "broswer": "./dist/scrollify.js",
   "jsnext:main": "./dist/scrollify.es6.js",
@@ -29,6 +30,7 @@
     "http-server": "^0.12.3",
     "rimraf": "^2.6.1",
     "rollup": "^2.38.4",
+    "rollup-plugin-terser": "^7.0.2",
     "tape": "^4.6.0"
   }
 }

@@ -1,128 +1,140 @@
 /**
- * A list of some default "transformations" that may be applied
+ * A list of default transformations that may be applied. Each transformation
+ * effect will receive three arguments, `transforms`, `element`, and `options`,
+ * and must return a function that receives a progress argument.
+ *
+ * @example sampleEffect({ transforms, element, options }) => (p) => {...}
+ *
+ *  transforms: A (CSS) transformation matrix that is applied to the
+ *              scrollif'ed element. Represents all CSS transforms (translate,
+ *              skew, rotate, etc) in a matrix format.
+ *
+ *     element: A reference to the scrollify'd DOM node.
+ *
+ *     options: An options object, `to`, `from`, etc.
  */
+
+
+const lerp = (start, end, t) => (end - start) * t + start;
 
 
 /**
  * Translate an element along the X-axis.
- * @param {object} context Setup options
- * @param {object} context.options Options for the scale effect
- * @param {object} context.transforms An object of matrix transforms to manipulate.
+ * @param {object} transforms An object of matrix transforms
+ * @param {object} options Options for the effect
+ * @param {object} options.from Initial value for the translateX
+ * @param {object} options.to Destination value for the translateX
  * @returns {Function} A function that receives a normalized progress value.
  */
-export const translateX = ({ options, transforms }) => {
-  const to = (options.to !== undefined) ? options.to : 0;
-  const from = (options.from !== undefined) ? options.from : 0;
-
-  return (progress) => {
-    transforms.position[0] = (to - from) * progress + from;
-  };
+export const translateX = ({ transforms, options }) => (progress) => {
+  transforms.position[0] = lerp(...options, progress);
 };
 
 /**
  * Translate an element vertically.
- * @param {object} context Setup options
- * @param {object} context.options Options for the scale effect
- * @param {object} context.transforms An object of matrix transforms to manipulate.
+ * @param {object} transforms An object of matrix transforms
+ * @param {object} options Options for the effect
+ * @param {object} options.from Initial value for the translateY
+ * @param {object} options.to Destination value for the translateY
  * @returns {Function} A function that receives a normalized progress value.
  */
-export const translateY = ({ options, transforms }) => {
-  const to = (options.to !== undefined) ? options.to : 0;
-  const from = (options.from !== undefined) ? options.from : 0;// this.transforms.position[1];
-
-  return (progress) => {
-    transforms.position[1] = (to - from) * progress + from;
-  };
+export const translateY = ({ transforms, options }) => (progress) => {
+  transforms.position[1] = lerp(...options, progress);
 };
+export const parallax = translateY;
+
 
 /**
- * Rotate an element, using radians. (note: rotates around Z-axis).
- * @param {object} context Setup options
- * @param {object} context.options Options for the scale effect
- * @param {object} context.transforms An object of matrix transforms to manipulate.
+ * Rotate an element along a specific axis, using radians
+ * @param {object} transforms An object of matrix transforms
+ * @param {object} options Options for the effect
+ * @param {object} options.rad Rotation in radians. TODO degrees?
  * @returns {Function} A function that receives a normalized progress value.
  */
-export const rotate = ({ options, transforms }) => {
-  return (progress) => {
-    transforms.rotation[2] = options.rad * progress;
-  };
+export const rotateX = ({ transforms, options }) => (progress) => {
+  transforms.rotation[0] = lerp(...options, progress);
 };
+
+export const rotateY = ({ transforms, options }) => (progress) => {
+  transforms.rotation[1] = lerp(...options, progress);
+};
+
+export const rotateZ = ({ transforms, options }) => (progress) => {
+  transforms.rotation[2] = lerp(...options, progress);
+};
+export const rotate = rotateZ;
+
 
 /**
- * Uniformly scale an element along both axis'.
- * @param {object} context Setup options
- * @param {object} context.options Options for the scale effect
- * @param {object} context.transforms An object of matrix transforms to manipulate.
+ * Uniformly scale an element along an axis
+ * @param {object} transforms An object of matrix transforms
+ * @param {object} options Options for the effect
+ * @param {object} options.from Initial value for the scale
+ * @param {object} options.to Destination value for the scale
  * @returns {Function} A function that receives a normalized progress value.
  */
-export const scale = ({ options, transforms }) => {
-  const to = (options.to !== undefined) ? options.to : 1;
-  const from = (options.from !== undefined) ? options.from : transforms.scale[0];
-
-  return (progress) => {
-    const scale = (to - from) * progress + from;
-
-    transforms.scale[0] = scale;
-    transforms.scale[1] = scale;
-  };
+export const scaleX = ({ transforms, options }) => (progress) => {
+  transforms.scale[0] = lerp(...options, progress);
 };
+
+// note: these default params won't ever be used....
+export const scaleY = ({ transforms, options = [transforms.scale[1], 1] }) => (progress) => {
+  transforms.scale[1] = lerp(...options, progress);
+};
+
+export const scale = ({ transforms, options }) => (progress) => {
+  transforms.scale[0] = transforms.scale[1] = lerp(...options, progress);
+};
+
+
+
+export const skewX = ({ transforms, options }) => (t) => {
+  transforms.skew[0] = lerp(...options, t);
+};
+
+export const skewY = ({ transforms, options }) => (t) => {
+  transforms.skew[1] = lerp(...options, t);
+};
+
+export const skew = ({ transforms, options }) => (t) => {
+  transforms.skew[0] = transforms.skew[1] = lerp(...options, t);
+};
+
 
 /**
  * Update an element's opacity.
- * @param {object} context Setup options
- * @param {object} context.options Options for the scale effect
- * @param {HTMLElement} context.element A reference to the element to Scrollify.
+ * @param {HTMLElement} element The element to fade
+ * @param {object} options Options for the effect
+ * @param {object} options.from Initial fade value
+ * @param {object} options.to Destination fade value
  * @returns {Function} A function that receives a normalized progress value.
  */
-export const fade = ({ options, element }) => {
-  const to = (options.to !== undefined) ? options.to : 0;
-  const from = (options.from !== undefined) ? options.from : 1;
-
-  return (progress) => {
-    element.style.opacity = (to - from) * progress + from;
-  };
+export const fade = ({ element, options }) => (progress) => {
+  element.style.opacity = lerp(...options, progress);
 };
+
 
 /**
  * Update an element's blur.
- * @param {object} context Setup options
- * @param {object} context.options Options for the scale effect
- * @param {HTMLElement} context.element A reference to the element to Scrollify.
+ * NOTE: this is a relatively CPU-heavy operation
+ * @param {HTMLElement} element The element to blur
+ * @param {object} options Options for the effect
+ * @param {object} options.from Initial fade value
+ * @param {object} options.to Destination fade value
  * @returns {Function} A function that receives a normalized progress value.
  */
-export const blur = ({ options, element }) => {
-  const to = (options.to !== undefined) ? options.to : 0;
-  const from = (options.from !== undefined) ? options.from : 0;
-
-  return (progress) => {
-    const amount = (to - from) * progress + from;
-    element.style.filter = 'blur(' + amount + 'px)';
-  };
+export const blur = ({ element, options }) => (progress) => {
+  element.style.filter = 'blur(' + lerp(...options, progress) + 'px)';
 };
 
-/**
- * Parallax an element.
- * @param {object} context Setup options
- * @param {object} context.options Options for the scale effect
- * @param {object} context.transforms An object of matrix transforms to manipulate.
- * @returns {Function} A function that receives a normalized progress value.
- */
-export const parallax = ({ options, transforms }) => {
-  const range = options.range || 0;
-
-  return (progress) => {
-    transforms.position[1] = progress * range;
-  };
-};
 
 /**
- * Toggle a class on or off.
- * @param {object} context Setup options
- * @param {object} context.options Options for the scale effect
- * @param {HTMLElement} context.element A reference to the element to Scrollify.
+ * Toggles a class on or off.
+ * @param {HTMLElement} element A element to toggle class(es) on
+ * @param {object} options Options for the effect
  * @returns {Function} A function that receives a normalized progress value.
  */
-export const toggle = ({ options, element }) => {
+export const toggle = ({ element, options }) => {
   const times = Object.keys(options);
 
   return (progress) => {
@@ -133,11 +145,11 @@ export const toggle = ({ options, element }) => {
   };
 };
 
+
 /**
  * Sticky Element: sets up a sticky element which toggles position 'fixed' on / off.
  * NOTE: this is a POC, a little CSS is also required
- * @param {object} context Setup options
- * @param {HTMLElement} context.element A reference to the element to Scrollify.
+ * @param {HTMLElement} element The element to stick
  * @returns {Function} A function that receives a normalized progress value.
  */
 export const stick = ({ element }) => {
@@ -174,8 +186,8 @@ export const stick = ({ element }) => {
 };
 
 
-// Effects that use matrix transformations. At present, only
-// built-in effects benefit from matrix transformations.
-[translateX, translateY, rotate, scale, parallax].forEach((fn) => {
-  Object.defineProperty(fn, '__applyTransform', { value: true });
+// Effects that do _not_ use matrix transformations.
+[stick, toggle, blur, fade].forEach((fn) => {
+  Object.defineProperty(fn, 'skipMatrix', { value: true });
 });
+

@@ -1,3 +1,4 @@
+.mb-8 { margin-bottom: 2rem; }
 main { overflow:hidden; }
 
 main #stick {
@@ -21,9 +22,6 @@ main #stick code { display: none; }
 .normal .normalCSS { display:block !important; }
 .sticky .stickyCSS { display:block !important; }
 .bottom .bottomCSS { display:block !important; }
-
-
-
 
 
 main dd {
@@ -128,22 +126,29 @@ p.parallax { color: #ddd; z-index:-1 }
 	padding: 1em;
 }
 
-.red {
+.fx-red {
 	color: red;
 	transform: translateX(30px);
 }
 
-.blue {
+.fx-blue {
+	background: rgba(255, 0, 255, 0.3);
 	color: blue;
 	transform: rotate(10deg);
 }
 
-.green {
+.fx-green {
 	color: green;
+  background: none;
 	border: 1px solid green;
-	transform: scale(1.3);
+	transform: scale(1.1);
 }
 
-.red.blue {
-	background: rgba(255, 0, 255, 0.3);
+.fx-await {
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.fx-show {
+  opacity: 1;
 }

@@ -42,3 +42,20 @@ export function mapTo(input, scale) {
   }
 }
 
+
+export const isArray = (n) => Array.isArray(n);
+export const isFunc = (n) => typeof n === 'function';
+
+export const getRef = (el) => el instanceof HTMLElement ? el : document.querySelector(el);
+
+export const getPosition = (el) => {
+  const bcr = el.getBoundingClientRect();
+  return {
+    left:   bcr.left + window.pageXOffset,
+    right:  bcr.right + window.pageXOffset,
+    top:    bcr.top + window.pageYOffset,
+    bottom: bcr.bottom + window.pageYOffset,
+    height: bcr.height,
+    width:  bcr.width
+  };
+};

@@ -2,7 +2,7 @@
 [![NPM Version](https://img.shields.io/npm/v/@hugeinc/scrollify.svg?style=flat-square)](https://www.npmjs.com/package/@hugeinc/scrollify)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://raw.githubusercontent.com/apathetic/scrollify/master/LICENSE)
 
-> Scrollify. Do things on scroll. 3KB minified and gzipped. There are no dependencies; you do not need jQuery; you do not need TweenMax.
+> Scrollify. Do things on scroll. 4KB minified and gzipped. There are no dependencies; you do not need jQuery; you do not need TweenMax.
 
 ## What sorts of things?
 
@@ -44,6 +44,12 @@ Either:
 * simplify API for effects / options definition
 
 ## Release History
+
+### 1.0
+* DOM helpers added; no longer req'd to use JS API to add effects and scenes
+
+### 0.6
+* modifying included helpers; now values are curried in vs. previous reliance on `this` for context
 
 ### 0.5
 * duration may be a function, a string, or a float
