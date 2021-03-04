@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Scrollify</title>
+  <meta name="viewport" content="width=device-width">
+
+  <!-- demo stuffs -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- end demo stuffs -->
+
+  <link rel="stylesheet" href="https://apathetic.github.io/showcase/assets/css/main.min.css">
+  <script src="https://rawgit.com/apathetic/stickynav/master/dist/stickynav.js"></script>
+  <script src="prism.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      new StickyNav({ nav: '#sticky' });
+    });
+  </script>
+  <style>
+    main { padding-bottom: 90vh !important; }
+  </style>
+</head>
+
+<body>
+  <header class="py-8 align-center">
+    <h1 class="py-4">Scrollify.</h1>
+  </header>
+
+  <nav class="mini-nav">
+    <div id="sticky">
+      <ul class="py-4" data-autogenerate="true">
+      </ul>
+    </div>
+  </nav>
+
+
+  <main class="prose py-4">
+
+    <section id="about">
+      <div class="container">
+        <h2>DEMO v1.0</h2>
+        <p>Scrollify. Do things on scroll. 3KB minified + gzipped.</p>
+
+        <h3>What sorts of things?</h3>
+        <p>Well, whatever you want. Common effects such as parallax or toggling a class on/off are
+          possible and bundled within. However, you may also easily create your own custom scroll
+          function, and pass it in to Scrollify. The built-in effects include:<p>
+        <ul class="bullets">
+          <li><strong>Stick</strong>: sticks an element to a particular point and holds in there for a
+            pre-defined number of pixels.</li>
+          <li><strong>Parallax</strong>: move stuff on scroll. A subtle effect that transistions elements
+            more slowly (or perhaps quickly) than the speed of the user-scroll.</li>
+          <li><strong>Toggle</strong>: turn a CSS class on or off if the element crosses a particular
+            threshold on the page.</li>
+          <li><strong>Translate</strong>: translate an element along the X- or Y- axis.</li>
+          <li><strong>Rotate</strong>: rotate an element via scroll.</li>
+          <li><strong>Scale</strong>: scale an element.</li>
+          <li><strong>Fade</strong>: change an element's opacity.</li>
+        </ul>
+      </div>
+    </section>
+
+
+    <section id="start">
+      <div class="container">
+        <h2>Demos</h2>
+
+
+        <!-- value -->
+        <div class="mb-8">
+          <h4 data-nav="Tween value">Tween value:</h4>
+          <p id="transformer" class="demo">This element will update from 0 to 1 as it moves across the viewport. &nbsp;(<em></em>)</p>
+          <script>
+            window.addEventListener('load', function() {
+              var debug1 = document.querySelector('#transformer em');
+
+              new Scrollify('#transformer')
+                .addScene({
+                  refs:    ['#transformer em'],
+                  start:   "refs[0].top - 90vh", // or `el.top` for a ref to #transform ...?
+                  end:     "refs[0].bottom",
+
+                  // timeline: [
+                  //   'refs[0].top - 100vh', 'refs[0].top', 'refs[0].bottom', ''  // relative to top of viewport
+                  // ],
+
+
+                  effects: {
+                    // if authoring via JS, you may insert custom fns
+                    printProgress: () => (p) => { debug1.innerHTML = p.toFixed(3); }
+                  },
+                });
+            });
+          </script>
+        </div>
+
+
+        <!-- rotate -->
+        <div class="mb-8">
+          <h4 data-nav="Rotate">Rotate:</h4>
+          <p id="transformer-2" class="demo">This element will rotate as it moves across the viewport. &nbsp;(<em></em>)</p>
+          <script>
+            window.addEventListener('load', function(event) {
+              var debug2 = document.querySelector('#transformer-2 em');
+              new Scrollify('#transformer-2').addScene({
+                start: 'el.top - 50vh',
+                // start: 'alert("i gotcha")', // el.top - 50vh',
+                end: 'el.top - 10vh',
+                // duration: '300px',
+                effects: {
+                  rotate: [0, Math.PI*2],
+                  printProgress: () => (p) => { debug2.innerHTML = p.toFixed(3); }
+                },
+              });
+            });
+          </script>
+        </div>
+
+
+        <!-- scale -->
+        <div class="mb-8">
+          <h4 data-nav="Scale">Scale:</h4>
+          <p id="transformer-3" class="demo">This element uses an elastic easing function. &nbsp;(<em></em>)</p>
+          <script>
+            window.addEventListener('load', function() {
+              var debug3 = document.querySelector('#transformer-3 em');
+              new Scrollify('#transformer-3')
+                .addScene({
+                  start: 'el.top - 100vh', //0.2,
+                  end: 'el.top - 200px',
+                  easing: 'easeInElastic',
+                  effects: {
+                    scale: [1.0, 1.5],
+                    fn: () => (p) => { debug3.innerHTML = p.toFixed(3); }
+                  }
+                });
+            });
+          </script>
+        </div>
+
+
+        <!-- multiple things -->
+        <div class="mb-8">
+          <h4 data-nav="Multiple">Multiple:</h4>
+          <p id="multiple" class="demo">This element will scale, rotate and translate. &nbsp;(<em></em>)</p>
+          <script>
+            window.addEventListener('load', function() {
+              var debug4 = document.querySelector('#multiple em');
+              new Scrollify('#multiple')
+                .addScene({
+                  start: 'el.top - 100vh',
+                  end: 'el.bottom',
+                  easing:  'easeInQuart', // string or fn
+                  effects: {
+                    scale: [ 1.0, 0.5 ],
+                    rotate: [ 0, Math.PI ],
+                    translateX: [ 0, 400 ],
+                    fn: () => (p) => { debug4.innerHTML = p.toFixed(3); }
+                  },
+                });
+            });
+          </script>
+        </div>
+
+
+        <!-- toggle classes -->
+        <div class="mb-8">
+          <h4 data-nav="Toggle Class">Toggle:</h4>
+          <div class="demo">
+            <p id="toggle-1" class="fx-await"><strong>This element will have an
+            "opacity" class toggled on when it it just visible.</strong> Lorem
+            ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+            tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+            quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+            consequat.</p>
+            <p id="toggle-2" class="fx-await"><strong>TODO This one too, but we'll only run it once and
+            then remove the effect for a minor scrolling performance gain.</strong> Lorem
+            ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+            tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+            quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+            consequat.</p>
+            <p id="toggle-3"><strong>I'll just toggle random classes for funsies.</strong> Lorem
+            ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+            tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+            quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+            consequat.</p>
+          </div>
+          <script>
+            window.addEventListener('load', function() {
+              new Scrollify('#toggle-1').addScene({
+                skipMatrix: true, // TODO automate this in addEffect
+                effects: {
+                  toggle: { 0.2: 'fx-show' }
+                },
+              });
+
+              new Scrollify('#toggle-2').addScene({
+                skipMatrix: true, // this allows transforms to be set in the CSS.
+                effects: {
+                  toggle: { 0.2: 'fx-show' }
+                },
+              });
+
+              new Scrollify('#toggle-3').addScene({
+                skipMatrix: true, // this allows transforms to be set in the CSS.
+                effects: {
+                  toggle: {
+                    0.2: 'fx-red',
+                    0.5: 'fx-blue',
+                    0.7: 'fx-green'
+                  }
+                },
+              });
+
+            });
+          </script>
+        </div>
+
+
+        <!-- parallax -->
+        <div class="mb-8">
+          <h4 data-nav="Parallax">Parallax:</h4>
+          <div style="height:260px; position:relative; overflow:hidden;"><div id="parallax"></div></div>
+          <script>
+            window.addEventListener('load', function() {
+              new Scrollify('#parallax').addScene({
+                effects: {
+                  parallax: [ 0, 300 ]
+                },
+              });
+            });
+          </script>
+        </div>
+
+
+        <!-- blur -->
+        <div class="mb-8">
+          <h4 data-nav="Blur">Blur:</h4>
+          <p id="blur" class="demo">
+            <span>
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+              tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+              quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+              consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+              cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+              proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            </span>
+          </p>
+
+          <script>
+            window.addEventListener('load', function() {
+              new Scrollify('#blur').addScene({
+                skipMatrix: true,
+                start: 'el.top - 80vh',
+                effects: {
+                  blur: [0, 8]
+                },
+              });
+            });
+          </script>
+        </div>
+
+
+        <!-- skew -->
+        <div class="mb-8">
+          <h4 data-nav="Skew">Skew:</h4>
+          <p id="skew" class="demo"><strong>Let's skew. Prepared to see my reality warped and twisted.</strong>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+            tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+            quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+            consequat. (<em></em>)
+          </p>
+          <script>
+            window.addEventListener('load', function() {
+              var debug8 = document.querySelector('#skew em');
+              var skew = ({ element }) => (t) => {
+                element.style.transform = 'skew('+ (45 * t) +'deg)';
+              };
+
+              new Scrollify('#skew').addScene({
+                skipMatrix: true,
+                  start: 'el.top - 60vh',
+                  end: 'el.top - 10vh',
+                  easing: 'easeInOutQuint',
+                  // duration': '200px',
+                  // 'applyTransform': false,
+                  effects: {
+                    // skewX: [0, 45],
+                    custom: skew,
+                    fn: () => (p) => { debug8.innerHTML = p.toFixed(3); }
+                  },
+                });
+            });
+          </script>
+        </div>
+
+
+        <!-- fade -->
+        <div class="mb-8">
+          <h4 data-nav="Fade">Fade:</h4>
+          <p id="fade">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+          tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+          consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+          cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+          proident, sunt in culpa qui officia deserunt mollit anim id est laborum. (<em></em>)</p>
+
+          <script>
+            window.addEventListener('load', function() {
+              var debug9 = document.querySelector('#fade em');
+              new Scrollify('#fade').addScene({
+                skipMatrix: true,
+                easing: 'easeInOutCubic',
+                effects: {
+                  fade: [1, 0],
+                  fn: () => (p) => { debug9.innerHTML = p.toFixed(3); }
+                }
+              });
+            });
+          </script>
+        </div>
+
+
+        <!-- image sequence -->
+        <div class="mb-8">
+          <h4 data-nav="Sequencer">Sequencer:</h4>
+          <div style="position:relative; padding-top:100%;">
+            <canvas id="sequence-2"></canvas>
+          </div>
+
+          <script>
+            window.addEventListener('load', function() {
+              var canvas = document.querySelector('#sequence-2');
+              var context = canvas.getContext('2d');
+
+              var width = 1250;
+              var height = 1250;
+              var frames = 70;
+              var images = [];
+              var path = 'images/phone';
+
+              canvas.width = width;
+              canvas.height = height;
+
+              // preload images
+              for (let i = 0; i <= frames; i++) {
+                const img = new Image();
+                img.src = `${path}/tilt-${i<10?'0'+i:i}.png`;
+                images.push(img);
+              }
+
+              // draw a frame
+              const sequencer = () => (progress) => {
+                let i = parseInt(progress * frames);
+                context.clearRect(0, 0, width, height);
+                context.drawImage(images[i], 0, 0, width, height);
+              };
+
+              // images[0].onload = () => context.drawImage(images[0], 0, 0, width, height);
+
+              new Scrollify('#sequence-2').addScene({
+                skipMatrix: true,
+                start: 'el.top - 90vh',
+                end: 'el.bottom - 10vh',
+                effects: { sequencer }
+              });
+            });
+          </script>
+        </div>
+
+
+        <!-- custom -->
+        <div class="mb-8">
+          <h4 data-nav="Custom">Custom:</h4>
+          <p id="custom"><strong>This is not a blink tag, exactly...</strong> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+          tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+          consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+          cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+          proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</strong></p>
+
+          <script>
+            window.addEventListener('load', function() {
+              new Scrollify('#custom').addScene({
+                skipTransform: false,
+                easing: 'oscillate',
+                effects: {
+                  fade: [1, 0]
+                },
+                debug: true
+              });
+            });
+          </script>
+        </div>
+
+
+
+      </div>
+    </section>
+
+  </main>
+
+
+  <footer>
+    <div class="container">
+    </div>
+  </footer>
+
+
+  <script src="../dist/scrollify.js"></script>
+  <script>
+    // var Scrollify = scrollify.Scrollify;
+    window.easings = Scrollify.easings;
+    window.fx = Scrollify.fx;
+    window.Scrollify = Scrollify.default;
+  </script>
+</body>
+
+</html>
