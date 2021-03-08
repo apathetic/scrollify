@@ -96,39 +96,118 @@
     <section data-nav="Getting Started" id="start">
       <div class="container">
         <h2>Getting Started</h2>
-        <p>Everything is relative to the viewport. Elements are <em>Scrollify'd</em> only when they are visible
-          on screen. There is an implicit timeline inherent in all Scrollify'd objects, which moves from 0 to 1.
+        <p>Everything is relative to the timeline, which is defined by `start` and `end`, in the options. By default
+          `start` is when the top edge of the <em>scrollify'd</em> element enters the bottom of the viewport,
+          while `stop` is when the bottom edge of it exits the top of the viewport. The progress between
+          these two points is represented as a numerical value, between 0 and 1.
+        </p>
+        <p>This is a <em>scene</em>, and by default it will be active for the duration of the element's time in
+          the viewport. That is to say, scroll effects start as soon as the element enters the viewport, and ends
+          when it leaves.
         </p>
         <p>
-          <strong>0  </strong>: bottom of viewport<br>
-          <strong>0.5</strong>: middle of viewport<br>
-          <strong>1  </strong>: top of viewport
-        </p>
-        <p>This is a <em>Scene</em>, and by default it will be active for the duration of the element's time in
-          the viewport. That is to say: the Scene starts as soon as the element enters the viewport, and ends
-          when it leaves.
+          <strong>0  </strong>: start of the scene<br>
+          <strong>0.5</strong>: middle of the scene<br>
+          <strong>1.0  </strong>: end of the scene
         </p>
 
         <dl>
+          <dt><h4>Modifying Start and Stop points</h4></dt>
+          <dd>
+            <p>`start` and `stop` determine where in the viewport a Scene should start. By default, it is when the element
+              first becomes visible to when it is scrolled offscreen. However, if you wish to have a `scene` start or stop
+              at a particular point, there are several variables at your disposal, which allow finer-grained control.
+            </p>
+            <ul class="bullets mb-8">
+              <li><strong>el</strong>: an object representing the element's boundingClientRect (BCR). It contains `left` `right` `top` `bottom` `width` `height` values of the element's position in the viewport.</li>
+              <li><strong>viewport units</strong>: `vh` and `vw` units may be used for dynamic start / stop points</li>
+            </ul>
+
+            <pre>
+            <ul>
+              <li><em>start</em>
+                `el.top`
+                `100vh`
+                `el.bottom - 30vh`
+              </li>
+            </ul>
+            </pre>
+            </p>
+              <pre><code class="language-javascript">new Scrollify('#transformer-2')
+  .addScene({
+    start: 0.2,         // start when the element is at 0.2 of the scene's progress (0 to 1)
+    duration: '300px',  // do something for 300 pixels
+    effects: [{
+      fn: Scrollify.fx.scale,
+      options: {
+        from: 1.0,
+        to: 1.2
+      }
+    }]
+  });</code></pre>
+
+
+          <dt><h4>Introducing "refs"</h4></dt>
+          <dd>
+            <p>The start / stop points are not necessarily contingent on the xxxelement. You may also use any other node
+              in the DOM to start or stop the scene. These are passed in as `querySelector` strings to the `refs` option.
+            </p>
+            <p>Additionally, you may use several helper functions to calculate more fine-grained endpoints for the scene
+              timeline.
+              <ul>
+                <li>max</li>
+                <li>min</li>
+                <li>css</li>
+              </ul>
+            </p>
+
+            <pre><code class="language-javascript">new Scrollify('#transformer-2')
+  .addScene({
+    start: 'refs[0].top - 30vh',
+    stop: 'refs[1].bottom + css(padding-top, refs[2])',
+    refs: ['.trigger-1', '#section-demo'],
+    effects: {
+      // ...
+    }
+  });</code></pre>
+
+
+
+            <!-- demo here -->
+            <h5>Result:</h5>
+            <p id="transformer-2" class="demo">This element will only start transforming at 20% of the way up from the bottom, and stop after 300px. &nbsp;(<em></em>)
+            </p>
+            <script>
+              window.addEventListener('load', function(event) {
+                var debug2 = document.querySelector('#transformer-2 em');
+                new Scrollify('#transformer-2')
+                  .addScene({
+                    start: 0.2,         // start the Scene when the element reaches 20% of the viewport
+                    duration: '300px',  // do something for 300 pixels
+                    effects: [{
+                      fn: Scrollify.fx.scale,
+                      options: {
+                        from: 1.0,
+                        to: 1.2
+                      }
+                    }, {
+                      fn: () => (p) => { debug2.innerHTML = p.toFixed(3); }
+                    }]
+                  });
+              });
+            </script>
+          </dd>
+
+
+
+
           <dt><h4>Add a Scene and Effect</h4></dt>
           <dd>
             <p>The easiest way to get started is to create a new Scrollify instance, with the
               DOM element you'd like to manipulate. Next, create a Scene, and define which
               effect to apply.
             </p>
-            <!--
-            THIS IS THE IDEAL API
-             <pre><code class="language-javascript">new Scrollify('#transformer') // the element to scrollify
-              .addScene({
-                effects: [{
-                  scale: {                // what effect to apply
-                    from: 1.0,              // some options for the effect
-                    to: 1.2
-                  }
-                }]
-              });</code></pre> -->
-            <pre><code class="language-javascript">import { scale } from './fx';
-
+            <pre><code class="language-javascript">
 new Scrollify('#transformer')   // the element to scrollify
   .addScene({
     effects: [{

@@ -59,6 +59,7 @@ function parseValue(val, refs = [], el) {
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
+  // with (refs) {
   return new Function('refs', 'el', `'use strict';return (${val
     .replace(/(\d*)vw/g, (match, v) => .01 * v * screenWidth)
     .replace(/(\d*)vh/g, (match, v) => .01 * v * screenHeight)

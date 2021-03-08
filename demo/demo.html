@@ -332,25 +332,44 @@
           </div>
 
           <script>
-            window.addEventListener('load', function() {
-              var canvas = document.querySelector('#sequence-2');
-              var context = canvas.getContext('2d');
+            async function imageSupport() {
+              const fallback = 'png';
+              const avifData = 'data:image/avif;base64,AAAAFGZ0eXBhdmlmAAAAAG1pZjEAAACgbWV0YQAAAAAAAAAOcGl0bQAAAAAAAQAAAB5pbG9jAAAAAEQAAAEAAQAAAAEAAAC8AAAAGwAAACNpaW5mAAAAAAABAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAARWlwcnAAAAAoaXBjbwAAABRpc3BlAAAAAAAAAAQAAAAEAAAADGF2MUOBAAAAAAAAFWlwbWEAAAAAAAAAAQABAgECAAAAI21kYXQSAAoIP8R8hAQ0BUAyDWeeUy0JG+QAACANEkA=';
+              const webpData = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoCAAEAAQAcJaQAA3AA/v3AgAA=';
+              const avifblob = await fetch(avifData).then((r) => r.blob());
+              const webpblob = await fetch(webpData).then((r) => r.blob());
+              return window.createImageBitmap ? createImageBitmap(avifblob).then(
+                () => 'avif',
+                () => createImageBitmap(webpblob).then(
+                  () => 'webp',
+                  () => fallback
+                )
+              ) : fallback
+            };
 
+            // const isWebp = canvas.toDataURL('image/webp').indexOf('data:image/webp') == 0;
+
+            var canvas = document.querySelector('#sequence-2');
+            var context = canvas.getContext('2d');
+            var frames = 70;
+            var images = [];
+
+            // preload images
+            imageSupport().then((type) => {
+              const path = `images/phone-${type}`;
+              for (let i = 0; i <= frames; i++) {
+                const img = new Image();
+                img.src = `${path}/tilt-${i<10?'0'+i:i}.${type}`;
+                images.push(img);
+              }
+            });
+
+            window.addEventListener('load', function() {
               var width = 1250;
               var height = 1250;
-              var frames = 70;
-              var images = [];
-              var path = 'images/phone';
 
               canvas.width = width;
               canvas.height = height;
-
-              // preload images
-              for (let i = 0; i <= frames; i++) {
-                const img = new Image();
-                img.src = `${path}/tilt-${i<10?'0'+i:i}.png`;
-                images.push(img);
-              }
 
               // draw a frame
               const sequencer = () => (progress) => {
@@ -358,8 +377,6 @@
                 context.clearRect(0, 0, width, height);
                 context.drawImage(images[i], 0, 0, width, height);
               };
-
-              // images[0].onload = () => context.drawImage(images[0], 0, 0, width, height);
 
               new Scrollify('#sequence-2').addScene({
                 skipMatrix: true,
