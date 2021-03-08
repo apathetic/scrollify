@@ -1,5 +1,5 @@
 /*!
- * Scrollify 1.0.0
+ * Scrollify 1.0.0-alpha
  *
  * @link https://github.com/apathetic/scrollify
  * @copyright (c) 2021 wes hatch

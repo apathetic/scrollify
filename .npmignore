@@ -1,7 +1,9 @@
+demo/
+test/
+
+
 node_modules/
 .vscode/
 .DS_Store
-*.sublime*
-
 APPLE_REFS
 TODO.md
