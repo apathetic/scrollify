@@ -16,7 +16,12 @@ const transform = 'transform';
 const scrollifys = [];
 let initialized = false;
 
-
+// enum states
+const STATE = {
+  BEFORE: 1,
+  AFTER: 2,
+  ACTIVE: 3
+};
 
 const calculateRefs = (refs) => refs.map(getRef).map(getPosition);
 
@@ -107,7 +112,9 @@ export default class Scrollify {
       // transformOrigin: [0,0,0]
     };
 
-    element.style.willChange = transform;
+    if (!skipMatrix) {
+      element.style.willChange = transform;
+    }
 
     // scrollifys.push(this);
     if (!initialized) {
@@ -154,7 +161,7 @@ export default class Scrollify {
   addScene(data) {
     let { element, transforms } = this;
     let {
-      start = 'el.top - 100vh',
+      start = 'max(0, el.top - 100vh)',
       end = 'el.bottom',
       easing,
       refs = [],
@@ -196,7 +203,7 @@ export default class Scrollify {
         scene.effects = fx;
         scene.start = s;
         scene.duration = e - s;
-        scene.state = (scroll > s) ? (scroll > e) ? 'after' : 'active' : 'before';
+        scene.state = (scroll > s) ? (scroll > e) ? STATE.AFTER : STATE.ACTIVE : STATE.BEFORE;
 
         this.update(scene);
       }
@@ -284,8 +291,8 @@ export default class Scrollify {
 
     // after end
     if (scroll - start > duration) {
-      if (scene.state !== 'after') {    // do one final iteration
-        scene.state = 'after';
+      if (scene.state !== STATE.AFTER) {    // do one final iteration
+        scene.state = STATE.AFTER;
         progress = 1;
       } else {
         return;
@@ -293,8 +300,8 @@ export default class Scrollify {
 
     // before start
     } else if (scroll - start < 0) {
-      if (scene.state !== 'before') {    // do one final iteration
-        scene.state = 'before';
+      if (scene.state !== STATE.BEFORE) {    // do one final iteration
+        scene.state = STATE.BEFORE;
         progress = 0;
       } else {
         return;
@@ -302,7 +309,7 @@ export default class Scrollify {
 
     // active
     } else {
-      scene.state = 'active';
+      scene.state = STATE.ACTIVE;
       if (easing) { //            start, from, to, end
         progress = easing(scroll - start, 0, 1, duration);
       } else {
