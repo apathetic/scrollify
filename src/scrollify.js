@@ -49,6 +49,12 @@ function parseValue(val, refs = [], el) {
     return val;
   }
 
+  // const pageHeight = document.body.scrollHeight;
+  // const pageWidth = document.body.scrollWidth;
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+
   // /** var(--top-spacing) **/
   // function var(str) {
   //   // ... returns a CSS var ie --top-padding
@@ -59,17 +65,13 @@ function parseValue(val, refs = [], el) {
   const max = (...args) => Math.max(...args);
   const min = (...args) => Math.min(...args);
 
-  const pageHeight = document.body.scrollHeight;
-  const pageWidth = document.body.scrollWidth;
-  const screenWidth = window.innerWidth;
-  const screenHeight = window.innerHeight;
-
-  // with (refs) {
-  return new Function('refs', 'el', `'use strict';return (${val
+  // with (css) {
+  return new Function('refs', 'el', 'css', 'min', 'max', `'use strict';return (${val
     .replace(/(\d*)vw/g, (match, v) => .01 * v * screenWidth)
     .replace(/(\d*)vh/g, (match, v) => .01 * v * screenHeight)
     .replace(/px/g, '')
-  });`)(refs, el);
+  });`)(refs, el, css, max, min);
+  // }
 }
 
 
@@ -111,10 +113,6 @@ export default class Scrollify {
       // skew: [],
       // transformOrigin: [0,0,0]
     };
-
-    if (!skipMatrix) {
-      element.style.willChange = transform;
-    }
 
     // scrollifys.push(this);
     if (!initialized) {
@@ -161,7 +159,7 @@ export default class Scrollify {
   addScene(data) {
     let { element, transforms } = this;
     let {
-      start = 'max(0, el.top - 100vh)',
+      start = '0, el.top - 100vh',
       end = 'el.bottom',
       easing,
       refs = [],
@@ -213,6 +211,8 @@ export default class Scrollify {
       // scene.skipMatrix = scene.effects.every((fn) => fn.skipMatrix);
       // internal-use only. Whether to use matrix transforms or not.
       scene.skipMatrix = true;
+    } else {
+      element.style.willChange = transform;
     }
 
     scene.reset();
