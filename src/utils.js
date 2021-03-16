@@ -43,10 +43,15 @@ export function mapTo(input, scale) {
 }
 
 
+export const lerp = (start, end, t) => (end - start) * t + start;
+// export const css = (prop, el) => parseFloat(window.getComputedStyle(el)[prop]) || 0;
+// export const css = (prop, el) => parseFloat(window.getComputedStyle(el).getPropertyValue(prop)) || 0;
+export const css = (prop, el) => window.getComputedStyle(el)[prop] || 0;
+export const max = (...args) => Math.max(...args);
+export const min = (...args) => Math.min(...args);
 export const isArray = (n) => Array.isArray(n);
 export const isFunc = (n) => typeof n === 'function';
-
-export const getRef = (el) => el instanceof HTMLElement ? el : document.querySelector(el);
+export const getRef = (el) => el.nodeType === 1 ? el : document.querySelector(el);
 
 export const getPosition = (el) => {
   const bcr = el.getBoundingClientRect();

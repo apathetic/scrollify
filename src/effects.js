@@ -15,7 +15,7 @@
  */
 
 
-const lerp = (start, end, t) => (end - start) * t + start;
+import { lerp } from './utils';
 
 
 /**
@@ -186,8 +186,15 @@ export const stick = ({ element }) => {
 };
 
 
-// Effects that do _not_ use matrix transformations.
-[stick, toggle, blur, fade].forEach((fn) => {
-  Object.defineProperty(fn, 'skipMatrix', { value: true });
-});
 
+// Effects that do _not_ use matrix transformations.
+// [stick, toggle, blur, fade].forEach((fn) => {
+//   Object.defineProperty(fn, 'skipMatrix', { value: true });
+// });
+
+// Effects that use matrix transformations. At present, only
+// built-in effects benefit from matrix transformations.
+[translateX, translateY, rotateX, rotateY, rotateZ, scale, scaleX, scaleY, skew, skewX, skewY].forEach((fn) => {
+  // Object.defineProperty(fn, '__applyTransform', { value: true });
+  Object.defineProperty(fn, 'useMatrix', { value: true });
+});

@@ -7,7 +7,7 @@
  *
  */
 
-import { getRef, getPosition, isFunc, isArray } from './utils';
+import { getRef, getPosition, isFunc, isArray, css, min, max } from './utils';
 import * as Effects from './effects';
 import * as Easings from './easings';
 import createMatrix from './matrix';
@@ -54,18 +54,15 @@ function parseValue(val, refs = [], el) {
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
-
-  // /** var(--top-spacing) **/
-  // function var(str) {
-  //   // ... returns a CSS var ie --top-padding
-  // }
-
   // helper parsing functions
-  const css = (prop, el) => parseFloat(window.getComputedStyle(el)[prop]) || 0;
-  const max = (...args) => Math.max(...args);
-  const min = (...args) => Math.min(...args);
+  // NOTE: will work for --css-vars, but only if they resolve to a number (ie. no strings, 'rgb(0,0,0)' etc):
+  // const css = (prop, el) => parseFloat(window.getComputedStyle(el).getPropertyValue(prop)) || 0;
 
-  // with (css) {
+  // const css = (prop, el) => parseFloat(window.getComputedStyle(el)[prop]) || 0;
+  // const max = (...args) => Math.max(...args);
+  // const min = (...args) => Math.min(...args);
+
+
   return new Function('refs', 'el', 'css', 'min', 'max', `'use strict';return (${val
     .replace(/(\d*)vw/g, (match, v) => .01 * v * screenWidth)
     .replace(/(\d*)vh/g, (match, v) => .01 * v * screenHeight)
@@ -166,6 +163,8 @@ export default class Scrollify {
       effects = {}
     } = data;
 
+    let useMatrix = false;
+
     // const calculateEffects = (r, el) => Object.keys(effects).reduce(this.addEffect, []);
     const calculateEffects = (r, el) => Object.keys(effects).reduce((fx, name) => {
       let value = effects[name];
@@ -179,6 +178,7 @@ export default class Scrollify {
         options = isArray(value) ? value.map((v) => parseValue(v, r, el)) : value;
       }
 
+      useMatrix = useMatrix || fn.useMatrix;
       fx.push(fn({ element, transforms, options }));
 
       return fx;
@@ -203,19 +203,23 @@ export default class Scrollify {
         scene.duration = e - s;
         scene.state = (scroll > s) ? (scroll > e) ? STATE.AFTER : STATE.ACTIVE : STATE.BEFORE;
 
+        // internal-use only. Whether to use matrix transforms or not.
+        scene.useMatrix = useMatrix; // || data.skipMatrix // force override
+
         this.update(scene);
       }
     };
 
-    if (data.skipMatrix) {
-      // scene.skipMatrix = scene.effects.every((fn) => fn.skipMatrix);
-      // internal-use only. Whether to use matrix transforms or not.
-      scene.skipMatrix = true;
-    } else {
+    scene.reset();
+
+    if (useMatrix) {
+      // scene.useMatrix = true;
       element.style.willChange = transform;
+    // } else {
+    //   // internal-use only. Whether to use matrix transforms or not.
+    //   scene.useMatrix = false;
     }
 
-    scene.reset();
 
     if (data.debug) {
       console.log('Scrollify scene: ', scene);
@@ -320,10 +324,10 @@ export default class Scrollify {
     // cycle through any registered transformations
     effects.forEach((effect) => effect(progress));
 
-    if (scene.skipMatrix) { return; }
-
-    // transmogrify all applied transformations into a single matrix, and apply
-    this.element.style[transform] = this.updateMatrix().asCSS();
+    if (scene.useMatrix) {
+      // transmogrify all applied transformations into a single matrix, and apply
+      this.element.style[transform] = this.updateMatrix().asCSS();
+    }
   }
 
 
