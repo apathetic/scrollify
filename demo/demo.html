@@ -20,7 +20,7 @@
     });
   </script>
   <style>
-    main { padding-bottom: 90vh !important; }
+    #start > div > div:last-of-type { margin-bottom: 50vh !important; }
   </style>
 </head>
 
@@ -70,7 +70,7 @@
 
 
         <!-- value -->
-        <div class="mb-8">
+        <div class="mb-16">
           <h4 data-nav="Tween value">Tween value:</h4>
           <p id="transformer" class="demo">This element will update from 0 to 1 as it moves across the viewport. &nbsp;(<em></em>)</p>
           <script>
@@ -99,18 +99,47 @@
 
 
         <!-- rotate -->
-        <div class="mb-8">
+        <div class="mb-16">
           <h4 data-nav="Rotate">Rotate:</h4>
           <p id="transformer-2" class="demo">This element will rotate as it moves across the viewport. &nbsp;(<em></em>)</p>
           <script>
             window.addEventListener('load', function(event) {
               var debug2 = document.querySelector('#transformer-2 em');
               new Scrollify('#transformer-2').addScene({
+                // start: 'alert("i gotcha")',
                 start: 'el.top - 50vh',
-                // start: 'alert("i gotcha")', // el.top - 50vh',
                 end: 'el.top - 10vh',
                 // duration: '300px',
+
+
+                // "keyframes", i.e. breakpoints normalized between 0 and 1
+                // here, start when 0.5 (or 50% along timeline), and end at 0.9 (90%)
+                //
+                // This could be used _instead_ of the `start` and `stop` values, above.
+                // ie. default start and stop would be used (which is when the element
+                // enters/exits the viewport), and we set the scene to be active between 50 and 90%
+
+                // or,
+
                 effects: {
+                  // translateX: {
+                  //   '0%':  0,
+                  //   '50%': '20px',
+                  //   '70%': '120px'
+                  // },
+
+                  // translateY: {
+                  //   0:   '0',
+                  //   0.7: '20px',
+                  //   0.9: '620px'
+                  // },
+
+                  // toggle: {
+                  //   0:    '',
+                  //   0.33: '.red',
+                  //   0.66: '.blue'
+                  // }
+
                   rotate: [0, Math.PI*2],
                   printProgress: () => (p) => { debug2.innerHTML = p.toFixed(3); }
                 },
@@ -121,7 +150,7 @@
 
 
         <!-- scale -->
-        <div class="mb-8">
+        <div class="mb-16">
           <h4 data-nav="Scale">Scale:</h4>
           <p id="transformer-3" class="demo">This element uses an elastic easing function. &nbsp;(<em></em>)</p>
           <script>
@@ -143,7 +172,7 @@
 
 
         <!-- multiple things -->
-        <div class="mb-8">
+        <div class="mb-16">
           <h4 data-nav="Multiple">Multiple:</h4>
           <p id="multiple" class="demo">This element will scale, rotate and translate. &nbsp;(<em></em>)</p>
           <script>
@@ -167,7 +196,7 @@
 
 
         <!-- toggle classes -->
-        <div class="mb-8">
+        <div class="mb-16">
           <h4 data-nav="Toggle Class">Toggle:</h4>
           <div class="demo">
             <p id="toggle-1" class="fx-await"><strong>This element will have an
@@ -191,26 +220,27 @@
           <script>
             window.addEventListener('load', function() {
               new Scrollify('#toggle-1').addScene({
-                skipMatrix: true, // TODO automate this in addEffect
                 effects: {
-                  toggle: { 0.2: 'fx-show' }
+                  toggle: {
+                    0.2: () => 'fx-show'
+                  }
                 },
               });
 
               new Scrollify('#toggle-2').addScene({
-                skipMatrix: true, // this allows transforms to be set in the CSS.
                 effects: {
-                  toggle: { 0.2: 'fx-show' }
+                  toggle: {
+                    0.2: () => 'fx-show'
+                  }
                 },
               });
 
               new Scrollify('#toggle-3').addScene({
-                skipMatrix: true, // this allows transforms to be set in the CSS.
                 effects: {
                   toggle: {
-                    0.2: 'fx-red',
-                    0.5: 'fx-blue',
-                    0.7: 'fx-green'
+                    0.2: ()=>'fx-red',
+                    0.5: ()=>'fx-blue',
+                    0.7: ()=>'fx-green'
                   }
                 },
               });
@@ -221,7 +251,7 @@
 
 
         <!-- parallax -->
-        <div class="mb-8">
+        <div class="mb-16">
           <h4 data-nav="Parallax">Parallax:</h4>
           <div style="height:260px; position:relative; overflow:hidden;"><div id="parallax"></div></div>
           <script>
@@ -237,7 +267,7 @@
 
 
         <!-- blur -->
-        <div class="mb-8">
+        <div class="mb-16">
           <h4 data-nav="Blur">Blur:</h4>
           <p id="blur" class="demo">
             <span>
@@ -265,7 +295,7 @@
 
 
         <!-- skew -->
-        <div class="mb-8">
+        <div class="mb-16">
           <h4 data-nav="Skew">Skew:</h4>
           <p id="skew" class="demo"><strong>Let's skew. Prepared to see my reality warped and twisted.</strong>
             Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
@@ -286,7 +316,6 @@
                   end: 'el.top - 10vh',
                   easing: 'easeInOutQuint',
                   // duration': '200px',
-                  // 'applyTransform': false,
                   effects: {
                     // skewX: [0, 45],
                     custom: skew,
@@ -299,7 +328,7 @@
 
 
         <!-- fade -->
-        <div class="mb-8">
+        <div class="mb-16">
           <h4 data-nav="Fade">Fade:</h4>
           <p id="fade">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
           tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
@@ -325,7 +354,7 @@
 
 
         <!-- image sequence -->
-        <div class="mb-8">
+        <div class="mb-16">
           <h4 data-nav="Sequencer">Sequencer:</h4>
           <div style="position:relative; padding-top:100%;">
             <canvas id="sequence-2"></canvas>
@@ -389,8 +418,37 @@
         </div>
 
 
+        <!-- stick -->
+        <div class="mb-16">
+          <h4 data-nav="Stick">Stick <span style="color:orange">(experimental)</span></h4>
+          <div class="spacer stick-spacer">
+            <p id="stick" class="">
+              <strong>Sticks!</strong> I'll hang around for <strong>300 px</strong>. &nbsp;(<em></em>)
+              <br /><br />
+              <code class="normalCSS">.normal { position: absolute; }</code>
+              <code class="stickyCSS">.sticky { position: fixed; }</code>
+              <code class="bottomCSS">.bottom { position: absolute; bottom: 0; }</code>
+            </p>
+          </div>
+          <!-- NOTE: you might be better using `toggle` to set `position:sticky` dynamically -->
+          <script>
+            window.addEventListener('load', function(event) {
+              const debug10 = document.querySelector('#stick em');
+              new Scrollify('#stick').addScene({
+                start: 'el.top - 500px',
+                end: 'el.top - 200px',
+                effects: {
+                  stick: [0,1], // hack for now...
+                  fn: () => (p) => { debug10.innerHTML = p.toFixed(3); }
+                }
+              });
+            });
+          </script>
+        </div>
+
+
         <!-- custom -->
-        <div class="mb-8">
+        <div class="mb-16">
           <h4 data-nav="Custom">Custom:</h4>
           <p id="custom"><strong>This is not a blink tag, exactly...</strong> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
           tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
@@ -407,14 +465,38 @@
                 effects: {
                   fade: [1, 0]
                 },
-                debug: true
               });
             });
           </script>
         </div>
 
 
-
+        <!-- data attribute -->
+        <div class="mb-16">
+          <h4 data-nav="Data Attribute">Data Attribute:</h4>
+          <p id="data-attr" data-scrollify="{
+              end: 'el.top - 10vh',
+              effects: {
+                fade: [1, 0],
+                rotate: [0, Math.PI*2],
+                translateY: {
+                  0:   '0',
+                  0.7: '20px',
+                  0.9: '120px'
+                },
+              }
+          }">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+          tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+          consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+          cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+          proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        </div>
+        <script>
+          window.addEventListener('load', function() {
+            new Scrollify();
+          });
+        </script>
       </div>
     </section>
 

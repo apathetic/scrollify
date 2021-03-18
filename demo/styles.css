@@ -1,4 +1,7 @@
+:root { --max-width: 800px !important }
+
 .mb-8 { margin-bottom: 2rem; }
+.mb-16 { margin-bottom: 4rem; }
 main { overflow:hidden; }
 
 main #stick {
@@ -160,11 +163,13 @@ p.parallax { color: #ddd; z-index:-1 }
 	transform: scale(1.1);
 }
 
+.demo p:nth-child(1),
+.demo p:nth-child(2),
 .fx-await {
   opacity: 0;
   transition: opacity 0.5s;
 }
 
 .fx-show {
-  opacity: 1;
+  opacity: 1 !important;
 }

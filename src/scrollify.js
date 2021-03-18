@@ -7,20 +7,20 @@
  *
  */
 
-import { getRef, getPosition, isFunc, isArray, css, min, max } from './utils';
+import { getRef, getPosition, parseDataAttribute, isFunc, isArray, css, min, max, lerp, interpolate } from './utils';
 import * as Effects from './effects';
 import * as Easings from './easings';
 import createMatrix from './matrix';
 
 const transform = 'transform';
-const scrollifys = [];
+const scenes = [];
 let initialized = false;
 
 // enum states
 const STATE = {
-  BEFORE: 1,
-  AFTER: 2,
-  ACTIVE: 3
+  BEFORE: 'before',
+  AFTER:  'after',
+  ACTIVE: 'active'
 };
 
 const calculateRefs = (refs) => refs.map(getRef).map(getPosition);
@@ -54,21 +54,39 @@ function parseValue(val, refs = [], el) {
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
-  // helper parsing functions
-  // NOTE: will work for --css-vars, but only if they resolve to a number (ie. no strings, 'rgb(0,0,0)' etc):
-  // const css = (prop, el) => parseFloat(window.getComputedStyle(el).getPropertyValue(prop)) || 0;
-
-  // const css = (prop, el) => parseFloat(window.getComputedStyle(el)[prop]) || 0;
-  // const max = (...args) => Math.max(...args);
-  // const min = (...args) => Math.min(...args);
-
-
   return new Function('refs', 'el', 'css', 'min', 'max', `'use strict';return (${val
     .replace(/(\d*)vw/g, (match, v) => .01 * v * screenWidth)
     .replace(/(\d*)vh/g, (match, v) => .01 * v * screenHeight)
     .replace(/px/g, '')
   });`)(refs, el, css, max, min);
-  // }
+}
+
+
+
+//
+
+
+
+function createInterpolator(value, refs, pos) {
+  let times = Object.keys(value);
+  let values = Object.values(value);
+
+  if (isArray(value)) {
+    value = value.map((v) => parseValue(v, refs, pos));
+    return (t) => lerp(...value, t);
+  }
+
+  if (isFunc(values[0])) { // TODO need a better way to trigger "discrete" / non-interpolating mode
+    // discreteMode; for strings, classnames, etc
+    return (t) => {
+      let index = 0;
+      times.forEach((a) => (a < t) && index++);
+      return index ? values[index - 1]() : '';
+    };
+  }
+
+  values = values.map((v) => parseValue(v, refs, pos));
+  return (t) => interpolate(times, values, t);
 }
 
 
@@ -83,24 +101,21 @@ export default class Scrollify {
    * @param {HTMLElement} element: The element to Scrollify.
    */
   constructor(element) {
-    element = getRef(element);
 
     if (!element) {
       // throw new Error('Scrollify requires an `element`');
-      document.querySelectorAll('[data-scrollify]').forEach((el) => new Scrollify(el));
-      return;
+      return document.querySelectorAll('[data-scrollify]').forEach((el) => new Scrollify(el));
     }
 
-    if (element.dataset.scrollify) {
-      // ... parseDataAttribute(element)
-      // .. addScene()
-    }
+    element = getRef(element);
 
+    // initialized || (initialized = true,
+      window.addEventListener('scroll', () => this.onScroll(), { passive: true }),
+      window.addEventListener('resize', () => this.onResize(), { passive: true });
+    // );
 
     this.scenes = []; // scenes = [];
-
     this.element = element;
-    this.ticking = false;
     this.active = true;
     this.matrix = createMatrix();
     this.transforms = {
@@ -111,24 +126,13 @@ export default class Scrollify {
       // transformOrigin: [0,0,0]
     };
 
-    // scrollifys.push(this);
-    if (!initialized) {
-      initialized = true;
+
+    if (element.dataset.scrollify) {
+      const data = parseDataAttribute(element);
+      this.addScene(data);
     }
-    // else {
-    window.addEventListener('scroll', () => this.onScroll(), { passive: true });
-    window.addEventListener('resize', () => this.onResize(), { passive: true });
-    // }
-
-
-
   }
 
-  parseDataAttribute(el) {
-    const parser = (str) => Function(`'use strict';return (${str})`)();
-
-    return parser(el.dataset.scrollify);
-  }
 
   /**
    * Add a new Scene to the Scrollify object. Scene information includes when
@@ -154,6 +158,7 @@ export default class Scrollify {
    *
    */
   addScene(data) {
+    let useMatrix = false;
     let { element, transforms } = this;
     let {
       start = '0, el.top - 100vh',
@@ -163,28 +168,31 @@ export default class Scrollify {
       effects = {}
     } = data;
 
-    let useMatrix = false;
-
     // const calculateEffects = (r, el) => Object.keys(effects).reduce(this.addEffect, []);
-    const calculateEffects = (r, el) => Object.keys(effects).reduce((fx, name) => {
+    // const calculateEffects = this.generateEffects(effects);
+    const calculateEffects = (r, pos) => Object.keys(effects).reduce((fx, name) => {
       let value = effects[name];
+      let interpolator;
+      let effect;
       let fn;
-      let options;
 
       if (isFunc(value)) {
         fn = value;
+        interpolator = (v) => v;
       } else {
         fn = Effects[name];
-        options = isArray(value) ? value.map((v) => parseValue(v, r, el)) : value;
+        interpolator = createInterpolator(value, r, pos);
       }
 
       useMatrix = useMatrix || fn.useMatrix;
-      fx.push(fn({ element, transforms, options }));
+      effect = fn({ element, transforms });
+      fx.push((t) => effect(interpolator(t)));
 
       return fx;
     }, []);
 
-    let scene = {
+
+    const scene = {
       start: 0,
       duration: 0,
       state: '',
@@ -192,19 +200,17 @@ export default class Scrollify {
       effects: [],
       reset: () => {
         const scroll = window.scrollY;
-        const el = getPosition(element);
+        const pos = getPosition(element);
         const r = calculateRefs(refs);
-        const s = parseValue(start, r, el);
-        const e = parseValue(end, r, el);
-        const fx = calculateEffects(r, el);
+        const s = parseValue(start, r, pos);
+        const e = parseValue(end, r, pos);
+        const fx = calculateEffects(r, pos);
 
         scene.effects = fx;
         scene.start = s;
-        scene.duration = e - s;
+        scene.duration = e - s; // dur ? parseValue(dur) : e - s;
         scene.state = (scroll > s) ? (scroll > e) ? STATE.AFTER : STATE.ACTIVE : STATE.BEFORE;
-
-        // internal-use only. Whether to use matrix transforms or not.
-        scene.useMatrix = useMatrix; // || data.skipMatrix // force override
+        scene.useMatrix = useMatrix; // || data.skipMatrix // (force override?) // internal-use only. ....
 
         this.update(scene);
       }
@@ -213,13 +219,8 @@ export default class Scrollify {
     scene.reset();
 
     if (useMatrix) {
-      // scene.useMatrix = true;
       element.style.willChange = transform;
-    // } else {
-    //   // internal-use only. Whether to use matrix transforms or not.
-    //   scene.useMatrix = false;
     }
-
 
     if (data.debug) {
       console.log('Scrollify scene: ', scene);
@@ -238,22 +239,31 @@ export default class Scrollify {
    * @param  {number} i ignore for now
    * @param  {object} effects A reference to ... .
    * /
-  addEffect(fx, name, i, effects) {
-    let value = effects[name];
-    let options;
-    let fn;
+  generateEffects(effects) {
+  addEffect(effects) {
+    let { element, transforms } = this;
+    let useMatrix = false;
 
-    if (typeof value == 'function') {
-      fn = value;
-    } else {
-      fn = Effects[name];
-      // if (!fn) { throw Error(`${name} not recognized`); }
-      options = value.map((val) => parseValue(val, r, el));
-    }
+    return (r, pos) => Object.keys(effects).reduce((fx, name) => {
+      let value = effects[name];
+      let interpolator;
+      let effect;
+      let fn;
 
-    fx.push(fn({ element, transforms, options }));
+      if (isFunc(value)) {
+        fn = value;
+        interpolator = (v) => v;
+      } else {
+        fn = Effects[name];
+        interpolator = createInterpolator(value, r, pos);
+      }
 
-    return fx;
+      useMatrix = useMatrix || fn.useMatrix;
+      effect = fn({ element, transforms });
+      fx.push((t) => effect(interpolator(t)));
+
+      return fx;
+    }, []);
   }
 
 

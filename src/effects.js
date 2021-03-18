@@ -15,102 +15,59 @@
  */
 
 
-import { lerp } from './utils';
-
-
 /**
- * Translate an element along the X-axis.
+ * Translate an element along the X-axis / vertically.
  * @param {object} transforms An object of matrix transforms
- * @param {object} options Options for the effect
- * @param {object} options.from Initial value for the translateX
- * @param {object} options.to Destination value for the translateX
- * @returns {Function} A function that receives a normalized progress value.
+ * @param {number} val The distance, in px, to translate the element.
+ * @returns {Function} A function that receives an keyframe-interpolated value.
  */
-export const translateX = ({ transforms, options }) => (progress) => {
-  transforms.position[0] = lerp(...options, progress);
-};
-
-/**
- * Translate an element vertically.
- * @param {object} transforms An object of matrix transforms
- * @param {object} options Options for the effect
- * @param {object} options.from Initial value for the translateY
- * @param {object} options.to Destination value for the translateY
- * @returns {Function} A function that receives a normalized progress value.
- */
-export const translateY = ({ transforms, options }) => (progress) => {
-  transforms.position[1] = lerp(...options, progress);
-};
+export const translateX = ({ transforms }) => (val) => transforms.position[0] = val;
+export const translateY = ({ transforms }) => (val) => transforms.position[1] = val;
 export const parallax = translateY;
 
 
 /**
  * Rotate an element along a specific axis, using radians
  * @param {object} transforms An object of matrix transforms
- * @param {object} options Options for the effect
- * @param {object} options.rad Rotation in radians. TODO degrees?
- * @returns {Function} A function that receives a normalized progress value.
+ * @param {number} val Rotation in radians. TODO degrees?
+ * @returns {Function} A function that receives a keyframe-interpolated value.
  */
-export const rotateX = ({ transforms, options }) => (progress) => {
-  transforms.rotation[0] = lerp(...options, progress);
-};
-
-export const rotateY = ({ transforms, options }) => (progress) => {
-  transforms.rotation[1] = lerp(...options, progress);
-};
-
-export const rotateZ = ({ transforms, options }) => (progress) => {
-  transforms.rotation[2] = lerp(...options, progress);
-};
+export const rotateX = ({ transforms }) => (val) => transforms.rotation[0] = val;
+export const rotateY = ({ transforms }) => (val) => transforms.rotation[1] = val;
+export const rotateZ = ({ transforms }) => (val) => transforms.rotation[2] = val;
 export const rotate = rotateZ;
 
 
 /**
  * Uniformly scale an element along an axis
  * @param {object} transforms An object of matrix transforms
- * @param {object} options Options for the effect
- * @param {object} options.from Initial value for the scale
- * @param {object} options.to Destination value for the scale
- * @returns {Function} A function that receives a normalized progress value.
+ * @param {number} val The value for the scale
+ * @returns {Function} A function that receives a keyframe-interpolated value.
  */
-export const scaleX = ({ transforms, options }) => (progress) => {
-  transforms.scale[0] = lerp(...options, progress);
-};
-
-// note: these default params won't ever be used....
-export const scaleY = ({ transforms, options = [transforms.scale[1], 1] }) => (progress) => {
-  transforms.scale[1] = lerp(...options, progress);
-};
-
-export const scale = ({ transforms, options }) => (progress) => {
-  transforms.scale[0] = transforms.scale[1] = lerp(...options, progress);
-};
+export const scaleX = ({ transforms }) => (val) => transforms.scale[0] = val;
+export const scaleY = ({ transforms }) => (val) => transforms.scale[1] = val;
+export const scale = ({ transforms }) => (val) => transforms.scale[0] = transforms.scale[1] = val;
 
 
-
-export const skewX = ({ transforms, options }) => (t) => {
-  transforms.skew[0] = lerp(...options, t);
-};
-
-export const skewY = ({ transforms, options }) => (t) => {
-  transforms.skew[1] = lerp(...options, t);
-};
-
-export const skew = ({ transforms, options }) => (t) => {
-  transforms.skew[0] = transforms.skew[1] = lerp(...options, t);
-};
+/**
+ * Skew an element along an axis
+ * @param {object} transforms An object of matrix transforms
+ * @param {number} val The value ...
+ * ....
+ */
+export const skewX = ({ transforms }) => (val) => transforms.skew[0] = val;
+export const skewY = ({ transforms }) => (val) => transforms.skew[1] = val;
+export const skew = ({ transforms }) => (val) => transforms.skew[0] = transforms.skew[1] = val;
 
 
 /**
  * Update an element's opacity.
  * @param {HTMLElement} element The element to fade
- * @param {object} options Options for the effect
- * @param {object} options.from Initial fade value
- * @param {object} options.to Destination fade value
- * @returns {Function} A function that receives a normalized progress value.
+ * @param {number} val The fade value
+ * @returns {Function} A function that receives a keyframe-interpolated value.
  */
-export const fade = ({ element, options }) => (progress) => {
-  element.style.opacity = lerp(...options, progress);
+export const fade = ({ element }) => (val) => {
+  element.style.opacity = val;
 };
 
 
@@ -119,30 +76,22 @@ export const fade = ({ element, options }) => (progress) => {
  * NOTE: this is a relatively CPU-heavy operation
  * @param {HTMLElement} element The element to blur
  * @param {object} options Options for the effect
- * @param {object} options.from Initial fade value
- * @param {object} options.to Destination fade value
  * @returns {Function} A function that receives a normalized progress value.
  */
-export const blur = ({ element, options }) => (progress) => {
-  element.style.filter = 'blur(' + lerp(...options, progress) + 'px)';
+export const blur = ({ element }) => (val) => {
+  element.style.filter = 'blur(' + val + 'px)';
 };
 
 
 /**
  * Toggles a class on or off.
+ * NOTE: blows away all other classes at present...
  * @param {HTMLElement} element A element to toggle class(es) on
- * @param {object} options Options for the effect
- * @returns {Function} A function that receives a normalized progress value.
+ * @param {string} name The `classname` to be added.
+ * @returns {Function} A function that receives xxxxx from a discrete set of options.
  */
-export const toggle = ({ element, options }) => {
-  const times = Object.keys(options);
-
-  return (progress) => {
-    times.forEach((time) => {
-      const css = options[time];
-      element.classList.toggle(css, progress > +time);
-    });
-  };
+export const toggle = ({ element }) => (name) => {
+  element.className = name;
 };
 
 
@@ -187,14 +136,8 @@ export const stick = ({ element }) => {
 
 
 
-// Effects that do _not_ use matrix transformations.
-// [stick, toggle, blur, fade].forEach((fn) => {
-//   Object.defineProperty(fn, 'skipMatrix', { value: true });
-// });
-
 // Effects that use matrix transformations. At present, only
 // built-in effects benefit from matrix transformations.
 [translateX, translateY, rotateX, rotateY, rotateZ, scale, scaleX, scaleY, skew, skewX, skewY].forEach((fn) => {
-  // Object.defineProperty(fn, '__applyTransform', { value: true });
   Object.defineProperty(fn, 'useMatrix', { value: true });
 });
