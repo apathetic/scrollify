@@ -12,11 +12,15 @@ import * as Effects from './effects';
 import * as Easings from './easings';
 import createMatrix from './matrix';
 
-const transform = 'transform';
+// const transforms = ['x', 'y', 'z', 'scale', 'scaleX', 'scaleY', 'rotate',
+//                     'rotateX', 'rotateY', 'rotateZ', 'skew', 'skewX', 'skewY'];
 const scenes = [];
 let initialized = false;
 
-// enum states
+const SCALE = 'scale';
+const POSITION = 'position';
+const ROTATION = 'rotation';
+const SKEW = 'skew';
 const STATE = {
   BEFORE: 'before',
   AFTER:  'after',
@@ -76,8 +80,10 @@ function createInterpolator(value, refs, pos) {
     return (t) => lerp(...value, t);
   }
 
-  if (isFunc(values[0])) { // TODO need a better way to trigger "discrete" / non-interpolating mode
+  if (isFunc(values[0])) { // or "isInterpolatable() ?
     // discreteMode; for strings, classnames, etc
+    // TODO need a better way to trigger "discrete" / non-interpolating mode
+    // currently: it checks if the `value` is a function
     return (t) => {
       let index = 0;
       times.forEach((a) => (a < t) && index++);
@@ -110,7 +116,8 @@ export default class Scrollify {
     element = getRef(element);
 
     // initialized || (initialized = true,
-      window.addEventListener('scroll', () => this.onScroll(), { passive: true }),
+      // window.addEventListener('scroll', () => this.onScroll(), { passive: true }),
+      window.addEventListener('scroll', () => this.onScroll()),
       window.addEventListener('resize', () => this.onResize(), { passive: true });
     // );
 
@@ -119,10 +126,10 @@ export default class Scrollify {
     this.active = true;
     this.matrix = createMatrix();
     this.transforms = {
-      scale: [1, 1],
-      rotation: [0, 0, 0],
-      position: [0, 0, 0],
-      // skew: [],
+      [SCALE]: [1, 1],
+      [ROTATION]: [0, 0, 0],
+      [POSITION]: [0, 0, 0],
+      [SKEW]: [0, 0],
       // transformOrigin: [0,0,0]
     };
 
@@ -158,8 +165,6 @@ export default class Scrollify {
    *
    */
   addScene(data) {
-    let useMatrix = false;
-    let { element, transforms } = this;
     let {
       start = '0, el.top - 100vh',
       end = 'el.bottom',
@@ -168,31 +173,11 @@ export default class Scrollify {
       effects = {}
     } = data;
 
-    // const calculateEffects = (r, el) => Object.keys(effects).reduce(this.addEffect, []);
-    // const calculateEffects = this.generateEffects(effects);
-    const calculateEffects = (r, pos) => Object.keys(effects).reduce((fx, name) => {
-      let value = effects[name];
-      let interpolator;
-      let effect;
-      let fn;
+    const { element } = this;
+    const scene = { // tween = {
+      element,
+      // matrix: ...
 
-      if (isFunc(value)) {
-        fn = value;
-        interpolator = (v) => v;
-      } else {
-        fn = Effects[name];
-        interpolator = createInterpolator(value, r, pos);
-      }
-
-      useMatrix = useMatrix || fn.useMatrix;
-      effect = fn({ element, transforms });
-      fx.push((t) => effect(interpolator(t)));
-
-      return fx;
-    }, []);
-
-
-    const scene = {
       start: 0,
       duration: 0,
       state: '',
@@ -204,13 +189,12 @@ export default class Scrollify {
         const r = calculateRefs(refs);
         const s = parseValue(start, r, pos);
         const e = parseValue(end, r, pos);
-        const fx = calculateEffects(r, pos);
 
-        scene.effects = fx;
+        scene.effects = this.calculateEffects.call(this, effects, r, pos);
         scene.start = s;
         scene.duration = e - s; // dur ? parseValue(dur) : e - s;
         scene.state = (scroll > s) ? (scroll > e) ? STATE.AFTER : STATE.ACTIVE : STATE.BEFORE;
-        scene.useMatrix = useMatrix; // || data.skipMatrix // (force override?) // internal-use only. ....
+        // scene.useMatrix = useMatrix; // || data.skipMatrix // (force override?) // internal-use only. ....
 
         this.update(scene);
       }
@@ -218,8 +202,8 @@ export default class Scrollify {
 
     scene.reset();
 
-    if (useMatrix) {
-      element.style.willChange = transform;
+    if (this.useMatrix) {
+      element.style.willChange = 'transform';
     }
 
     if (data.debug) {
@@ -233,34 +217,38 @@ export default class Scrollify {
 
 
   /**
-   * Adds an effect to a scene.
-   * @param  {array} fx A reference to the `effects` array
-   * @param  {string} name The name of the effect to add
-   * @param  {number} i ignore for now
-   * @param  {object} effects A reference to ... .
-   * /
-  generateEffects(effects) {
-  addEffect(effects) {
+   * Generates the function for each `effect` in a scene taking into account
+   * the element's position, the position of any refs, and any interpolation
+   * of the scrolling input (ie. using multiple keyframes).
+   * Also determines if the effect is a matrix transformation and sets a flag
+   * if so, which enables further performance optimizations.
+   * @param {Object} effects A reference to the `effects` key / values
+   * @param {Array} refs An array of BCRs from the `refs` option
+   * @param {Object} pos A BCR-like position object for the main `el`
+   */
+  calculateEffects(effects, refs, pos) {
     let { element, transforms } = this;
-    let useMatrix = false;
 
-    return (r, pos) => Object.keys(effects).reduce((fx, name) => {
+    return Object.keys(effects).reduce((fx, name) => {
       let value = effects[name];
       let interpolator;
-      let effect;
       let fn;
 
       if (isFunc(value)) {
-        fn = value;
+        fn = value({ element, transforms });
         interpolator = (v) => v;
       } else {
-        fn = Effects[name];
-        interpolator = createInterpolator(value, r, pos);
+        fn = Effects[name]({ element, transforms });
+        interpolator = createInterpolator(value, refs, pos);
+
+        // Effects that use matrix transformations. At present, only
+        // built-in effects benefit from matrix transformations.
+        const m = new RegExp(`(?<${SCALE}>scale)|(?<${POSITION}>x|y|z)|(?<${ROTATION}>rotate)|(?<${SKEW}>skew)/i`).exec(name); // eslint-disable-line max-len
+        const t = m && Object.keys(m.groups).filter((i) => m.groups[i]).toString();
+        fn && t && (this.transforms[t].isActive = this.useMatrix = true);
       }
 
-      useMatrix = useMatrix || fn.useMatrix;
-      effect = fn({ element, transforms });
-      fx.push((t) => effect(interpolator(t)));
+      fx.push((t) => fn(interpolator(t)));
 
       return fx;
     }, []);
@@ -334,9 +322,9 @@ export default class Scrollify {
     // cycle through any registered transformations
     effects.forEach((effect) => effect(progress));
 
-    if (scene.useMatrix) {
+    if (this.useMatrix) {
       // transmogrify all applied transformations into a single matrix, and apply
-      this.element.style[transform] = this.updateMatrix().asCSS();
+      this.element.style['transform'] = this.updateMatrix().asCSS();
     }
   }
 
@@ -355,21 +343,21 @@ export default class Scrollify {
       matrix.translate(-t.transformOrigin[0], -t.transformOrigin[1], -t.transformOrigin[2]);
     }
 
-    if (t.scale) {
+    if (t.scale.isActive) {
       matrix.scale(t.scale[0], t.scale[1]);
     }
 
-    if (t.skew) {
+    if (t.skew.isActive) {
       matrix.skew(t.skew[0], t.skew[1]);
     }
 
-    if (t.rotation) {
+    if (t.rotation.isActive) {
       matrix.rotateX(t.rotation[0]);
       matrix.rotateY(t.rotation[1]);
       matrix.rotateZ(t.rotation[2]);
     }
 
-    if (t.position) {
+    if (t.position.isActive) {
       matrix.translate(t.position[0], t.position[1], t.position[2]);
     }
 

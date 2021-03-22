@@ -186,9 +186,10 @@
                   effects: {
                     scale: [ 1.0, 0.5 ],
                     rotate: [ 0, Math.PI ],
-                    translateX: [ 0, 400 ],
+                    x: [ 0, 400 ],
                     fn: () => (p) => { debug4.innerHTML = p.toFixed(3); }
                   },
+                  debug: true
                 });
             });
           </script>
@@ -479,7 +480,7 @@
               effects: {
                 fade: [1, 0],
                 rotate: [0, Math.PI*2],
-                translateY: {
+                y: {
                   0:   '0',
                   0.7: '20px',
                   0.9: '120px'

@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict';
 
 function assignedMatrixMultiplication(a, b, res) {
   // Unrolled loop
@@ -87,8 +86,8 @@ function assignRotateX(matrix, rad) {
   matrix[15] = 1;
 }
 
-
-var assignRotateY = function(matrix, rad) {
+// const assignRotateY = (matrix, rad) => {
+function assignRotateY(matrix, rad) {
   matrix[0] = Math.cos(rad);
   matrix[1] = 0;
   matrix[2] = Math.sin(rad);
@@ -144,7 +143,6 @@ function assignSkew(matrix, ax, ay) {
   matrix[14] = 0;
   matrix[15] = 1;
 }
-
 
 function assignScale(matrix, x, y) {
   matrix[0] = x;
@@ -204,71 +202,59 @@ function copyArray(a, b) {
 }
 
 function createMatrix() {
-    var data = new Float32Array(16);
-    var a = new Float32Array(16);
-    var b = new Float32Array(16);
-    assignIdentity(data);
+  var data = new Float32Array(16);
+  var a = new Float32Array(16);
+  var b = new Float32Array(16);
 
-    return {
-      data: data,
+  assignIdentity(data);
 
-      asCSS: function() {
-        var css = 'matrix3d(';
-        for (var i = 0; i < 15; ++i) {
-          if (Math.abs(data[i]) < 0.0001) {
-            css += '0,';
-          } else {
-            css += data[i].toFixed(10) + ',';
-          }
-        }
-        if (Math.abs(data[15]) < 0.0001) {
-          css += '0)';
-        } else {
-          css += data[15].toFixed(10) + ')';
-        }
-        return css;
-      },
+  return {
+    data,
 
-      clear: function() {
-        assignIdentity(data);
-      },
+    asCSS: function() {
+      return `matrix3d(${ data.toString() })`;
+    },
 
-      translate: function(x, y, z) {
-        copyArray(data, a);
-        assignTranslate(b, x, y, z);
-        assignedMatrixMultiplication(a, b, data);
-        return this;
-      },
+    clear() {
+      assignIdentity(data);
+    },
 
-      rotateX: function(radians) {
-        copyArray(data, a);
-        assignRotateX(b, radians);
-        assignedMatrixMultiplication(a, b, data);
-        return this;
-      },
+    translate(x, y, z) {
+      copyArray(data, a);
+      assignTranslate(b, x, y, z);
+      assignedMatrixMultiplication(a, b, data);
+      return this;
+    },
 
-      rotateY: function(radians) {
-        copyArray(data, a);
-        assignRotateY(b, radians);
-        assignedMatrixMultiplication(a, b, data);
-        return this;
-      },
+    rotateX(radians) {
+      copyArray(data, a);
+      assignRotateX(b, radians);
+      assignedMatrixMultiplication(a, b, data);
+      return this;
+    },
 
-      rotateZ: function(radians) {
-        copyArray(data, a);
-        assignRotateZ(b, radians);
-        assignedMatrixMultiplication(a, b, data);
-        return this;
-      },
+    rotateY(radians) {
+      copyArray(data, a);
+      assignRotateY(b, radians);
+      assignedMatrixMultiplication(a, b, data);
+      return this;
+    },
 
-      scale: function(x, y) {
-        copyArray(data, a);
-        assignScale(b, x, y);
-        assignedMatrixMultiplication(a, b, data);
-        return this;
-      },
+    rotateZ(radians) {
+      copyArray(data, a);
+      assignRotateZ(b, radians);
+      assignedMatrixMultiplication(a, b, data);
+      return this;
+    },
 
-    skew: function(ax, ay) {
+    scale(x, y) {
+      copyArray(data, a);
+      assignScale(b, x, y);
+      assignedMatrixMultiplication(a, b, data);
+      return this;
+    },
+
+    skew(ax, ay) {
       copyArray(data, a);
       assignSkew(b, ax, ay);
       assignedMatrixMultiplication(a, b, data);
@@ -278,5 +264,4 @@ function createMatrix() {
 }
 
 
-// module.exports = createMatrix;
 export default createMatrix;

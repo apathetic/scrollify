@@ -15,15 +15,30 @@
  */
 
 
+// const rad = Math.PI / 180
+// export const transforms = ['x', 'y', 'z', 'scale', 'scaleX', 'scaleY', 'rotate', 'rotateX',
+//                             'rotateY', 'rotateZ', 'skew', 'skewX', 'skewY'];
+// const keywords = ["borderRadius", "bottom", "fontSize", "fontWeight", "height", "left", "lineHeight",
+//                   "marginBottom", "marginLeft", "marginRight", "marginTop", "maxHeight", "maxWidth",
+//                   "opacity", "paddingBottom", "paddingLeft", "paddingRight", "paddingTop", "right",
+//                   "top", "width", "zIndex", "strokeDashoffset"]
+//   , _ = ["currentTime", "scrollLeft", "scrollTop"]
+
+
+
 /**
  * Translate an element along the X-axis / vertically.
  * @param {object} transforms An object of matrix transforms
  * @param {number} val The distance, in px, to translate the element.
  * @returns {Function} A function that receives an keyframe-interpolated value.
  */
-export const translateX = ({ transforms }) => (val) => transforms.position[0] = val;
-export const translateY = ({ transforms }) => (val) => transforms.position[1] = val;
-export const parallax = translateY;
+export const x = ({ transforms }) => (val) => transforms.position[0] = val;
+export const y = ({ transforms }) => (val) => transforms.position[1] = val;
+export const z = ({ transforms }) => (val) => transforms.position[2] = val;
+export const translateX = x;
+export const translateY = y;
+export const translateZ = z;
+export const parallax = y;
 
 
 /**
@@ -57,7 +72,7 @@ export const scale = ({ transforms }) => (val) => transforms.scale[0] = transfor
  */
 export const skewX = ({ transforms }) => (val) => transforms.skew[0] = val;
 export const skewY = ({ transforms }) => (val) => transforms.skew[1] = val;
-export const skew = ({ transforms }) => (val) => transforms.skew[0] = transforms.skew[1] = val;
+export const skew = skewX;
 
 
 /**
@@ -133,11 +148,3 @@ export const stick = ({ element }) => {
     }
   };
 };
-
-
-
-// Effects that use matrix transformations. At present, only
-// built-in effects benefit from matrix transformations.
-[translateX, translateY, rotateX, rotateY, rotateZ, scale, scaleX, scaleY, skew, skewX, skewY].forEach((fn) => {
-  Object.defineProperty(fn, 'useMatrix', { value: true });
-});
